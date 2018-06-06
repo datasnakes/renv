@@ -35,6 +35,7 @@ class RenvBuilder(EnvBuilder):
         true_system_site_packages = self.system_site_packages
         self.system_site_packages = False
         self.create_configuration(context)
+        self.setup_r(context)
 
     def ensure_directories(self, env_dir):
         """
@@ -130,18 +131,67 @@ class RenvBuilder(EnvBuilder):
                 incl = 'false'
             f.write('include-system-site-packages = %s\n' % incl)
             f.write('version = %d.%d.%d\n' % (3, 4, 3))
-        # TODO-ROB:  Is this necessary for R?  This is called in setup_python(r)
-        if os.name == 'nt':
-            def include_binary(self, f):
-                if f.endswith(('.pyd', '.dll')):
-                    result = True
-                else:
-                    result = f.startswith('python') and f.endswith('.exe')
-                return result
+        # TODO-ROB:  This would only be apply under Windows.  This is called in setup_python(r)
+        # if os.name == 'nt':
+        #     def include_binary(self, f):
+        #         if f.endswith(('.pyd', '.dll')):
+        #             result = True
+        #         else:
+        #             result = f.startswith('python') and f.endswith('.exe')
+        #         return result
 
-    def setup_r(self):
-        # This will be modeled after setup_python()
-        pass
+    def setup_r(self, context):
+        """
+       Set up a R executable in the environment.
+       :param context: The information for the environment creation request
+                       being processed.
+       """
+        binpath = context.bin_path
+        path = context.env_R_exe
+        copier = self.symlink_or_copy
+        copier(context.R_abs_exe, path)
+        dirname = context.R_exe_dir
+        if os.name != 'nt':
+            if not os.path.islink(path):
+                os.chmod(path, 0o755)
+            #for suffix in ('python', 'python3'):
+            suffix = "R?"
+            path = os.path.join(binpath, suffix)
+            if not os.path.exists(path):
+                # Issue 18807: make copies if
+                # symlinks are not wanted
+                copier(context.env_exe, path, relative_symlinks_ok=True)
+                if not os.path.islink(path):
+                    os.chmod(path, 0o755)
+        else:
+            # TODO-ROB: Build Windows version
+            raise OSError("renv is only currently working for some POISIX systems.")
+            # subdir = 'DLLs'
+            # include = self.include_binary
+            # files = [f for f in os.listdir(dirname) if include(f)]
+            # for f in files:
+            #     src = os.path.join(dirname, f)
+            #     dst = os.path.join(binpath, f)
+            #     if dst != context.env_exe:  # already done, above
+            #         copier(src, dst)
+            # dirname = os.path.join(dirname, subdir)
+            # if os.path.isdir(dirname):
+            #     files = [f for f in os.listdir(dirname) if include(f)]
+            #     for f in files:
+            #         src = os.path.join(dirname, f)
+            #         dst = os.path.join(binpath, f)
+            #         copier(src, dst)
+            # # copy init.tcl over
+            # for root, dirs, files in os.walk(context.python_dir):
+            #     if 'init.tcl' in files:
+            #         tcldir = os.path.basename(root)
+            #         tcldir = os.path.join(context.env_dir, 'Lib', tcldir)
+            #         if not os.path.exists(tcldir):
+            #             os.makedirs(tcldir)
+            #         src = os.path.join(root, 'init.tcl')
+            #         dst = os.path.join(tcldir, 'init.tcl')
+            #         shutil.copyfile(src, dst)
+            #         break
 
     def install_r(self):
         # New: install specified version of R in the R environment.
