@@ -1,5 +1,5 @@
 from venv import EnvBuilder
-
+import os
 
 class RenvBuilder(EnvBuilder):
     """
@@ -10,14 +10,35 @@ class RenvBuilder(EnvBuilder):
     This initial skeleton class includes all of the methods that will need
     to be reworked for R environments.
     """
-    def __init__(self):
-        pass
+    def __init__(self, system_site_packages=False, clear=False,
+                 symlinks=False, upgrade=False, prompt=None):
+        super().__init__(system_site_packages=system_site_packages, clear=clear,
+                         symlinks=symlinks, upgrade=upgrade, prompt=prompt)
+        del self.with_pip
 
     def create(self, env_dir):
-        pass
+        """
+        Create a virtual environment in a directory.
+        :param env_dir: The target directory to create an environment in.
+        """
+        env_dir = os.path.abspath(env_dir)
+        context = self.ensure_directories(env_dir)
 
     def ensure_directories(self, env_dir):
-        pass
+        """
+
+        :param env_dir:
+        :return:
+        """
+
+        def create_if_needed(d):
+            if not os.path.exists(d):
+                os.makedirs(d)
+            elif os.path.islink(d) or os.path.isfile(d):
+                raise ValueError('Unable to create directory %r' % d)
+
+        if os.path.exists(env_dir) and self.clear:
+            self.clear_directory(env_dir)
 
     def create_configuration(self, context):
         pass
