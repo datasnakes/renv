@@ -41,8 +41,14 @@ class RenvBuilder(EnvBuilder):
         #     self._setup_pip(context)
         if not self.upgrade:
             self.setup_scripts(context)
+            # TODO-ROB: Setup .Rprofile using a default one included with the package
+            # TODO-ROB: Setup .Renviron using a default one included with the package
             self.post_setup(context)
-
+        if true_system_site_packages:
+            # We had set it to False before, now
+            # restore it and rewrite the configuration
+            self.system_site_packages = True
+            self.create_configuration(context)
 
     def ensure_directories(self, env_dir):
         """
@@ -217,8 +223,7 @@ class RenvBuilder(EnvBuilder):
         :param context: The information for the environment creation request
                         being processed.
         """
-        # TODO-ROB: Setup .Rprofile using a default one included with the package
-        # TODO-ROB: Setup .Renviron using a default one included with the package
+        pass
 
     def setup_r_profile(self):
         # New
