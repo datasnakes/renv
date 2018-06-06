@@ -29,6 +29,12 @@ class RenvBuilder(EnvBuilder):
         """
         env_dir = os.path.abspath(env_dir)
         context = self.ensure_directories(env_dir)
+        # TODO-ROB: pip will eventually be beRi
+        # See issue 24875. We need system_site_packages to be False
+        # until after pip is installed.
+        true_system_site_packages = self.system_site_packages
+        self.system_site_packages = False
+        self.create_configuration(context)
 
     def ensure_directories(self, env_dir):
         """
