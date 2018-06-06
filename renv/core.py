@@ -36,6 +36,13 @@ class RenvBuilder(EnvBuilder):
         self.system_site_packages = False
         self.create_configuration(context)
         self.setup_r(context)
+        # TODO-ROB: pip will eventually be beRi
+        # if self.with_pip:
+        #     self._setup_pip(context)
+        if not self.upgrade:
+            self.setup_scripts(context)
+            self.post_setup(context)
+
 
     def ensure_directories(self, env_dir):
         """
@@ -204,7 +211,14 @@ class RenvBuilder(EnvBuilder):
         pass
 
     def post_setup(self, context):
-        pass
+        """
+        Hook for post-setup modification of the venv. Subclasses may install
+        additional packages or scripts here, add activation shell scripts, etc.
+        :param context: The information for the environment creation request
+                        being processed.
+        """
+        # TODO-ROB: Setup .Rprofile using a default one included with the package
+        # TODO-ROB: Setup .Renviron using a default one included with the package
 
     def setup_r_profile(self):
         # New
