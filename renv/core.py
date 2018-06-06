@@ -1,5 +1,11 @@
 from venv import EnvBuilder
+import logging
 import os
+import shutil
+import subprocess
+import sys
+import types
+
 
 class RenvBuilder(EnvBuilder):
     """
@@ -39,6 +45,21 @@ class RenvBuilder(EnvBuilder):
 
         if os.path.exists(env_dir) and self.clear:
             self.clear_directory(env_dir)
+
+        context = types.SimpleNamespace()
+        context.env_dir = env_dir
+        context.env_name = os.path.split(env_dir)[1]
+        prompt = self.prompt if self.prompt is not None else context.env_name
+        context.prompt = '(%s) ' % prompt
+        create_if_needed(env_dir)
+        # TODO-ROB: Create a function for finding the R executable
+        # TODO-ROB:  This may be tied in with a config file or with an outside environment variable.
+        # env = os.environ
+        # if sys.platform == 'darwin' and '__PYVENV_LAUNCHER__' in env:
+        #     executable = os.environ['__PYVENV_LAUNCHER__']
+        # else:
+        #     executable = sys.executable
+
 
     def create_configuration(self, context):
         pass
