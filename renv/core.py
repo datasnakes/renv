@@ -206,14 +206,28 @@ class RenvBuilder(EnvBuilder):
             #         shutil.copyfile(src, dst)
             #         break
 
-    def install_r(self):
-        # New: install specified version of R in the R environment.
-        pass
-
     def replace_variables(self, text, context):
-        pass
+        """
+        Replace variable placeholders in script text with context-specific
+        variables.
+        Return the text passed in , but with variables replaced.
+        :param text: The text in which to replace placeholder variables.
+        :param context: The information for the environment creation request
+                        being processed.
+        """
+        text = text.replace('__VENV_DIR__', context.env_dir)
+        text = text.replace('__VENV_NAME__', context.env_name)
+        text = text.replace('__VENV_PROMPT__', context.prompt)
+        text = text.replace('__VENV_BIN_NAME__', context.bin_name)
+        # NEW:
+        text = text.replace('__VENV_R_NAME__', context.env_R_exe)
+        text = text.replace('__VENV_RSCRIPT_NAME', context.env_R_script)
+        #text = text.replace('__VENV_PYTHON__', context.env_exe)
+        return text
 
     # TODO-ROB: Test if the scripts work properly with this build.
+    # TODO-ROB: Different variables will need to be created in the replace_variables function.
+    # TODO-ROB: The variables will have to be changed in the /scripts/* files.
     # def install_scripts(self, context, path):
     #     pass
 
