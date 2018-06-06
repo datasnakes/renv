@@ -231,6 +231,10 @@ class RenvBuilder(EnvBuilder):
     # def install_scripts(self, context, path):
     #     pass
 
+    def install_r(self):
+        # New: install specified version of R in the R environment.
+        pass
+
     def setup_r_profile(self):
         # New
         pass
