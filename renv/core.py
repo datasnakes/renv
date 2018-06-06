@@ -130,6 +130,14 @@ class RenvBuilder(EnvBuilder):
                 incl = 'false'
             f.write('include-system-site-packages = %s\n' % incl)
             f.write('version = %d.%d.%d\n' % (3, 4, 3))
+        # TODO-ROB:  Is this necessary for R?  This is called in setup_python(r)
+        if os.name == 'nt':
+            def include_binary(self, f):
+                if f.endswith(('.pyd', '.dll')):
+                    result = True
+                else:
+                    result = f.startswith('python') and f.endswith('.exe')
+                return result
 
     def setup_r(self):
         # This will be modeled after setup_python()
