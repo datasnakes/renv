@@ -213,8 +213,9 @@ class RenvBuilder(EnvBuilder):
     def replace_variables(self, text, context):
         pass
 
-    def install_scripts(self, context, path):
-        pass
+    # TODO-ROB: Test if the scripts work properly with this build.
+    # def install_scripts(self, context, path):
+    #     pass
 
     def setup_r_profile(self):
         # New
