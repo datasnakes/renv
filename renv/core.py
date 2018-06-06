@@ -154,15 +154,15 @@ class RenvBuilder(EnvBuilder):
         if os.name != 'nt':
             if not os.path.islink(path):
                 os.chmod(path, 0o755)
-            #for suffix in ('python', 'python3'):
-            suffix = "R?"
-            path = os.path.join(binpath, suffix)
-            if not os.path.exists(path):
-                # Issue 18807: make copies if
-                # symlinks are not wanted
-                copier(context.env_exe, path, relative_symlinks_ok=True)
-                if not os.path.islink(path):
-                    os.chmod(path, 0o755)
+            # for suffix in ('python', 'python3'):
+            for suffix in ('R', 'Rscript'):
+                path = os.path.join(binpath, suffix)
+                if not os.path.exists(path):
+                    # Issue 18807: make copies if
+                    # symlinks are not wanted
+                    copier(context.env_exe, path, relative_symlinks_ok=True)
+                    if not os.path.islink(path):
+                        os.chmod(path, 0o755)
         else:
             # TODO-ROB: Build Windows version
             raise OSError("renv is only currently working for some POISIX systems.")
