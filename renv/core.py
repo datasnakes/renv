@@ -38,6 +38,9 @@ class RenvBuilder(EnvBuilder):
 
     def ensure_directories(self, env_dir):
         """
+        Create the directories for the environment.
+        Returns a context object which holds paths in the environment,
+        for use by subsequent logic.
 
         :param env_dir:
         :return:
@@ -110,7 +113,23 @@ class RenvBuilder(EnvBuilder):
         return context
 
     def create_configuration(self, context):
-        pass
+        """
+        Create a configuration file indicating where the environment's R
+        was copied from, and whether the system site-packages should be made
+        available in the environment.
+        :param context: The information for the environment creation request
+                        being processed.
+        """
+        # TODO-ROB: Work YAML configuration into this section
+        context.cfg_path = path = os.path.join(context.env_dir, 'FAKE_Rcfg.yaml')
+        with open(path, 'w', encoding='utf-8') as f:
+            f.write('R_HOME? = %s\n' % context.R_exe_dir)
+            if self.system_site_packages:
+                incl = 'true'
+            else:
+                incl = 'false'
+            f.write('include-system-site-packages = %s\n' % incl)
+            f.write('version = %d.%d.%d\n' % (3, 4, 3))
 
     def setup_r(self):
         # This will be modeled after setup_python()
