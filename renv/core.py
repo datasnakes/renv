@@ -131,6 +131,7 @@ class RenvBuilder(EnvBuilder):
         """
         config_dict = dict()
         context.cfg_path = path = os.path.join(context.env_dir, 'rvenv.yaml')
+        # TODO-ROB:  Create a parameter for using the users "global" package library
         with open(path, 'w', encoding='utf-8') as f:
             if self.system_site_packages:
                 sep = ";" if sys.platform == "win32" else ":"
