@@ -76,13 +76,8 @@ class RenvBuilder(EnvBuilder):
         prompt = self.prompt if self.prompt is not None else context.env_name
         context.prompt = '(%s) ' % prompt
         create_if_needed(env_dir)
-        # env = os.environ
-        # if sys.platform == 'darwin' and '__PYVENV_LAUNCHER__' in env:
-        #     executable = os.environ['__PYVENV_LAUNCHER__']
-        # else:
-        #     executable = sys.executable
-        # TODO-ROB: Create a function for finding the R executable
         # TODO-ROB:  This may be tied in with a config file or with an outside environment variable.
+        # System R files and paths
         r_exe = "R.exe"
         r_script = "Rscript"
         context.R_abs_exe = os.path.join(self.r_path, r_exe)
@@ -93,17 +88,19 @@ class RenvBuilder(EnvBuilder):
 
         # TODO-config:  Set default r_home in YAML.  Create parameter for user setting.
         # TODO-config:  Add to .Renviron file.
-        if (sys.maxsize > 2**32) and (os.name == 'posix') and (sys.platform != 'darwin'):
-            r_home = os.path.join(env_dir, "lib64", "R")
-            r_include_dir = os.path.join(r_home, "include")
-        elif sys.platform == 'win32':
+        # R-Environment R files and paths
+        if sys.platform == 'win32':
             r_home = env_dir
             r_include_dir = "include"
         else:
             r_home = os.path.join(env_dir, 'lib', "R")
             r_include_dir = os.path.join(r_home, "include")
+        # Issue 21197: create lib64 as a symlink to lib on 64-bit non-OS X POSIX
+        if (sys.maxsize > 2**32) and (os.name == 'posix') and (sys.platform != 'darwin'):
+            link_path = os.path.join(env_dir, 'lib64', 'R')
+            if not os.path.exists(link_path):   # Issue #21643
+                os.symlink(r_home, link_path)
         binname = 'bin'
-
         context.bin_name = binname
         context.inc_path = os.path.join(env_dir, r_include_dir)
         context.bin_path = binpath = os.path.join(env_dir, binname)
@@ -113,13 +110,6 @@ class RenvBuilder(EnvBuilder):
         create_if_needed(r_home)
         create_if_needed(binpath)
         return context
-        # TODO-ROB: Do we need this somehow?
-        # Issue 21197: create lib64 as a symlink to lib on 64-bit non-OS X POSIX
-        # if ((sys.maxsize > 2**32) and (os.name == 'posix') and
-        #     (sys.platform != 'darwin')):
-        #     link_path = os.path.join(env_dir, 'lib64')
-        #     if not os.path.exists(link_path):   # Issue #21643
-        #         os.symlink('library', link_path)
 
     def create_configuration(self, context):
         """
