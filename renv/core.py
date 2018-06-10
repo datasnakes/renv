@@ -93,21 +93,18 @@ class RenvBuilder(EnvBuilder):
         context.R_exe = r_exe
         context.R_script = r_script
 
-        # TODO-ROB: Get the package directory information from R
-        # TODO-ROB: This can be relative, because the script just needs the naming convention per os
-        binname = "FAKE_bin"
-        incpath = "FAKE_include"
-        libpath = os.path.join(env_dir, 'FAKE_R', "FAKE_platform", "FAKE_R_X.X.X")
-        # if sys.platform == 'win32':
-        #     binname = 'Scripts'
-        #     incpath = 'Include'
-        #     libpath = os.path.join(env_dir, 'Lib', 'site-packages')
-        # else:
-        #     binname = 'bin'
-        #     incpath = 'include'
-        #     libpath = os.path.join(env_dir, 'lib',
-        #                            'python%d.%d' % sys.version_info[:2],
-        #                            'site-packages')
+        # TODO-config:  Set default r_home in YAML.  Create parameter for user setting.
+        # TODO-config:  Add to .Renviron file.
+        if (sys.maxsize > 2**32) and (os.name == 'posix') and (sys.platform != 'darwin'):
+            r_home = os.path.join(env_dir, "lib64", "R")
+            r_include_dir = os.path.join(r_home, "include")
+        elif sys.platform == 'win32':
+            r_home = env_dir
+            r_include_dir = "include"
+        else:
+            r_home = os.path.join(env_dir, 'lib', "R")
+            r_include_dir = os.path.join(r_home, "include")
+        binname = 'bin'
 
         context.inc_path = path = os.path.join(env_dir, incpath)
         create_if_needed(path)
@@ -222,7 +219,6 @@ class RenvBuilder(EnvBuilder):
         # NEW:
         text = text.replace('__VENV_R_NAME__', context.env_R_exe)
         text = text.replace('__VENV_RSCRIPT_NAME', context.env_R_script)
-        #text = text.replace('__VENV_PYTHON__', context.env_exe)
         return text
 
     # TODO-ROB: Test if the scripts work properly with this build.
