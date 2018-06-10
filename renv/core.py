@@ -83,16 +83,13 @@ class RenvBuilder(EnvBuilder):
         #     executable = sys.executable
         # TODO-ROB: Create a function for finding the R executable
         # TODO-ROB:  This may be tied in with a config file or with an outside environment variable.
-        r_exe = "FAKE EXECUTABLE//PATH//R.exe"
-        context.R_abs_exe = r_exe
-        r_script = "FAKE EXECUTABLE//PATH//Rscript"
-        context.R_abs_script = r_script
-        r_exe_dir, r_exe = os.path.split(os.path.abspath(r_exe))
-        r_script_dir, r_script = os.path.split(os.path.abspath(r_script))
-        context.R_exe_dir = r_exe_dir
-        context.R_script_dir = r_script_dir
+        r_exe = "R.exe"
+        r_script = "Rscript"
+        context.R_abs_exe = os.path.join(self.r_path, r_exe)
+        context.R_abs_script = os.path.join(self.r_path, r_script)
         context.R_exe = r_exe
         context.R_script = r_script
+        context.R_path = self.r_path
 
         # TODO-config:  Set default r_home in YAML.  Create parameter for user setting.
         # TODO-config:  Add to .Renviron file.
