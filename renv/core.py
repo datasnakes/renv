@@ -75,17 +75,17 @@ class RenvBuilder(EnvBuilder):
         prompt = self.prompt if self.prompt is not None else context.env_name
         context.prompt = '(%s) ' % prompt
         create_if_needed(env_dir)
-        r_exe = "FAKE EXECUTABLE//PATH//R.exe"
-        context.R_abs_exe = r_exe
-        r_script = "FAKE EXECUTABLE//PATH//Rscript"
-        context.R_abs_script = r_script
-        # TODO-ROB: Create a function for finding the R executable
-        # TODO-ROB:  This may be tied in with a config file or with an outside environment variable.
         # env = os.environ
         # if sys.platform == 'darwin' and '__PYVENV_LAUNCHER__' in env:
         #     executable = os.environ['__PYVENV_LAUNCHER__']
         # else:
         #     executable = sys.executable
+        # TODO-ROB: Create a function for finding the R executable
+        # TODO-ROB:  This may be tied in with a config file or with an outside environment variable.
+        r_exe = "FAKE EXECUTABLE//PATH//R.exe"
+        context.R_abs_exe = r_exe
+        r_script = "FAKE EXECUTABLE//PATH//Rscript"
+        context.R_abs_script = r_script
         r_exe_dir, r_exe = os.path.split(os.path.abspath(r_exe))
         r_script_dir, r_script = os.path.split(os.path.abspath(r_script))
         context.R_exe_dir = r_exe_dir
@@ -106,22 +106,22 @@ class RenvBuilder(EnvBuilder):
             r_include_dir = os.path.join(r_home, "include")
         binname = 'bin'
 
-        context.inc_path = path = os.path.join(env_dir, incpath)
-        create_if_needed(path)
-        create_if_needed(libpath)
+        context.bin_name = binname
+        context.inc_path = os.path.join(env_dir, r_include_dir)
+        context.bin_path = binpath = os.path.join(env_dir, binname)
+        context.env_R_exe = os.path.join(binpath, r_exe)
+        context.env_R_script = os.path.join(binpath, r_script)
+        create_if_needed(r_include_dir)
+        create_if_needed(r_home)
+        create_if_needed(binpath)
+        return context
         # TODO-ROB: Do we need this somehow?
         # Issue 21197: create lib64 as a symlink to lib on 64-bit non-OS X POSIX
         # if ((sys.maxsize > 2**32) and (os.name == 'posix') and
         #     (sys.platform != 'darwin')):
         #     link_path = os.path.join(env_dir, 'lib64')
         #     if not os.path.exists(link_path):   # Issue #21643
-        #         os.symlink('lib', link_path)
-        context.bin_path = binpath = os.path.join(env_dir, binname)
-        context.bin_name = binname
-        context.env_R_exe = os.path.join(binpath, r_exe)
-        context.env_R_script = os.path.join(binpath, r_script)
-        create_if_needed(binpath)
-        return context
+        #         os.symlink('library', link_path)
 
     def create_configuration(self, context):
         """
