@@ -129,16 +129,18 @@ class RenvBuilder(EnvBuilder):
         :param context: The information for the environment creation request
                         being processed.
         """
-        # TODO-ROB: Work YAML configuration into this section
-        context.cfg_path = path = os.path.join(context.env_dir, 'FAKE_Rcfg.yaml')
+        config_dict = dict()
+        context.cfg_path = path = os.path.join(context.env_dir, 'rvenv.yaml')
         with open(path, 'w', encoding='utf-8') as f:
-            f.write('R_HOME? = %s\n' % context.R_exe_dir)
             if self.system_site_packages:
-                incl = 'true'
+                sep = ";" if sys.platform == "win32" else ":"
+                config_dict["R_LIBS_USER"] = "%s%s%s" % (context.abs_R_libs, sep, context.env_R_libs)
             else:
-                incl = 'false'
-            f.write('include-system-site-packages = %s\n' % incl)
-            f.write('version = %d.%d.%d\n' % (3, 4, 3))
+                config_dict["R_LIBS_USER"] = context.env_R_libs
+            config_dict['R_VERSION'] = context.R_version
+            config_dict["R_HOME"] = context.env_R_home
+            config_dict["R_INCLUDE_DIR"] = context.env_R_include
+            yaml.dump(config_dict, f, default_flow_style=False)
         # TODO-ROB:  This would only be apply under Windows.  This is called in setup_python(r)
         # if os.name == 'nt':
         #     def include_binary(self, f):
@@ -215,8 +217,8 @@ class RenvBuilder(EnvBuilder):
         text = text.replace('__VENV_PROMPT__', context.prompt)
         text = text.replace('__VENV_BIN_NAME__', context.bin_name)
         # NEW:
-        text = text.replace('__VENV_R_NAME__', context.env_R_exe)
-        text = text.replace('__VENV_RSCRIPT_NAME', context.env_R_script)
+        text = text.replace('__VENV_R__', context.env_R_exe)
+        text = text.replace('__VENV_RSCRIPT__', context.env_R_script)
         return text
 
     # TODO-ROB: Test if the scripts work properly with this build.
