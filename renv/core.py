@@ -5,6 +5,7 @@ import shutil
 import subprocess
 import sys
 import types
+import yaml
 
 
 class RenvBuilder(EnvBuilder):
@@ -80,34 +81,43 @@ class RenvBuilder(EnvBuilder):
         # System R files and paths
         r_exe = "R.exe"
         r_script = "Rscript"
-        context.R_abs_exe = os.path.join(self.r_path, r_exe)
-        context.R_abs_script = os.path.join(self.r_path, r_script)
         context.R_exe = r_exe
         context.R_script = r_script
-        context.R_path = self.r_path
+        context.R_version = os.path.split(self.r_path)[1]
+        context.abs_R_exe = os.path.join(self.r_path, "bin", r_exe)
+        context.abs_R_script = os.path.join(self.r_path, "bin", r_script)
+        context.abs_R_path = self.r_path
 
         # TODO-config:  Set default r_home in YAML.  Create parameter for user setting.
         # TODO-config:  Add to .Renviron file.
         # R-Environment R files and paths
         if sys.platform == 'win32':
-            r_home = env_dir
-            r_include_dir = "include"
+            r_env_home = env_dir
+            r_abs_home = self.r_path
+            r_env_include = r_abs_include = "include"
         else:
-            r_home = os.path.join(env_dir, 'lib', "R")
-            r_include_dir = os.path.join(r_home, "include")
+            r_env_home = os.path.join(env_dir, 'lib', "R")
+            r_abs_home = os.path.join(self.r_path, 'lib', "R")
+            r_env_include = os.path.join(r_env_home, "include")
+            r_abs_include = os.path.join(self.r_path, "include")
         # Issue 21197: create lib64 as a symlink to lib on 64-bit non-OS X POSIX
         if (sys.maxsize > 2**32) and (os.name == 'posix') and (sys.platform != 'darwin'):
             link_path = os.path.join(env_dir, 'lib64', 'R')
             if not os.path.exists(link_path):   # Issue #21643
-                os.symlink(r_home, link_path)
+                os.symlink(r_env_home, link_path)
         binname = 'bin'
+        r_env_libs = os.path.join(r_env_home, 'library')
+        r_abs_libs = os.path.join(r_abs_home, 'library')
         context.bin_name = binname
-        context.inc_path = os.path.join(env_dir, r_include_dir)
+        context.env_R_home = r_env_home
+        context.env_R_libs = r_env_libs
+        context.abs_R_libs = r_abs_libs
+        context.env_R_include = os.path.join(env_dir, r_env_include)
         context.bin_path = binpath = os.path.join(env_dir, binname)
         context.env_R_exe = os.path.join(binpath, r_exe)
         context.env_R_script = os.path.join(binpath, r_script)
-        create_if_needed(r_include_dir)
-        create_if_needed(r_home)
+        create_if_needed(r_env_include)
+        create_if_needed(r_env_home)
         create_if_needed(binpath)
         return context
 
