@@ -17,12 +17,13 @@ class RenvBuilder(EnvBuilder):
     This initial skeleton class includes all of the methods that will need
     to be reworked for R environments.
     """
-    def __init__(self, r_path, system_site_packages=False, clear=False,
+    def __init__(self, r_path, system_site_packages=False, recommended_packages=True,clear=False,
                  symlinks=False, upgrade=False, prompt=None):
         super().__init__(system_site_packages=system_site_packages, clear=clear,
                          symlinks=symlinks, upgrade=upgrade, prompt=prompt)
         del self.with_pip
         self.r_path = r_path
+        self.recommended_packages = recommended_packages
 
     def create(self, env_dir):
         """
@@ -135,7 +136,11 @@ class RenvBuilder(EnvBuilder):
         with open(path, 'w', encoding='utf-8') as f:
             if self.system_site_packages:
                 sep = ";" if sys.platform == "win32" else ":"
-                config_dict["R_LIBS_USER"] = "%s%s%s" % (context.abs_R_libs, sep, context.env_R_libs)
+                # TODO-ROB: Create system links instead of appending R_LIBS_USER
+                # TODO-ROB: Default to copying the system packages
+                # TODO-ROB: Create command for updating the system links in case something is installed globally
+                #
+                # config_dict["R_LIBS_USER"] = "%s%s%s" % (context.abs_R_libs, sep, context.env_R_libs)
                 # TODO-ROB:  If all system packages are required then
                 # recommended_pkgs = subprocess.Popen([Rcmd], stderr=subprocess.PIPE, stdout=subprocess.PIPE,
                 #                                     shell=True, encoding='utf-8')
@@ -145,6 +150,16 @@ class RenvBuilder(EnvBuilder):
                 # recommended_pkgs = out[0].decode("utf-8").split(" ")
             else:
                 config_dict["R_LIBS_USER"] = context.env_R_libs
+            if self.recommended_packages:
+                pass
+                # recommended_pkgs = subprocess.Popen([Rcmd], stderr=subprocess.PIPE, stdout=subprocess.PIPE,
+                #                                     shell=True, encoding='utf-8')
+                # error = recommended_pkgs.stderr.readlines()
+                # out = recommended_pkgs.stdout.readlines()
+                # recommended_pkgs.wait()
+                # recommended_pkgs = out[0].decode("utf-8").split(" ")
+            else:
+                pass
             config_dict['R_VERSION'] = context.R_version
             config_dict["R_HOME"] = context.env_R_home
             config_dict["R_INCLUDE_DIR"] = context.env_R_include
