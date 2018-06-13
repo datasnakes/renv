@@ -136,6 +136,13 @@ class RenvBuilder(EnvBuilder):
             if self.system_site_packages:
                 sep = ";" if sys.platform == "win32" else ":"
                 config_dict["R_LIBS_USER"] = "%s%s%s" % (context.abs_R_libs, sep, context.env_R_libs)
+                # TODO-ROB:  If all system packages are required then
+                # recommended_pkgs = subprocess.Popen([Rcmd], stderr=subprocess.PIPE, stdout=subprocess.PIPE,
+                #                                     shell=True, encoding='utf-8')
+                # error = recommended_pkgs.stderr.readlines()
+                # out = recommended_pkgs.stdout.readlines()
+                # recommended_pkgs.wait()
+                # recommended_pkgs = out[0].decode("utf-8").split(" ")
             else:
                 config_dict["R_LIBS_USER"] = context.env_R_libs
             config_dict['R_VERSION'] = context.R_version
