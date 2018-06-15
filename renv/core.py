@@ -23,7 +23,12 @@ class RenvBuilder(EnvBuilder):
                          symlinks=symlinks, upgrade=upgrade, prompt=prompt)
         del self.with_pip
         self.r_path = r_path
-        self.recommended_packages = recommended_packages
+        if self.system_site_packages:
+            self.base_packages = False
+            self.recommended_packages = False
+        else:
+            self.base_packages = True
+            self.recommended_packages = recommended_packages
 
     def create(self, env_dir):
         """
