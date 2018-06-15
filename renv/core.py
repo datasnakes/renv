@@ -136,35 +136,43 @@ class RenvBuilder(EnvBuilder):
                         being processed.
         """
         config_dict = dict()
+        recommended_pkgs = list()
+        base_pkgs = list()
+        copier = self.symlink_or_copy
         context.cfg_path = path = os.path.join(context.env_dir, 'rvenv.yaml')
-        # TODO-ROB:  Create a parameter for using the users "global" package library
         with open(path, 'w', encoding='utf-8') as f:
             if self.system_site_packages:
                 sep = ";" if sys.platform == "win32" else ":"
-                # TODO-ROB: Create system links instead of appending R_LIBS_USER
-                # TODO-ROB: Default to copying the system packages
-                # TODO-ROB: Create command for updating the system links in case something is installed globally
-                #
-                # config_dict["R_LIBS_USER"] = "%s%s%s" % (context.abs_R_libs, sep, context.env_R_libs)
-                # TODO-ROB:  If all system packages are required then
-                # recommended_pkgs = subprocess.Popen([Rcmd], stderr=subprocess.PIPE, stdout=subprocess.PIPE,
-                #                                     shell=True, encoding='utf-8')
-                # error = recommended_pkgs.stderr.readlines()
-                # out = recommended_pkgs.stdout.readlines()
-                # recommended_pkgs.wait()
-                # recommended_pkgs = out[0].decode("utf-8").split(" ")
+                config_dict["R_LIBS_USER"] = "%s%s%s" % (context.abs_R_libs, sep, context.env_R_libs)
             else:
                 config_dict["R_LIBS_USER"] = context.env_R_libs
-            if self.recommended_packages:
-                pass
-                # recommended_pkgs = subprocess.Popen([Rcmd], stderr=subprocess.PIPE, stdout=subprocess.PIPE,
-                #                                     shell=True, encoding='utf-8')
-                # error = recommended_pkgs.stderr.readlines()
-                # out = recommended_pkgs.stdout.readlines()
-                # recommended_pkgs.wait()
-                # recommended_pkgs = out[0].decode("utf-8").split(" ")
-            else:
-                pass
+                if self.recommended_packages:
+                    Rcmd = f"{context.abs_R_script} " \
+                           f"-e \'base::cat(rownames(installed.packages(priority=\'recommended\')))\'"
+                    recommended_pkgs = subprocess.Popen([Rcmd], stderr=subprocess.PIPE, stdout=subprocess.PIPE,
+                                                        shell=True, encoding='utf-8')
+                    error = recommended_pkgs.stderr.readlines()
+                    out = recommended_pkgs.stdout.readlines()
+                    recommended_pkgs.wait()
+                    recommended_pkgs = out[0].decode("utf-8").split(" ")
+                if self.base_packages:
+                    Rcmd = f"{context.abs_R_script} " \
+                           f"-e \'base::cat(rownames(installed.packages(priority=\'base\')))\'"
+                    base_pkgs = subprocess.Popen([Rcmd], stderr=subprocess.PIPE, stdout=subprocess.PIPE,
+                                                        shell=True, encoding='utf-8')
+                    error = base_pkgs.stderr.readlines()
+                    out = base_pkgs.stdout.readlines()
+                    base_pkgs.wait()
+                    base_pkgs = out[0].decode("utf-8").split(" ")
+                pkgs = recommended_pkgs + base_pkgs
+                # TODO-config: This may need to be separate for windows vs linux
+                for pkg in pkgs:
+                    abs_pkg_path = os.path.join(context.abs_R_libs, pkg)
+                    env_pkg_path = os.path.join(context.env_R_libs, pkg)
+                    copier(abs_pkg_path, env_pkg_path)
+                    if not os.path.islink(env_pkg_path):
+                        os.chmod(path, 0o755)
+
             config_dict['R_VERSION'] = context.R_version
             config_dict["R_HOME"] = context.env_R_home
             config_dict["R_INCLUDE_DIR"] = context.env_R_include
