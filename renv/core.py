@@ -187,7 +187,7 @@ class RenvBuilder(EnvBuilder):
                     env_pkg_path = os.path.join(context.env_R_libs, pkg)
                     copier(abs_pkg_path, env_pkg_path)
                     if not os.path.islink(env_pkg_path):
-                        os.chmod(path, 0o755)
+                        os.chmod(env_pkg_path, 0o755)
 
             config_dict['R_VERSION'] = context.R_version
             config_dict["R_HOME"] = context.env_R_home
