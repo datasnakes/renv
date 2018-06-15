@@ -51,7 +51,9 @@ class RenvBuilder(EnvBuilder):
         if not self.upgrade:
             self.setup_scripts(context)
             # TODO-ROB: Setup .Rprofile using a default one included with the package
+            # self.setup_r_profile(context)
             # TODO-ROB: Setup .Renviron using a default one included with the package
+            # self.setup_r_environ(context)
             self.post_setup(context)
         if true_system_site_packages:
             # We had set it to False before, now
@@ -268,14 +270,14 @@ class RenvBuilder(EnvBuilder):
     # def install_scripts(self, context, path):
     #     pass
 
-    def install_r(self):
-        # New: install specified version of R in the R environment.
-        pass
-
-    def setup_r_profile(self):
-        # New
-        pass
-
-    def setup_r_environ(self):
-        # New
-        pass
+    # def install_r(self):
+    #     # New: install specified version of R in the R environment.
+    #     pass
+    #
+    # def setup_r_profile(self, context):
+    #     # New
+    #     pass
+    #
+    # def setup_r_environ(self):
+    #     # New
+    #     pass
