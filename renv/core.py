@@ -6,6 +6,7 @@ import subprocess
 import sys
 import types
 import yaml
+logger = logging.getLogger(__name__)
 
 
 class RenvBuilder(EnvBuilder):
@@ -93,6 +94,7 @@ class RenvBuilder(EnvBuilder):
         context.abs_R_exe = os.path.join(self.r_path, "bin", r_exe)
         context.abs_R_script = os.path.join(self.r_path, "bin", r_script)
         context.abs_R_path = self.r_path
+        logging.info(f"System R(version):  {self.r_path}({context.R_version})")
 
         # TODO-config:  Set default r_home in YAML.  Create parameter for user setting.
         # TODO-config:  Add to .Renviron file.
@@ -119,12 +121,13 @@ class RenvBuilder(EnvBuilder):
         context.env_R_libs = r_env_libs
         context.abs_R_libs = r_abs_libs
         context.env_R_include = os.path.join(env_dir, r_env_include)
-        context.bin_path = binpath = os.path.join(env_dir, binname)
+        context.env_bin_path = binpath = os.path.join(env_dir, binname)
         context.env_R_exe = os.path.join(binpath, r_exe)
         context.env_R_script = os.path.join(binpath, r_script)
         create_if_needed(r_env_include)
         create_if_needed(r_env_home)
         create_if_needed(binpath)
+        logging.info(f"Environment R:  {r_env_home}")
         return context
 
     def create_configuration(self, context):
@@ -176,6 +179,7 @@ class RenvBuilder(EnvBuilder):
             config_dict['R_VERSION'] = context.R_version
             config_dict["R_HOME"] = context.env_R_home
             config_dict["R_INCLUDE_DIR"] = context.env_R_include
+            logging.info(f"Config Dictionary:  {config_dict}")
             yaml.dump(config_dict, f, default_flow_style=False)
         # TODO-ROB:  This would only be apply under Windows.  This is called in setup_python(r)
         # if os.name == 'nt':
