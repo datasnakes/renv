@@ -280,6 +280,11 @@ class RenvBuilder(EnvBuilder):
         # NEW:
         text = text.replace('__VENV_R__', context.env_R_exe)
         text = text.replace('__VENV_RSCRIPT__', context.env_R_script)
+        text = text.replace('__R_LIBS_USER__', context.config_dict["R_LIBS_USER"])
+        text = text.replace('__R_VERSION__', context.config_dict["R_VERSION"])
+        text = text.replace('__R_HOME__', context.config_dict["R_HOME"])
+        text = text.replace('__R_INCLUDE_DIR__', context.config_dict["R_INCLUDE_DIR"])
+
         return text
 
     # TODO-ROB: Test if the scripts work properly with this build.
