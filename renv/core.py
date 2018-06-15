@@ -196,23 +196,24 @@ class RenvBuilder(EnvBuilder):
        :param context: The information for the environment creation request
                        being processed.
        """
-        binpath = context.bin_path
-        path = context.env_R_exe
+        env_bin = context.env_bin_path
+        env_R = context.env_R_exe
         copier = self.symlink_or_copy
-        copier(context.R_abs_exe, path)
-        dirname = context.R_exe_dir
+        copier(context.R_abs_exe, env_R)
+        dirname = context.abs_R_path
         if os.name != 'nt':
-            if not os.path.islink(path):
-                os.chmod(path, 0o755)
+            if not os.path.islink(env_R):
+                os.chmod(env_R, 0o755)
             # for suffix in ('python', 'python3'):
             for suffix in ('R', 'Rscript'):
-                path = os.path.join(binpath, suffix)
-                if not os.path.exists(path):
+                exe_path = os.path.join(env_bin, suffix)
+                if not os.path.exists(exe_path):
+                    abs_exe_path = os.path.join(dirname, "bin", suffix)
                     # Issue 18807: make copies if
                     # symlinks are not wanted
-                    copier(context.env_exe, path, relative_symlinks_ok=True)
-                    if not os.path.islink(path):
-                        os.chmod(path, 0o755)
+                    copier(abs_exe_path, exe_path, relative_symlinks_ok=True)
+                    if not os.path.islink(exe_path):
+                        os.chmod(exe_path, 0o755)
         else:
             # TODO-ROB: Build Windows version
             raise OSError("renv is only currently working for some POISIX systems.")
