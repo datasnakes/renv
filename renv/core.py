@@ -125,6 +125,7 @@ class RenvBuilder(EnvBuilder):
         r_abs_libs = os.path.join(r_abs_home, 'library')
         context.bin_name = binname
         context.env_R_home = r_env_home
+        context.abs_R_home = r_abs_home
         context.env_R_libs = r_env_libs
         context.abs_R_libs = r_abs_libs
         context.env_R_include = os.path.join(env_dir, r_env_include)
@@ -190,7 +191,8 @@ class RenvBuilder(EnvBuilder):
                         os.chmod(env_pkg_path, 0o755)
 
             config_dict['R_VERSION'] = context.R_version
-            config_dict["R_HOME"] = context.env_R_home
+            config_dict["R_ENV_HOME"] = context.env_R_home
+            config_dict["R_ABS_HOME"] = context.abs_R_home
             config_dict["R_INCLUDE_DIR"] = context.env_R_include
             logging.info(f"Config Dictionary:  {config_dict}")
             if user_config:
@@ -282,7 +284,7 @@ class RenvBuilder(EnvBuilder):
         text = text.replace('__VENV_RSCRIPT__', context.env_R_script)
         text = text.replace('__R_LIBS_USER__', context.config_dict["R_LIBS_USER"])
         text = text.replace('__R_VERSION__', context.config_dict["R_VERSION"])
-        text = text.replace('__R_HOME__', context.config_dict["R_HOME"])
+        text = text.replace('__R_HOME__', context.config_dict["R_ENV_HOME"])
         text = text.replace('__R_INCLUDE_DIR__', context.config_dict["R_INCLUDE_DIR"])
 
         return text
