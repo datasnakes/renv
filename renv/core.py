@@ -43,7 +43,7 @@ class RenvBuilder(EnvBuilder):
         # until after pip is installed.
         true_system_site_packages = self.system_site_packages
         self.system_site_packages = False
-        self.create_configuration(context)
+        context.config_dict = self.create_configuration(context)
         self.setup_r(context)
         # TODO-ROB: pip will eventually be beRi
         # if self.with_pip:
@@ -79,8 +79,13 @@ class RenvBuilder(EnvBuilder):
 
         if os.path.exists(env_dir) and self.clear:
             self.clear_directory(env_dir)
-
+        user_config = os.path.join(env_dir, "renv.yaml")
         context = types.SimpleNamespace()
+        if os.path.exists(env_dir) and os.path.isfile(user_config):
+            context.user_config = user_config
+        else:
+            context.user_config = None
+
         context.env_dir = env_dir
         context.env_name = os.path.split(env_dir)[1]
         prompt = self.prompt if self.prompt is not None else context.env_name
@@ -144,7 +149,13 @@ class RenvBuilder(EnvBuilder):
         recommended_pkgs = list()
         base_pkgs = list()
         copier = self.symlink_or_copy
-        context.cfg_path = path = os.path.join(context.env_dir, 'rvenv.yaml')
+        path = context.user_config
+        if path:
+            with open(path, 'r', encoding='utf-8')as f:
+                user_config = yaml.load(f)
+        else:
+            user_config = None
+
         with open(path, 'w', encoding='utf-8') as f:
             if self.system_site_packages:
                 sep = ";" if sys.platform == "win32" else ":"
@@ -182,7 +193,10 @@ class RenvBuilder(EnvBuilder):
             config_dict["R_HOME"] = context.env_R_home
             config_dict["R_INCLUDE_DIR"] = context.env_R_include
             logging.info(f"Config Dictionary:  {config_dict}")
-            yaml.dump(config_dict, f, default_flow_style=False)
+            if user_config:
+                yaml.dump(user_config, f, default_flow_style=False)
+            else:
+                yaml.dump(config_dict, f, default_flow_style=False)
         # TODO-ROB:  This would only be apply under Windows.  This is called in setup_python(r)
         # if os.name == 'nt':
         #     def include_binary(self, f):
@@ -191,6 +205,10 @@ class RenvBuilder(EnvBuilder):
         #         else:
         #             result = f.startswith('python') and f.endswith('.exe')
         #         return result
+        if not user_config:
+            return config_dict
+        else:
+            return user_config
 
     def setup_r(self, context):
         """
