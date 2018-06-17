@@ -13,8 +13,8 @@
 # Set repositories for CRAN
 local({
   r <- getOption("repos")
-  r["CRAN"] <- "https://cran.rstudio.com/"
-  r["CRANextra"] <- "https://mirrors.nics.utk.edu/cran/"
+  r["CRAN"] <- "__CRAN_MIRROR__"
+  r["CRANextra"] <- "__CRANEXTRA__MIRROR__"
   options(repos=r)
 })
 
@@ -37,8 +37,8 @@ askYesNo <- function(msg) {
 }
 
 # List of default packages to install based on the users need
-standard_pkg_list <- list(BiocInstaller="Bioconductor", devtools="Devtools", tidyverse="Tidyverse")
-reproducible_wf_pkg_list <- list(packrat="Packrat", miniCRAN="MiniCRAN")
+standard_pkg_list <- __STANDARD_PKG_LIST__
+reproducible_wf_pkg_list <- __REPRODUCIBLE_WORKFLOW_PKG_LIST__
 
 # Checker for the default packages; also displays helpful output
 checker_for_packages <-function(pkgs=list()) {
