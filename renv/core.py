@@ -169,7 +169,7 @@ class RenvBuilder(EnvBuilder):
         with open(path, 'w', encoding='utf-8') as f:
             if self.system_site_packages:
                 sep = ";" if sys.platform == "win32" else ":"
-                config_dict["R_LIBS_USER"] = "%s%s%s" % (context.abs_R_libs, sep, context.env_R_libs)
+                config_dict["R_LIBS_USER"] = "%s%s%s" % (context.env_R_libs, sep, context.abs_R_libs)
             else:
                 config_dict["R_LIBS_USER"] = context.env_R_libs
                 if self.recommended_packages:
