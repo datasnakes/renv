@@ -190,15 +190,13 @@ class RenvBuilder(EnvBuilder):
                     if not os.path.islink(env_pkg_path):
                         os.chmod(env_pkg_path, 0o755)
 
-            config_dict['R_VERSION'] = context.R_version
             config_dict["R_ENV_HOME"] = context.env_R_home
             config_dict["R_ABS_HOME"] = context.abs_R_home
             config_dict["R_INCLUDE_DIR"] = context.env_R_include
             logging.info(f"Config Dictionary:  {config_dict}")
-            if user_config:
-                yaml.dump(user_config, f, default_flow_style=False)
-            else:
-                yaml.dump(config_dict, f, default_flow_style=False)
+
+            # Dump the configuration dictionary to the YAML file in the R environment HOME
+            yaml.dump(config_dict, f, default_flow_style=False)
         # TODO-ROB:  This would only be apply under Windows.  This is called in setup_python(r)
         # if os.name == 'nt':
         #     def include_binary(self, f):
@@ -207,10 +205,7 @@ class RenvBuilder(EnvBuilder):
         #         else:
         #             result = f.startswith('python') and f.endswith('.exe')
         #         return result
-        if not user_config:
-            return config_dict
-        else:
-            return user_config
+        return config_dict
 
     def setup_r(self, context):
         """
