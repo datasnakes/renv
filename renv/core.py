@@ -8,6 +8,15 @@ import types
 import yaml
 logger = logging.getLogger(__name__)
 
+__DEFAULT_CONFIG__ = {
+    "CRAN_MIRROR": "https://cran.rstudio.com/",
+    "CRANEXTRA_MIRROR": "https://mirrors.nics.utk.edu/cran/",
+    "STANDARD_PKG_LIST": {
+        "BiocInstaller": "Bioconductor",
+        "devtools": "Devtools"
+    }
+}
+
 
 class RenvBuilder(EnvBuilder):
     """
@@ -193,6 +202,12 @@ class RenvBuilder(EnvBuilder):
             config_dict["R_ENV_HOME"] = context.env_R_home
             config_dict["R_ABS_HOME"] = context.abs_R_home
             config_dict["R_INCLUDE_DIR"] = context.env_R_include
+            config_dict["R_VERSION"] = context.R_version
+            # Package lists
+            config_dict.update(__DEFAULT_CONFIG__)
+            pkg_lists = self.format_pkg_list(context)
+            config_dict.update(pkg_lists)
+            config_dict.update(user_config)
             logging.info(f"Config Dictionary:  {config_dict}")
 
             # Dump the configuration dictionary to the YAML file in the R environment HOME
@@ -281,6 +296,10 @@ class RenvBuilder(EnvBuilder):
         text = text.replace('__R_VERSION__', context.config_dict["R_VERSION"])
         text = text.replace('__R_HOME__', context.config_dict["R_ENV_HOME"])
         text = text.replace('__R_INCLUDE_DIR__', context.config_dict["R_INCLUDE_DIR"])
+        text = text.replace('__CRAN_MIRROR__', context.config_dict["CRAN_MIRROR"])
+        text = text.replace('__CRANEXTRA_MIRROR__', context.config_dict["CRANEXTRA_MIRROR"])
+        text = text.replace('__STANDARD_PKG_LIST__', context.config_dict["STANDARD_PGK_LIST"])
+        text = text.replace('__REPRODUCIBLE_WORKFLOW_PKG_LIST__', context.config_dict["REPRODUCIBLE_WORKFLOW_PKG_LIST"])
 
         return text
 
@@ -301,3 +320,24 @@ class RenvBuilder(EnvBuilder):
     # def setup_r_environ(self):
     #     # New
     #     pass
+
+    def format_pkg_list(self, context):
+        config_dict = context.config_dict
+        config_dict = {k: v for k, v in config_dict.items() if "PKG_LIST" in k}
+        fmtd_list = dict()
+
+        for list_name in config_dict:
+            pkg_dict = config_dict[list_name]
+            pkg_list_count = len(pkg_dict) - 1
+            pkg_list_string = ""
+            for k, v in enumerate(pkg_dict):
+                if k == pkg_list_count:
+                    pkg_list_string = f"{pkg_list_string}{v}=\"{pkg_dict[v]}\""
+                else:
+                    sep = ", "
+                    pkg_list_string = f"{pkg_list_string}{v}=\"{pkg_dict[v]}\"{sep}"
+
+            pkg_list_string = f"list({pkg_list_string})"
+            fmtd_list[list_name] = pkg_list_string
+
+        return fmtd_list
