@@ -27,7 +27,7 @@ class RenvBuilder(EnvBuilder):
     This initial skeleton class includes all of the methods that will need
     to be reworked for R environments.
     """
-    def __init__(self, r_path, system_site_packages=False, recommended_packages=True,clear=False,
+    def __init__(self, r_path, system_site_packages=False, recommended_packages=True, clear=False,
                  symlinks=False, upgrade=False, prompt=None):
         super().__init__(system_site_packages=system_site_packages, clear=clear,
                          symlinks=symlinks, upgrade=upgrade, prompt=prompt)
