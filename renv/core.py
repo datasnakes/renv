@@ -90,11 +90,7 @@ class RenvBuilder(EnvBuilder):
             self.clear_directory(env_dir)
         user_config = os.path.join(env_dir, "renv.yaml")
         context = types.SimpleNamespace()
-        if os.path.exists(env_dir) and os.path.isfile(user_config):
-            context.user_config = user_config
-        else:
-            context.user_config = None
-
+        context.user_config = user_config
         context.env_dir = env_dir
         context.env_name = os.path.split(env_dir)[1]
         prompt = self.prompt if self.prompt is not None else context.env_name
@@ -162,11 +158,11 @@ class RenvBuilder(EnvBuilder):
         base_pkgs = list()
         copier = self.symlink_or_copy
         path = context.user_config
-        if path:
+        if os.path.isfile(path):
             with open(path, 'r', encoding='utf-8')as f:
                 user_config = yaml.load(f)
         else:
-            user_config = None
+            user_config = {}
 
         with open(path, 'w', encoding='utf-8') as f:
             if self.system_site_packages:
