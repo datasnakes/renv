@@ -203,7 +203,7 @@ class RenvBuilder(EnvBuilder):
             config_dict["R_VERSION"] = context.R_version
             # Package lists
             config_dict.update(__DEFAULT_CONFIG__)
-            pkg_lists = self.format_pkg_list(context)
+            pkg_lists = self.format_pkg_list(config_dict)
             config_dict.update(pkg_lists)
             config_dict.update(user_config)
             logging.info(f"Config Dictionary:  {config_dict}")
@@ -319,8 +319,7 @@ class RenvBuilder(EnvBuilder):
     #     # New
     #     pass
 
-    def format_pkg_list(self, context):
-        config_dict = context.config_dict
+    def format_pkg_list(self, config_dict):
         config_dict = {k: v for k, v in config_dict.items() if "PKG_LIST" in k}
         fmtd_list = dict()
 
