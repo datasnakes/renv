@@ -14,6 +14,9 @@ __DEFAULT_CONFIG__ = {
     "STANDARD_PKG_LIST": {
         "BiocInstaller": "Bioconductor",
         "devtools": "Devtools"
+    },
+    "REPRODUCIBLE_WORKFLOW_PKG_LIST": {
+        "tidyverse": "Tidyverse"
     }
 }
 
