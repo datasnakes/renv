@@ -30,3 +30,6 @@ pyyaml = "^3.12"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.5"
+
+[tool.poetry.scripts]
+renv = 'renv.renv:renv'
