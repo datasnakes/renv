@@ -230,7 +230,6 @@ class RenvBuilder(EnvBuilder):
         env_bin = context.env_bin_path
         env_R = context.env_R_exe
         copier = self.symlink_or_copy
-        copier(context.abs_R_exe, env_R)
         dirname = context.abs_R_path
         if os.name != 'nt':
             if not os.path.islink(env_R):
@@ -297,7 +296,7 @@ class RenvBuilder(EnvBuilder):
         text = text.replace('__R_INCLUDE_DIR__', context.config_dict["R_INCLUDE_DIR"])
         text = text.replace('__CRAN_MIRROR__', context.config_dict["CRAN_MIRROR"])
         text = text.replace('__CRANEXTRA_MIRROR__', context.config_dict["CRANEXTRA_MIRROR"])
-        text = text.replace('__STANDARD_PKG_LIST__', context.config_dict["STANDARD_PGK_LIST"])
+        text = text.replace('__STANDARD_PKG_LIST__', context.config_dict["STANDARD_PKG_LIST"])
         text = text.replace('__REPRODUCIBLE_WORKFLOW_PKG_LIST__', context.config_dict["REPRODUCIBLE_WORKFLOW_PKG_LIST"])
 
         return text
