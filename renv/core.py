@@ -98,7 +98,7 @@ class RenvBuilder(EnvBuilder):
         create_if_needed(env_dir)
         # TODO-ROB:  This may be tied in with a config file or with an outside environment variable.
         # System R files and paths
-        r_exe = "R.exe"
+        r_exe = "R"
         r_script = "Rscript"
         context.R_exe = r_exe
         context.R_script = r_script
