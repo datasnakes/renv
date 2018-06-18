@@ -229,7 +229,7 @@ class RenvBuilder(EnvBuilder):
         env_bin = context.env_bin_path
         env_R = context.env_R_exe
         copier = self.symlink_or_copy
-        copier(context.R_abs_exe, env_R)
+        copier(context.abs_R_exe, env_R)
         dirname = context.abs_R_path
         if os.name != 'nt':
             if not os.path.islink(env_R):
