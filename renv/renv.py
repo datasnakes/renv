@@ -21,8 +21,8 @@ import os
               help="Upgrades the environment directory to use this version of R.")
 @click.option('--prompt', '-p', default=None,
               help="Provide an alternative prompt prefix for this environment.")
-@click.argument('env_dir',
-                help="A directory to create the environment in.")
+@click.option('--env_dir', '-d',
+              help="A directory for creating the environment in.")
 def renv(r_path, system_site_packages, recommended_packages, clear, upgrade, prompt, env_dir):
     if not os.path.exists(r_path):
         raise NotADirectoryError("%s is an")
