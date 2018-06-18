@@ -178,7 +178,7 @@ class RenvBuilder(EnvBuilder):
                     error = recommended_pkgs.stderr.readlines()
                     out = recommended_pkgs.stdout.readlines()
                     recommended_pkgs.wait()
-                    recommended_pkgs = out[0].decode("utf-8").split(" ")
+                    recommended_pkgs = out[0].split(" ")
                 if self.base_packages:
                     Rcmd = f"{context.abs_R_script} " \
                            f"-e \'base::cat(rownames(installed.packages(priority=\"base\")))\'"
@@ -187,7 +187,7 @@ class RenvBuilder(EnvBuilder):
                     error = base_pkgs.stderr.readlines()
                     out = base_pkgs.stdout.readlines()
                     base_pkgs.wait()
-                    base_pkgs = out[0].decode("utf-8").split(" ")
+                    base_pkgs = out[0].split(" ")
                 pkgs = recommended_pkgs + base_pkgs
                 # TODO-config: This may need to be separate for windows vs linux
                 for pkg in pkgs:
