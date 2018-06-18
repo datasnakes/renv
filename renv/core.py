@@ -172,7 +172,7 @@ class RenvBuilder(EnvBuilder):
                 config_dict["R_LIBS_USER"] = context.env_R_libs
                 if self.recommended_packages:
                     Rcmd = f"{context.abs_R_script} " \
-                           f"-e \'base::cat(rownames(installed.packages(priority=\'recommended\')))\'"
+                           f"-e \'base::cat(rownames(installed.packages(priority=\"recommended\")))\'"
                     recommended_pkgs = subprocess.Popen([Rcmd], stderr=subprocess.PIPE, stdout=subprocess.PIPE,
                                                         shell=True, encoding='utf-8')
                     error = recommended_pkgs.stderr.readlines()
@@ -181,7 +181,7 @@ class RenvBuilder(EnvBuilder):
                     recommended_pkgs = out[0].decode("utf-8").split(" ")
                 if self.base_packages:
                     Rcmd = f"{context.abs_R_script} " \
-                           f"-e \'base::cat(rownames(installed.packages(priority=\'base\')))\'"
+                           f"-e \'base::cat(rownames(installed.packages(priority=\"base\")))\'"
                     base_pkgs = subprocess.Popen([Rcmd], stderr=subprocess.PIPE, stdout=subprocess.PIPE,
                                                         shell=True, encoding='utf-8')
                     error = base_pkgs.stderr.readlines()
