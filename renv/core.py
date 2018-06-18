@@ -127,6 +127,7 @@ class RenvBuilder(EnvBuilder):
         # Issue 21197: create lib64 as a symlink to lib on 64-bit non-OS X POSIX
         create_if_needed(r_env_home)
         if (sys.maxsize > 2**32) and (os.name == 'posix') and (sys.platform != 'darwin'):
+            os.mkdir(os.path.join(env_dir, 'lib64'))
             link_path = os.path.join(env_dir, 'lib64', 'R')
             if not os.path.exists(link_path):   # Issue #21643
                 os.symlink(r_env_home, link_path)
