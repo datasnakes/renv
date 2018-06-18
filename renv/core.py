@@ -137,6 +137,7 @@ class RenvBuilder(EnvBuilder):
         context.abs_R_libs = r_abs_libs
         context.env_R_include = os.path.join(env_dir, r_env_include)
         context.env_bin_path = binpath = os.path.join(env_dir, binname)
+        context.bin_path = binpath
         context.env_R_exe = os.path.join(binpath, r_exe)
         context.env_R_script = os.path.join(binpath, r_script)
         create_if_needed(context.env_R_libs)
