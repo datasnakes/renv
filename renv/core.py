@@ -134,6 +134,7 @@ class RenvBuilder(EnvBuilder):
         r_env_libs = os.path.join(r_env_home, 'library')
         r_abs_libs = os.path.join(r_abs_home, 'library')
         context.bin_name = binname
+        context.packrat_home = os.path.join(env_dir, 'projects')
         context.env_R_home = r_env_home
         context.abs_R_home = r_abs_home
         context.env_R_libs = r_env_libs
