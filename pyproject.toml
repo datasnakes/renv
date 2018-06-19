@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "renv"
+version = "0.2.0"
+license = "MIT"
+description = """The renv package is a CLI tool for creating environments for the R statistical programming
+language.  It takes advantage of the python venv module, and it's modular EnvBuilder class."""
+authors = ["Rob Gilmore <robgilmore127@gmail.com>"]
+readme = "README.md"
+repository = "https://github.com/datasnakes/renv"
+keywords = ["R", "virtual", "environment", "reproducible", "statistics"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: System Administrators",
+    "Natural Language :: English",
+    "Programming Language :: Other",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Unix",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: System :: Filesystems"
+    ]
+
+[tool.poetry.dependencies]
+python = "*"
+click = "^6.7"
+pyyaml = "^3.12"
+
+[tool.poetry.dev-dependencies]
+pytest = "^3.5"
+
+[tool.poetry.scripts]
+renv = 'renv.renv:renv'

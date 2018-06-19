@@ -1,0 +1,5 @@
+R_LIBS_USER=__R_LIBS_USER__
+R_HOME=/home/grabear/test/lib/R
+R_SHARE_DIR=/home/grabear/test/lib/R/share
+R_INCLUDE_DIR=/home/grabear/test/lib/R/include
+R_DOC_DIR=/home/grabear/test/lib/R/doc
