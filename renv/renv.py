@@ -23,14 +23,17 @@ import os
               help="Provide an alternative prompt prefix for this environment.")
 @click.option('--env_dir', '-d',
               help="A directory for creating the environment in.")
-def renv(r_path, system_site_packages, recommended_packages, clear, upgrade, prompt, env_dir):
+def renv(r_path, system_site_packages, recommended_packages, clear, upgrade,
+         prompt, env_dir):
     if not os.path.exists(r_path):
-        raise NotADirectoryError("%s is an")
+        raise NotADirectoryError("%s is not a directory." % r_path)
     if os.name == 'nt':
         use_symlinks = False
     else:
         use_symlinks = True
-    builder = RenvBuilder(r_path=r_path, system_site_packages=system_site_packages,
-                          recommended_packages=recommended_packages, clear=clear, symlinks=use_symlinks,
-                          upgrade=upgrade, prompt=prompt)
+    builder = RenvBuilder(r_path=r_path,
+                          system_site_packages=system_site_packages,
+                          recommended_packages=recommended_packages,
+                          clear=clear, symlinks=use_symlinks, upgrade=upgrade,
+                          prompt=prompt)
     builder.create(env_dir)
