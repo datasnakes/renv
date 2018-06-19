@@ -14,6 +14,9 @@ __DEFAULT_CONFIG__ = {
     "STANDARD_PKG_LIST": {
         "BiocInstaller": "Bioconductor",
         "devtools": "Devtools"
+    },
+    "REPRODUCIBLE_WORKFLOW_PKG_LIST": {
+        "tidyverse": "Tidyverse"
     }
 }
 
@@ -90,11 +93,7 @@ class RenvBuilder(EnvBuilder):
             self.clear_directory(env_dir)
         user_config = os.path.join(env_dir, "renv.yaml")
         context = types.SimpleNamespace()
-        if os.path.exists(env_dir) and os.path.isfile(user_config):
-            context.user_config = user_config
-        else:
-            context.user_config = None
-
+        context.user_config = user_config
         context.env_dir = env_dir
         context.env_name = os.path.split(env_dir)[1]
         prompt = self.prompt if self.prompt is not None else context.env_name
@@ -102,7 +101,7 @@ class RenvBuilder(EnvBuilder):
         create_if_needed(env_dir)
         # TODO-ROB:  This may be tied in with a config file or with an outside environment variable.
         # System R files and paths
-        r_exe = "R.exe"
+        r_exe = "R"
         r_script = "Rscript"
         context.R_exe = r_exe
         context.R_script = r_script
@@ -125,7 +124,9 @@ class RenvBuilder(EnvBuilder):
             r_env_include = os.path.join(r_env_home, "include")
             r_abs_include = os.path.join(self.r_path, "include")
         # Issue 21197: create lib64 as a symlink to lib on 64-bit non-OS X POSIX
+        create_if_needed(r_env_home)
         if (sys.maxsize > 2**32) and (os.name == 'posix') and (sys.platform != 'darwin'):
+            os.mkdir(os.path.join(env_dir, 'lib64'))
             link_path = os.path.join(env_dir, 'lib64', 'R')
             if not os.path.exists(link_path):   # Issue #21643
                 os.symlink(r_env_home, link_path)
@@ -133,16 +134,18 @@ class RenvBuilder(EnvBuilder):
         r_env_libs = os.path.join(r_env_home, 'library')
         r_abs_libs = os.path.join(r_abs_home, 'library')
         context.bin_name = binname
+        context.packrat_home = os.path.join(env_dir, 'projects')
         context.env_R_home = r_env_home
         context.abs_R_home = r_abs_home
         context.env_R_libs = r_env_libs
         context.abs_R_libs = r_abs_libs
         context.env_R_include = os.path.join(env_dir, r_env_include)
         context.env_bin_path = binpath = os.path.join(env_dir, binname)
+        context.bin_path = binpath
         context.env_R_exe = os.path.join(binpath, r_exe)
         context.env_R_script = os.path.join(binpath, r_script)
-        create_if_needed(r_env_include)
-        create_if_needed(r_env_home)
+        create_if_needed(context.env_R_libs)
+        create_if_needed(context.env_R_include)
         create_if_needed(binpath)
         logging.info(f"Environment R:  {r_env_home}")
         return context
@@ -160,11 +163,11 @@ class RenvBuilder(EnvBuilder):
         base_pkgs = list()
         copier = self.symlink_or_copy
         path = context.user_config
-        if path:
+        if os.path.isfile(path):
             with open(path, 'r', encoding='utf-8')as f:
                 user_config = yaml.load(f)
         else:
-            user_config = None
+            user_config = {}
 
         with open(path, 'w', encoding='utf-8') as f:
             if self.system_site_packages:
@@ -174,22 +177,22 @@ class RenvBuilder(EnvBuilder):
                 config_dict["R_LIBS_USER"] = context.env_R_libs
                 if self.recommended_packages:
                     Rcmd = f"{context.abs_R_script} " \
-                           f"-e \'base::cat(rownames(installed.packages(priority=\'recommended\')))\'"
+                           f"-e \'base::cat(rownames(installed.packages(priority=\"recommended\")))\'"
                     recommended_pkgs = subprocess.Popen([Rcmd], stderr=subprocess.PIPE, stdout=subprocess.PIPE,
                                                         shell=True, encoding='utf-8')
                     error = recommended_pkgs.stderr.readlines()
                     out = recommended_pkgs.stdout.readlines()
                     recommended_pkgs.wait()
-                    recommended_pkgs = out[0].decode("utf-8").split(" ")
+                    recommended_pkgs = out[0].split(" ")
                 if self.base_packages:
                     Rcmd = f"{context.abs_R_script} " \
-                           f"-e \'base::cat(rownames(installed.packages(priority=\'base\')))\'"
+                           f"-e \'base::cat(rownames(installed.packages(priority=\"base\")))\'"
                     base_pkgs = subprocess.Popen([Rcmd], stderr=subprocess.PIPE, stdout=subprocess.PIPE,
                                                         shell=True, encoding='utf-8')
                     error = base_pkgs.stderr.readlines()
                     out = base_pkgs.stdout.readlines()
                     base_pkgs.wait()
-                    base_pkgs = out[0].decode("utf-8").split(" ")
+                    base_pkgs = out[0].split(" ")
                 pkgs = recommended_pkgs + base_pkgs
                 # TODO-config: This may need to be separate for windows vs linux
                 for pkg in pkgs:
@@ -205,7 +208,7 @@ class RenvBuilder(EnvBuilder):
             config_dict["R_VERSION"] = context.R_version
             # Package lists
             config_dict.update(__DEFAULT_CONFIG__)
-            pkg_lists = self.format_pkg_list(context)
+            pkg_lists = self.format_pkg_list(config_dict)
             config_dict.update(pkg_lists)
             config_dict.update(user_config)
             logging.info(f"Config Dictionary:  {config_dict}")
@@ -230,8 +233,10 @@ class RenvBuilder(EnvBuilder):
        """
         env_bin = context.env_bin_path
         env_R = context.env_R_exe
+        env_R_script = context.env_R_script
         copier = self.symlink_or_copy
-        copier(context.R_abs_exe, env_R)
+        copier(context.abs_R_exe, env_R)
+        copier(context.abs_R_script, env_R_script)
         dirname = context.abs_R_path
         if os.name != 'nt':
             if not os.path.islink(env_R):
@@ -298,7 +303,7 @@ class RenvBuilder(EnvBuilder):
         text = text.replace('__R_INCLUDE_DIR__', context.config_dict["R_INCLUDE_DIR"])
         text = text.replace('__CRAN_MIRROR__', context.config_dict["CRAN_MIRROR"])
         text = text.replace('__CRANEXTRA_MIRROR__', context.config_dict["CRANEXTRA_MIRROR"])
-        text = text.replace('__STANDARD_PKG_LIST__', context.config_dict["STANDARD_PGK_LIST"])
+        text = text.replace('__STANDARD_PKG_LIST__', context.config_dict["STANDARD_PKG_LIST"])
         text = text.replace('__REPRODUCIBLE_WORKFLOW_PKG_LIST__', context.config_dict["REPRODUCIBLE_WORKFLOW_PKG_LIST"])
 
         return text
@@ -306,8 +311,65 @@ class RenvBuilder(EnvBuilder):
     # TODO-ROB: Test if the scripts work properly with this build.
     # TODO-ROB: Different variables will need to be created in the replace_variables function.
     # TODO-ROB: The variables will have to be changed in the /scripts/* files.
-    # def install_scripts(self, context, path):
-    #     pass
+    def install_scripts(self, context, path):
+        """
+        Install scripts into the created environment from a directory.
+        :param context: The information for the environment creation request
+                        being processed.
+        :param path:    Absolute pathname of a directory containing script.
+                        Scripts in the 'common' subdirectory of this directory,
+                        and those in the directory named for the platform
+                        being run on, are installed in the created environment.
+                        Placeholder variables are replaced with environment-
+                        specific values.
+        """
+        env_dir = context.env_dir
+        plen = len(path)
+        for root, dirs, files in os.walk(path):
+            if root == path:  # at top-level, remove irrelevant dirs
+                for d in dirs[:]:
+                    if d not in ('common', os.name):
+                        dirs.remove(d)
+                continue  # ignore files in top level
+            for f in files:
+                srcfile = os.path.join(root, f)
+                suffix = root[plen:].split(os.sep)[2:]
+                if not suffix:
+                    dstdir = env_dir
+                else:
+                    dstdir = os.path.join(env_dir, *suffix)
+                if not os.path.exists(dstdir):
+                    os.makedirs(dstdir)
+                dstfile = os.path.join(dstdir, f)
+                with open(srcfile, 'rb') as f:
+                    data = f.read()
+                if not srcfile.endswith('.exe'):
+                    try:
+                        data = data.decode('utf-8')
+                        data = self.replace_variables(data, context)
+                        data = data.encode('utf-8')
+                    except UnicodeError as e:
+                        data = None
+                        logger.warning('unable to copy script %r, '
+                                       'may be binary: %s', srcfile, e)
+                if data is not None:
+                    with open(dstfile, 'wb') as f:
+                        f.write(data)
+                    shutil.copymode(srcfile, dstfile)
+
+    def setup_scripts(self, context):
+        """
+        Set up scripts into the created environment from a directory.
+        This method installs the default scripts into the environment
+        being created. You can prevent the default installation by overriding
+        this method if you really need to, or if you need to specify
+        a different location for the scripts to install. By default, the
+        'scripts' directory in the venv package is used as the source of
+        scripts to install.
+        """
+        path = os.path.abspath(os.path.dirname(__file__))
+        path = os.path.join(path, 'scripts')
+        self.install_scripts(context, path)
 
     # def install_r(self):
     #     # New: install specified version of R in the R environment.
@@ -321,8 +383,7 @@ class RenvBuilder(EnvBuilder):
     #     # New
     #     pass
 
-    def format_pkg_list(self, context):
-        config_dict = context.config_dict
+    def format_pkg_list(self, config_dict):
         config_dict = {k: v for k, v in config_dict.items() if "PKG_LIST" in k}
         fmtd_list = dict()
 

@@ -3,7 +3,7 @@ from renv.core import RenvBuilder
 import os
 
 
-@click.group()
+@click.command()
 @click.option('--r_path', '-r',
               help="Provide the root of the directory tree where R is installed.  This would be R's installation "
                    "directory when using ./configure --prefix=<r_path>.")
@@ -21,7 +21,9 @@ import os
               help="Upgrades the environment directory to use this version of R.")
 @click.option('--prompt', '-p', default=None,
               help="Provide an alternative prompt prefix for this environment.")
-def renv(r_path, system_site_packages, recommended_packages, clear, upgrade, prompt):
+@click.option('--env_dir', '-d',
+              help="A directory for creating the environment in.")
+def renv(r_path, system_site_packages, recommended_packages, clear, upgrade, prompt, env_dir):
     if not os.path.exists(r_path):
         raise NotADirectoryError("%s is an")
     if os.name == 'nt':
@@ -31,3 +33,4 @@ def renv(r_path, system_site_packages, recommended_packages, clear, upgrade, pro
     builder = RenvBuilder(r_path=r_path, system_site_packages=system_site_packages,
                           recommended_packages=recommended_packages, clear=clear, symlinks=use_symlinks,
                           upgrade=upgrade, prompt=prompt)
+    builder.create(env_dir)
