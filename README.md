@@ -52,7 +52,7 @@ Options:
 
 ## Features
 
-## Why revn?
+## Why renv?
 
 ### Strategy
 
