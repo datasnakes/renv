@@ -79,7 +79,7 @@ class RenvBuilder(EnvBuilder):
         Returns a context object which holds paths in the environment,
         for use by subsequent logic.
 
-        :param env_dir:
+        :param env_dir: The environment directory.
         :return:
         """
 
@@ -155,6 +155,7 @@ class RenvBuilder(EnvBuilder):
         Create a configuration file indicating where the environment's R
         was copied from, and whether the system site-packages should be made
         available in the environment.
+
         :param context: The information for the environment creation request
                         being processed.
         """
@@ -227,7 +228,8 @@ class RenvBuilder(EnvBuilder):
 
     def setup_r(self, context):
         """
-       Set up a R executable in the environment.
+       Set up an R executable in the environment.
+
        :param context: The information for the environment creation request
                        being processed.
        """
@@ -286,6 +288,7 @@ class RenvBuilder(EnvBuilder):
         Replace variable placeholders in script text with context-specific
         variables.
         Return the text passed in , but with variables replaced.
+
         :param text: The text in which to replace placeholder variables.
         :param context: The information for the environment creation request
                         being processed.
@@ -314,6 +317,7 @@ class RenvBuilder(EnvBuilder):
     def install_scripts(self, context, path):
         """
         Install scripts into the created environment from a directory.
+
         :param context: The information for the environment creation request
                         being processed.
         :param path:    Absolute pathname of a directory containing script.
@@ -384,6 +388,12 @@ class RenvBuilder(EnvBuilder):
     #     pass
 
     def format_pkg_list(self, config_dict):
+        """
+        Format the package list.
+
+        :param config_dict: A configuration dictionary.
+        :return:
+        """
         config_dict = {k: v for k, v in config_dict.items() if "PKG_LIST" in k}
         fmtd_list = dict()
 
