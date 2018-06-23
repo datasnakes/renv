@@ -121,8 +121,8 @@ Warning messages:
 
 1.  Creates a default R virtual environment using default config settings
     or a YAML file in the pre-existing environment directory.
-2.  Manages users and the environments .Rprofile and .Renviron files
-    during the usage of an R environment.
+2.  Manages the user's and the environment's .Rprofile and .Renviron
+    files.
 
 Below is an example of the YAML config file (there may be mistakes or
 missing keys). Try to use absolute paths.
