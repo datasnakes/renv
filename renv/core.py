@@ -23,15 +23,27 @@ __DEFAULT_CONFIG__ = {
 
 class RenvBuilder(EnvBuilder):
     """
-    The RenvBuilder class is a giant rework of the venv.EnvBuilder class.
+    The RenvBuilder class is a rework of the venv.EnvBuilder class.
     The EnvBuilder class can be found here:
     https://github.com/python/cpython/blob/3.6/Lib/venv/__init__.py
 
-    This initial skeleton class includes all of the methods that will need
-    to be reworked for R environments.
+    This class is meant to help facilitate the basic functionality of creating an
+    R environment.
     """
     def __init__(self, r_path, system_site_packages=False, recommended_packages=True, clear=False,
                  symlinks=False, upgrade=False, prompt=None):
+        """
+        :param r_path:  This is the root directory of the R installation that's being
+        used to create the virtual environment.
+        :param system_site_packages:  A switch for including the r_path library packages
+        in the env.
+        :param recommended_packages:  A switch for including the recommended packages in
+        the env.
+        :param clear:  A switch for clearing the environment directory if it exists.
+        :param symlinks:  A switch for using system links or not.
+        :param upgrade:  A switch for upgrading vs creating an environment.
+        :param prompt:  The prompt prefix can be customized with this parameter.
+        """
         super().__init__(system_site_packages=system_site_packages, clear=clear,
                          symlinks=symlinks, upgrade=upgrade, prompt=prompt)
         del self.with_pip
@@ -62,10 +74,6 @@ class RenvBuilder(EnvBuilder):
         #     self._setup_pip(context)
         if not self.upgrade:
             self.setup_scripts(context)
-            # TODO-ROB: Setup .Rprofile using a default one included with the package
-            # self.setup_r_profile(context)
-            # TODO-ROB: Setup .Renviron using a default one included with the package
-            # self.setup_r_environ(context)
             self.post_setup(context)
         if true_system_site_packages:
             # We had set it to False before, now
@@ -75,12 +83,10 @@ class RenvBuilder(EnvBuilder):
 
     def ensure_directories(self, env_dir):
         """
-        Create the directories for the environment.
-        Returns a context object which holds paths in the environment,
-        for use by subsequent logic.
+        Creates the context and directories of the R environment.
+        The context contains all of the paths used in the setup.
 
-        :param env_dir: The environment directory.
-        :return:
+        :param env_dir:  The directory used for the environment.
         """
 
         def create_if_needed(d):
@@ -99,7 +105,6 @@ class RenvBuilder(EnvBuilder):
         prompt = self.prompt if self.prompt is not None else context.env_name
         context.prompt = '(%s) ' % prompt
         create_if_needed(env_dir)
-        # TODO-ROB:  This may be tied in with a config file or with an outside environment variable.
         # System R files and paths
         r_exe = "R"
         r_script = "Rscript"
@@ -111,8 +116,6 @@ class RenvBuilder(EnvBuilder):
         context.abs_R_path = self.r_path
         logging.info(f"System R(version):  {self.r_path}({context.R_version})")
 
-        # TODO-config:  Set default r_home in YAML.  Create parameter for user setting.
-        # TODO-config:  Add to .Renviron file.
         # R-Environment R files and paths
         if sys.platform == 'win32':
             r_env_home = env_dir
@@ -152,10 +155,9 @@ class RenvBuilder(EnvBuilder):
 
     def create_configuration(self, context):
         """
-        Create a configuration file indicating where the environment's R
+        Create and/or use a configuration file indicating where the environment's R
         was copied from, and whether the system site-packages should be made
         available in the environment.
-
         :param context: The information for the environment creation request
                         being processed.
         """
@@ -228,8 +230,7 @@ class RenvBuilder(EnvBuilder):
 
     def setup_r(self, context):
         """
-       Set up an R executable in the environment.
-
+       Set up a R executable in the environment.
        :param context: The information for the environment creation request
                        being processed.
        """
@@ -288,7 +289,6 @@ class RenvBuilder(EnvBuilder):
         Replace variable placeholders in script text with context-specific
         variables.
         Return the text passed in , but with variables replaced.
-
         :param text: The text in which to replace placeholder variables.
         :param context: The information for the environment creation request
                         being processed.
@@ -311,13 +311,9 @@ class RenvBuilder(EnvBuilder):
 
         return text
 
-    # TODO-ROB: Test if the scripts work properly with this build.
-    # TODO-ROB: Different variables will need to be created in the replace_variables function.
-    # TODO-ROB: The variables will have to be changed in the /scripts/* files.
     def install_scripts(self, context, path):
         """
         Install scripts into the created environment from a directory.
-
         :param context: The information for the environment creation request
                         being processed.
         :param path:    Absolute pathname of a directory containing script.
@@ -368,31 +364,18 @@ class RenvBuilder(EnvBuilder):
         being created. You can prevent the default installation by overriding
         this method if you really need to, or if you need to specify
         a different location for the scripts to install. By default, the
-        'scripts' directory in the venv package is used as the source of
+        'scripts' directory in the renv (not venv) package is used as the source of
         scripts to install.
         """
         path = os.path.abspath(os.path.dirname(__file__))
         path = os.path.join(path, 'scripts')
         self.install_scripts(context, path)
 
-    # def install_r(self):
-    #     # New: install specified version of R in the R environment.
-    #     pass
-    #
-    # def setup_r_profile(self, context):
-    #     # New
-    #     pass
-    #
-    # def setup_r_environ(self):
-    #     # New
-    #     pass
-
     def format_pkg_list(self, config_dict):
         """
-        Format the package list.
-
-        :param config_dict: A configuration dictionary.
-        :return:
+        Takes the YAML configuration information and parses/formats the R
+        package list for use with an "Rscript -e **" call.
+        :param config_dict:  The configuration dictionary created with the YAML file.
         """
         config_dict = {k: v for k, v in config_dict.items() if "PKG_LIST" in k}
         fmtd_list = dict()
@@ -412,3 +395,15 @@ class RenvBuilder(EnvBuilder):
             fmtd_list[list_name] = pkg_list_string
 
         return fmtd_list
+
+    # def install_r(self):
+    #     # New: install specified version of R in the R environment.
+    #     pass
+    #
+    # def setup_r_profile(self, context):
+    #     # New
+    #     pass
+    #
+    # def setup_r_environ(self):
+    #     # New
+    #     pass
