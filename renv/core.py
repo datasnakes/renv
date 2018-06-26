@@ -35,6 +35,12 @@ class RenvBuilder(EnvBuilder):
         """
         :param r_path:  This is the root directory of the R installation that's being
         used to create the virtual environment.
+        :param r_bin_path:  This is the bin directory of the R installation that's being
+        used to create the virtual environment.
+        :param r_lib_path:  This is the lib directory of the R installation that's being
+        used to create the virtual environment.
+        :param r_include_path:  This is the include directory of the R installation that's
+        being used to create the virtual environment.
         :param system_site_packages:  A switch for including the r_path library packages
         in the env.
         :param recommended_packages:  A switch for including the recommended packages in
