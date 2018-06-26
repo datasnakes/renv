@@ -107,6 +107,7 @@ class RenvBuilder(EnvBuilder):
         if os.path.exists(env_dir) and self.clear:
             self.clear_directory(env_dir)
         user_config = os.path.join(env_dir, "renv.yaml")
+        # Create the context for the virtual environment
         context = types.SimpleNamespace()
         context.user_config = user_config
         context.env_dir = env_dir
@@ -114,7 +115,7 @@ class RenvBuilder(EnvBuilder):
         prompt = self.prompt if self.prompt is not None else context.env_name
         context.prompt = '(%s) ' % prompt
         create_if_needed(env_dir)
-        # System R files and paths
+        # System R files/paths
         r_exe = "R"
         r_script = "Rscript"
         context.R_exe = r_exe
@@ -129,13 +130,14 @@ class RenvBuilder(EnvBuilder):
         context.abs_R_path = self.r_path
         logging.info(f"System R(version):  {self.r_path}({context.R_version})")
 
-        # R-Environment R files and paths
-        if sys.platform == 'win32':
+        # Begin with R-Environment R files/paths
+        # Continue with system R files/paths
+        if sys.platform == 'win32':  # Windows
             r_env_home = env_dir
             r_abs_home = self.r_path
             r_env_include = "include"
             r_abs_include = "include"
-        else:
+        else:  # Linux
             r_env_home = os.path.join(env_dir, 'lib', "R")
             if self.r_lib_path:
                 r_abs_home = os.path.join(self.r_lib_path, "R")
@@ -186,18 +188,22 @@ class RenvBuilder(EnvBuilder):
         base_pkgs = list()
         copier = self.symlink_or_copy
         path = context.user_config
+        # Get the user provided YAML config if it exists
         if os.path.isfile(path):
             with open(path, 'r', encoding='utf-8')as f:
                 user_config = yaml.load(f)
         else:
             user_config = {}
 
+        # Open and overwrite YAML config
         with open(path, 'w', encoding='utf-8') as f:
+            # Append system R_LIBS_USER if desired
             if self.system_site_packages:
                 sep = ";" if sys.platform == "win32" else ":"
                 config_dict["R_LIBS_USER"] = "%s%s%s" % (context.env_R_libs, sep, context.abs_R_libs)
             else:
                 config_dict["R_LIBS_USER"] = context.env_R_libs
+                # Get a list of the recommended packages for this version of R
                 if self.recommended_packages:
                     Rcmd = f"{context.abs_R_script} " \
                            f"-e \'base::cat(rownames(installed.packages(priority=\"recommended\")))\'"
@@ -207,6 +213,7 @@ class RenvBuilder(EnvBuilder):
                     out = recommended_pkgs.stdout.readlines()
                     recommended_pkgs.wait()
                     recommended_pkgs = out[0].split(" ")
+                # Get a list of the base packages for this version of R
                 if self.base_packages:
                     Rcmd = f"{context.abs_R_script} " \
                            f"-e \'base::cat(rownames(installed.packages(priority=\"base\")))\'"
@@ -216,8 +223,10 @@ class RenvBuilder(EnvBuilder):
                     out = base_pkgs.stdout.readlines()
                     base_pkgs.wait()
                     base_pkgs = out[0].split(" ")
+                # Create a list of all the packages to use
                 pkgs = recommended_pkgs + base_pkgs
                 # TODO-config: This may need to be separate for windows vs linux
+                # Copy the packages to the environment
                 for pkg in pkgs:
                     abs_pkg_path = os.path.join(context.abs_R_libs, pkg)
                     env_pkg_path = os.path.join(context.env_R_libs, pkg)
@@ -225,6 +234,7 @@ class RenvBuilder(EnvBuilder):
                     if not os.path.islink(env_pkg_path):
                         os.chmod(env_pkg_path, 0o755)
 
+            # Add more variables
             config_dict["R_ENV_HOME"] = context.env_R_home
             config_dict["R_ABS_HOME"] = context.abs_R_home
             config_dict["R_INCLUDE_DIR"] = context.env_R_include
@@ -313,19 +323,22 @@ class RenvBuilder(EnvBuilder):
         :param context: The information for the environment creation request
                         being processed.
         """
+        # Old and new VENV variables
         text = text.replace('__VENV_DIR__', context.env_dir)
         text = text.replace('__VENV_NAME__', context.env_name)
         text = text.replace('__VENV_PROMPT__', context.prompt)
         text = text.replace('__VENV_BIN_NAME__', context.bin_name)
-        # NEW:
         text = text.replace('__VENV_R__', context.env_R_exe)
         text = text.replace('__VENV_RSCRIPT__', context.env_R_script)
-        text = text.replace('__R_LIBS_USER__', context.config_dict["R_LIBS_USER"])
+        # R variables
         text = text.replace('__R_VERSION__', context.config_dict["R_VERSION"])
-        text = text.replace('__R_HOME__', context.config_dict["R_ENV_HOME"])
-        text = text.replace('__R_INCLUDE_DIR__', context.config_dict["R_INCLUDE_DIR"])
         text = text.replace('__CRAN_MIRROR__', context.config_dict["CRAN_MIRROR"])
         text = text.replace('__CRANEXTRA_MIRROR__', context.config_dict["CRANEXTRA_MIRROR"])
+        # Environment variables for .Renviron
+        text = text.replace('__R_LIBS_USER__', context.config_dict["R_LIBS_USER"])
+        text = text.replace('__R_HOME__', context.config_dict["R_ENV_HOME"])
+        text = text.replace('__R_INCLUDE_DIR__', context.config_dict["R_INCLUDE_DIR"])
+        # Packages to install from .Rprofile
         text = text.replace('__STANDARD_PKG_LIST__', context.config_dict["STANDARD_PKG_LIST"])
         text = text.replace('__REPRODUCIBLE_WORKFLOW_PKG_LIST__', context.config_dict["REPRODUCIBLE_WORKFLOW_PKG_LIST"])
 
