@@ -114,8 +114,12 @@ class RenvBuilder(EnvBuilder):
         context.R_exe = r_exe
         context.R_script = r_script
         context.R_version = os.path.split(self.r_path)[1]
-        context.abs_R_exe = os.path.join(self.r_path, "bin", r_exe)
-        context.abs_R_script = os.path.join(self.r_path, "bin", r_script)
+        if self.r_bin_path:
+            context.abs_R_exe = os.path.join(self.r_bin_path, r_exe)
+            context.abs_R_script = os.path.join(self.r_bin_path, r_script)
+        else:
+            context.abs_R_exe = os.path.join(self.r_path, "bin", r_exe)
+            context.abs_R_script = os.path.join(self.r_path, "bin", r_script)
         context.abs_R_path = self.r_path
         logging.info(f"System R(version):  {self.r_path}({context.R_version})")
 
@@ -123,12 +127,19 @@ class RenvBuilder(EnvBuilder):
         if sys.platform == 'win32':
             r_env_home = env_dir
             r_abs_home = self.r_path
-            r_env_include = r_abs_include = "include"
+            r_env_include = "include"
+            r_abs_include = "include"
         else:
             r_env_home = os.path.join(env_dir, 'lib', "R")
-            r_abs_home = os.path.join(self.r_path, 'lib', "R")
+            if self.r_lib_path:
+                r_abs_home = os.path.join(self.r_lib_path, "R")
+            else:
+                r_abs_home = os.path.join(self.r_path, 'lib', "R")
             r_env_include = os.path.join(r_env_home, "include")
-            r_abs_include = os.path.join(self.r_path, "include")
+            if self.r_include_path:
+                r_abs_include = self.r_include_path
+            else:
+                r_abs_include = os.path.join(self.r_path, "include")
         # Issue 21197: create lib64 as a symlink to lib on 64-bit non-OS X POSIX
         create_if_needed(r_env_home)
         if (sys.maxsize > 2**32) and (os.name == 'posix') and (sys.platform != 'darwin'):
