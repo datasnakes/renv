@@ -30,8 +30,8 @@ class RenvBuilder(EnvBuilder):
     This class is meant to help facilitate the basic functionality of creating an
     R environment.
     """
-    def __init__(self, r_path, system_site_packages=False, recommended_packages=True, clear=False,
-                 symlinks=False, upgrade=False, prompt=None):
+    def __init__(self, r_path, r_bin_path=None, r_lib_path=None, r_include_path = None,system_site_packages=False,
+                 recommended_packages=True, clear=False, symlinks=False, upgrade=False, prompt=None):
         """
         :param r_path:  This is the root directory of the R installation that's being
         used to create the virtual environment.
@@ -48,6 +48,9 @@ class RenvBuilder(EnvBuilder):
                          symlinks=symlinks, upgrade=upgrade, prompt=prompt)
         del self.with_pip
         self.r_path = r_path
+        self.r_bin_path = r_bin_path
+        self.r_lib_path = r_lib_path
+        self.r_include_path = r_include_path
         if self.system_site_packages:
             self.base_packages = False
             self.recommended_packages = False
