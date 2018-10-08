@@ -32,7 +32,7 @@ actual release of this package.
 
 ### Commands
 
-```bash
+```console
 user@host:~$ renv --help
 Usage: renv [OPTIONS]
 
@@ -65,7 +65,7 @@ Options:
 
 ### Creating an R Environment
 
-```bash
+```console
 user@host:~$ renv -r /usr/local/R -d ~/projects/rna-brain
 user@host:~$ source projects/rna-brain/bin/activate
 (rna-brain) user@host:~$ R
@@ -181,5 +181,5 @@ recreate the _.whl_.
 
 ## Maintainers
 
-Rob Gilmore | [@grabear](https://github.com/grabear) | [✉](mailto:robgilmore127@gmail.com)
-Shaurita Hutchins | [@sdhutchins](https://github.com/sdhutchins) | [✉](mailto:sdhutchins@outlook.com)
+Rob Gilmore · [@grabear](https://github.com/grabear) · [✉](mailto:robgilmore127@gmail.com)  
+Shaurita Hutchins · [@sdhutchins](https://github.com/sdhutchins) · [✉](mailto:sdhutchins@outlook.com)
