@@ -5,6 +5,7 @@ import subprocess as sp
 def get_r_path():
     """
     Get current R installed path in Linux
+    # TODO make this function cross-platform
     :return: path to R
     """
     sp_out = sp.run(["which R"], shell=True, capture_output=True, encoding="utf8")
@@ -23,13 +24,26 @@ def get_r_installed_root():
     return os.path.dirname(os.path.dirname(r_path))  # remove /bin/R
 
 
-def get_beri_path():
+def get_user_home_dir():
+    """
+    Get home directory in Linux where users can create directory.
+    # TODO make this function cross-platform
+    :return: None
+    """
+    sp_out = sp.run(["echo $HOME"], shell=True, capture_output=True, encoding="utf8")
+    return sp_out.stdout.strip()
+
+def get_beri_path(has_root_access=False):
     """
     Get the default R environment path
+    # TODO make this function cross-platform
+    :param has_root_access: whether user has root access in Linux.
     :return: path to beRi_envs, inclusive.
     """
-    return os.path.join(get_r_installed_root(), "beRi_envs")
-
+    if has_root_access:
+        return os.path.join(get_r_installed_root(), "beRi_envs")
+    else:
+        return os.path.join(get_user_home_dir(), "beRi_envs")
 
 def get_default_env_path(env_name):
     """
