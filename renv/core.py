@@ -6,6 +6,10 @@ import subprocess
 import sys
 import types
 import yaml
+from pkg_resources import resource_filename
+from renv import cookies
+from pathlib import Path
+from cookiecutter.main import cookiecutter
 logger = logging.getLogger(__name__)
 
 __DEFAULT_CONFIG__ = {
@@ -358,38 +362,7 @@ class RenvBuilder(EnvBuilder):
                         specific values.
         """
         env_dir = context.env_dir
-        plen = len(path)
-        for root, dirs, files in os.walk(path):
-            if root == path:  # at top-level, remove irrelevant dirs
-                for d in dirs[:]:
-                    if d not in ('common', os.name):
-                        dirs.remove(d)
-                continue  # ignore files in top level
-            for f in files:
-                srcfile = os.path.join(root, f)
-                suffix = root[plen:].split(os.sep)[2:]
-                if not suffix:
-                    dstdir = env_dir
-                else:
-                    dstdir = os.path.join(env_dir, *suffix)
-                if not os.path.exists(dstdir):
-                    os.makedirs(dstdir)
-                dstfile = os.path.join(dstdir, f)
-                with open(srcfile, 'rb') as f:
-                    data = f.read()
-                if not srcfile.endswith('.exe'):
-                    try:
-                        data = data.decode('utf-8')
-                        data = self.replace_variables(data, context)
-                        data = data.encode('utf-8')
-                    except UnicodeError as e:
-                        data = None
-                        logger.warning('unable to copy script %r, '
-                                       'may be binary: %s', srcfile, e)
-                if data is not None:
-                    with open(dstfile, 'wb') as f:
-                        f.write(data)
-                    shutil.copymode(srcfile, dstfile)
+        cookiecutter(str(activator_cookie), no_input=True, extra_context=e_c, output_dir=context.bin_path)
 
     def setup_scripts(self, context):
         """
