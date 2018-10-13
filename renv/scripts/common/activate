@@ -48,7 +48,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="/home/grabear/test"
+VIRTUAL_ENV="$(pwd)"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
