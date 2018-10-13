@@ -6,6 +6,8 @@ import subprocess
 import sys
 import types
 import yaml
+import renv.utils as utils
+
 logger = logging.getLogger(__name__)
 
 __DEFAULT_CONFIG__ = {
@@ -30,7 +32,7 @@ class RenvBuilder(EnvBuilder):
     This class is meant to help facilitate the basic functionality of creating an
     R environment.
     """
-    def __init__(self, r_path, r_bin_path=None, r_lib_path=None, r_include_path = None,system_site_packages=False,
+    def __init__(self, r_path=None, r_bin_path=None, r_lib_path=None, r_include_path = None, system_site_packages=False,
                  recommended_packages=True, clear=False, symlinks=False, upgrade=False, prompt=None):
         """
         :param r_path:  This is the root directory of the R installation that's being
@@ -53,10 +55,13 @@ class RenvBuilder(EnvBuilder):
         super().__init__(system_site_packages=system_site_packages, clear=clear,
                          symlinks=symlinks, upgrade=upgrade, prompt=prompt)
         del self.with_pip
+        if r_path is None:
+            r_path = utils.get_r_installed_root()
         self.r_path = r_path
         self.r_bin_path = r_bin_path
         self.r_lib_path = r_lib_path
         self.r_include_path = r_include_path
+        self.clear = clear
         if self.system_site_packages:
             self.base_packages = False
             self.recommended_packages = False
@@ -64,12 +69,16 @@ class RenvBuilder(EnvBuilder):
             self.base_packages = True
             self.recommended_packages = recommended_packages
 
-    def create(self, env_dir):
+    def create(self, env_dir, env_name=None):
         """
         Create a virtual environment in a directory.
         :param env_dir: The target directory to create an environment in.
         """
-        env_dir = os.path.abspath(env_dir)
+        if env_name:
+            print("Environment name is given, so ignoring parameter --env-dir.")
+            env_dir = utils.get_default_env_path(env_name)
+        else:
+            env_dir = os.path.abspath(env_dir)
         context = self.ensure_directories(env_dir)
         # TODO-ROB: pip will eventually be beRi
         # See issue 24875. We need system_site_packages to be False
@@ -98,14 +107,6 @@ class RenvBuilder(EnvBuilder):
         :param env_dir:  The directory used for the environment.
         """
 
-        def create_if_needed(d):
-            if not os.path.exists(d):
-                os.makedirs(d)
-            elif os.path.islink(d) or os.path.isfile(d):
-                raise ValueError('Unable to create directory %r' % d)
-
-        if os.path.exists(env_dir) and self.clear:
-            self.clear_directory(env_dir)
         user_config = os.path.join(env_dir, "renv.yaml")
         # Create the context for the virtual environment
         context = types.SimpleNamespace()
@@ -114,7 +115,7 @@ class RenvBuilder(EnvBuilder):
         context.env_name = os.path.split(env_dir)[1]
         prompt = self.prompt if self.prompt is not None else context.env_name
         context.prompt = '(%s) ' % prompt
-        create_if_needed(env_dir)
+        utils.create_directory(env_dir, self.clear)
         # System R files/paths
         r_exe = "R"
         r_script = "Rscript"
@@ -149,7 +150,7 @@ class RenvBuilder(EnvBuilder):
             else:
                 r_abs_include = os.path.join(self.r_path, "include")
         # Issue 21197: create lib64 as a symlink to lib on 64-bit non-OS X POSIX
-        create_if_needed(r_env_home)
+        utils.create_directory(r_env_home, self.clear)
         if (sys.maxsize > 2**32) and (os.name == 'posix') and (sys.platform != 'darwin'):
             os.mkdir(os.path.join(env_dir, 'lib64'))
             link_path = os.path.join(env_dir, 'lib64', 'R')
@@ -169,9 +170,9 @@ class RenvBuilder(EnvBuilder):
         context.bin_path = binpath
         context.env_R_exe = os.path.join(binpath, r_exe)
         context.env_R_script = os.path.join(binpath, r_script)
-        create_if_needed(context.env_R_libs)
-        create_if_needed(context.env_R_include)
-        create_if_needed(binpath)
+        utils.create_directory(context.env_R_libs, self.clear)
+        utils.create_directory(context.env_R_include, self.clear)
+        utils.create_directory(binpath, self.clear)
         logging.info(f"Environment R:  {r_env_home}")
         return context
 
