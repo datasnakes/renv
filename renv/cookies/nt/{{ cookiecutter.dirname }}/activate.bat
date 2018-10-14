@@ -8,7 +8,7 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-set "VIRTUAL_ENV={{ cookiecutter.__VENV_DIR__ }}"
+set "VIRTUAL_ENV={{cookiecutter.__VENV_DIR__}}"
 
 if not defined PROMPT (
     set "PROMPT=$P$G"
@@ -23,7 +23,7 @@ if defined _OLD_VIRTUAL_PYTHONHOME (
 )
 
 set "_OLD_VIRTUAL_PROMPT=%PROMPT%"
-set "PROMPT={{ cookiecutter.__VENV_PROMPT__ }}%PROMPT%"
+set "PROMPT={{cookiecutter.__VENV_PROMPT__}}%PROMPT%"
 
 if defined PYTHONHOME (
     set "_OLD_VIRTUAL_PYTHONHOME=%PYTHONHOME%"
@@ -36,7 +36,7 @@ if defined _OLD_VIRTUAL_PATH (
     set "_OLD_VIRTUAL_PATH=%PATH%"
 )
 
-set "PATH=%VIRTUAL_ENV%\{{ cookiecutter.__VENV_BIN_NAME__ }};%PATH%"
+set "PATH=%VIRTUAL_ENV%\{{cookiecutter.__VENV_BIN_NAME__}};%PATH%"
 
 :END
 if defined _OLD_CODEPAGE (

@@ -13,8 +13,8 @@
 # Set repositories for CRAN
 local({
   r <- getOption("repos")
-  r["CRAN"] <- "{{ cookiecutter.__CRAN_MIRROR__ }}"
-  r["CRANextra"] <- "{{ cookiecutter.__CRANEXTRA_MIRROR__ }}"
+  r["CRAN"] <- "{{cookiecutter.__CRAN_MIRROR__}}"
+  r["CRANextra"] <- "{{cookiecutter.__CRANEXTRA_MIRROR__}}"
   options(repos=r)
 })
 
@@ -37,8 +37,8 @@ askYesNo <- function(msg) {
 }
 
 # List of default packages to install based on the users need
-standard_pkg_list <- {{ cookiecutter.__STANDARD_PKG_LIST__ }}
-reproducible_wf_pkg_list <- {{ cookiecutter.__REPRODUCIBLE_WORKFLOW_PKG_LIST__ }}
+standard_pkg_list <- {{cookiecutter.__STANDARD_PKG_LIST__}}
+reproducible_wf_pkg_list <- {{cookiecutter.__REPRODUCIBLE_WORKFLOW_PKG_LIST__}}
 
 # Checker for the default packages; also displays helpful output
 checker_for_packages <-function(pkgs=list()) {
