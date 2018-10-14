@@ -41,15 +41,51 @@ actual release of this package.
 
 ### Commands
 
+
+### Commands
+
+
+Once you have renv installed, you can create an R environment by a simple command: 
+
+```
+renv -n myenv
+```
+
+An environment folder `myenv` will be created under `$HOME/beRi_envs`. 
+
+To activate the environment 
+```
+cd $HOME\beRi_envs\myenv\bin
+. ./activate 
+```
+
+To deactivate the R environment, simply issue the command
+```
+deactivate
+```
+
+
+Use `--help` to see the other configurations.
+
 ```bash
 user@host:~$ renv --help
 Usage: renv [OPTIONS]
 
 Options:
+Options:
   -r, --r_path TEXT               Provide the root of the directory tree where
                                   R is installed.  This would be R's
                                   installation directory when using
                                   ./configure --prefix=<r_path>.
+  -n, --env_name TEXT             Name of the environment.
+  -d, --env_dir TEXT              A directory for creating the environment in.
+  -b, --binpath TEXT              Provide the bin directory if R was installed
+                                  when using ./configure --bindir=<binpath>.
+  -l, --libpath TEXT              Provide the lib directory if R was installed
+                                  when using ./configure --libdir=<libpath>.
+  -i, --includepath TEXT          Provide the include directory if R was
+                                  installed when using ./configure
+                                  --includedir=<includepath>.
   -sp, --system_site_packages BOOLEAN
                                   This determines whether or not the
                                   R_LIBS_USER environment variable utilizes
@@ -68,9 +104,9 @@ Options:
                                   this version of R.
   -p, --prompt TEXT               Provide an alternative prompt prefix for
                                   this environment.
-  -d, --env_dir TEXT              A directory for creating the environment in.
   --help                          Show this message and exit.
 ```
+
 
 ### Creating an R Environment
 
