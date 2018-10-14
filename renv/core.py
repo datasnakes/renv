@@ -368,6 +368,7 @@ class RenvBuilder(EnvBuilder):
         cookie_jar = Path(resource_filename(cookies.__name__, ''))
         activator_cookie = cookie_jar / Path(os.name)
         e_c = {
+            "dirname": "bin",
             "__VENV_DIR__": context.env_dir,
             "__VENV_NAME__": context.env_name,
             "__VENV_PROMPT__": context.prompt,
