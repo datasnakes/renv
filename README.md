@@ -2,6 +2,15 @@
 
 Creating virtual environments for R.
 
+## Description
+
+One of the problems with using R for data analysis can be dependency issues.
+Especially for those scientists that use various versions of R or R packages
+ and have a large number of projects that they are developing with R.
+ Dependency issues are especially prevalent among those individuals or groups
+ that are developing R packages.  renv is a [Python style](https://github.com/python/cpython/blob/3.6/Lib/venv/__init__.py) virtual environment
+ manager for creating virtual environments for R.
+
 ## Installation
 
 This package is being managed with [`poetry`](https://github.com/sdispater/poetry).
@@ -183,3 +192,4 @@ recreate the _.whl_.
 
 Rob Gilmore | [@grabear](https://github.com/grabear) | [✉](mailto:robgilmore127@gmail.com)
 Shaurita Hutchins | [@sdhutchins](https://github.com/sdhutchins) | [✉](mailto:sdhutchins@outlook.com)
+Santina Lin | [@santina](https://github.com/santina) | [✉](mailto:hello@santina.me)
