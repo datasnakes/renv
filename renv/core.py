@@ -77,10 +77,12 @@ class RenvBuilder(EnvBuilder):
         if env_dir:
             env_dir = os.path.abspath(env_dir)
         else:
-            env_dir = utils.get_default_env_path(env_name)
-        if env_name:
-            env_dir = os.path.join(env_dir, env_name)
-
+            env_dir = utils.get_beri_path()
+            if env_name:
+                env_dir = os.path.join(env_dir, env_name)
+            else:
+                Exception("Please provide the environment name.")
+        
         context = self.ensure_directories(env_dir)
         # TODO-ROB: pip will eventually be beRi
         # See issue 24875. We need system_site_packages to be False

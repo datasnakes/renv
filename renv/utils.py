@@ -45,14 +45,6 @@ def get_beri_path(has_root_access=False):
     else:
         return os.path.join(get_user_home_dir(), "beRi_envs")
 
-def get_default_env_path(env_name):
-    """
-    Get default environment path for the given environment
-    :param env_name: name of the R environment
-    :return: path to the environment with the default root path
-    """
-    return os.path.join(get_beri_path(), env_name)
-
 
 def create_directory(directory, clear=False):
     """
