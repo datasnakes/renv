@@ -8,7 +8,7 @@ def get_r_path():
     # TODO make this function cross-platform
     :return: path to R
     """
-    sp_out = sp.run(["which R"], shell=True, capture_output=True, encoding="utf8")
+    sp_out = sp.run(["which R"], shell=True, stdout=sp.PIPE, encoding="utf8")
     if sp_out.returncode:
         raise Exception("Could not get the default R path. Is R installed?")
 
