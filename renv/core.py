@@ -374,7 +374,7 @@ class RenvBuilder(EnvBuilder):
             "__VENV_RSCRIPT__": context.env_R_script,
             "__R_VERSION__": context.config_dict["R_VERSION"],
             "__CRAN_MIRROR__": context.config_dict["CRAN_MIRROR"],
-            "__CRANEXTRA_MIRROR__": context.config_dict["CRANEXTA_MIRROR"],
+            "__CRANEXTRA_MIRROR__": context.config_dict["CRANEXTRA_MIRROR"],
             "__R_LIBS_USER__": context.config_dict["R_LIBS_USER"],
             "__R_HOME__": context.config_dict["R_ENV_HOME"],
             "__R_INCLUDE_DIR__": context.config_dict["R_INCLUDE_DIR"],
