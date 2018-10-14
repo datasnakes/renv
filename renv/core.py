@@ -81,16 +81,18 @@ class RenvBuilder(EnvBuilder):
         true_system_site_packages = self.system_site_packages
         self.system_site_packages = False
         context.config_dict = self.create_configuration(context)
-        self.setup_r(context)
+        # self.setup_r(context)
         # TODO-ROB: pip will eventually be beRi
         # if self.with_pip:
         #     self._setup_pip(context)
         if not self.upgrade:
-            self.setup_scripts(context)
+            self.install_scripts(context)
+            self.setup_r(context)
             self.post_setup(context)
         if true_system_site_packages:
             # We had set it to False before, now
             # restore it and rewrite the configuration
+            self.setup_r(context)
             self.system_site_packages = True
             self.create_configuration(context)
 
@@ -175,7 +177,7 @@ class RenvBuilder(EnvBuilder):
         context.env_R_script = os.path.join(binpath, r_script)
         create_if_needed(context.env_R_libs)
         create_if_needed(context.env_R_include)
-        create_if_needed(binpath)
+        # create_if_needed(binpath)
         logging.info(f"Environment R:  {r_env_home}")
         return context
 
@@ -349,7 +351,7 @@ class RenvBuilder(EnvBuilder):
     #
     #     return text
 
-    def install_scripts(self, context, path):
+    def install_scripts(self, context):
         """
         Install scripts into the created environment from a directory.
         :param context: The information for the environment creation request
@@ -382,21 +384,21 @@ class RenvBuilder(EnvBuilder):
             "__REPRODUCIBLE_WORKFLOW_PKG_LIST__": context.config_dict["REPRODUCIBLE_WORKFLOW_PKG_LIST"]
         }
         env_dir = context.env_dir
-        cookiecutter(str(activator_cookie), no_input=True, extra_context=e_c, output_dir=context.bin_path)
+        cookiecutter(str(activator_cookie), no_input=True, extra_context=e_c, output_dir=context.env_dir)
 
-    def setup_scripts(self, context):
-        """
-        Set up scripts into the created environment from a directory.
-        This method installs the default scripts into the environment
-        being created. You can prevent the default installation by overriding
-        this method if you really need to, or if you need to specify
-        a different location for the scripts to install. By default, the
-        'scripts' directory in the renv (not venv) package is used as the source of
-        scripts to install.
-        """
-        path = os.path.abspath(os.path.dirname(__file__))
-        path = os.path.join(path, 'scripts')
-        self.install_scripts(context, path)
+    # def setup_scripts(self, context):
+    #     """
+    #     Set up scripts into the created environment from a directory.
+    #     This method installs the default scripts into the environment
+    #     being created. You can prevent the default installation by overriding
+    #     this method if you really need to, or if you need to specify
+    #     a different location for the scripts to install. By default, the
+    #     'scripts' directory in the renv (not venv) package is used as the source of
+    #     scripts to install.
+    #     """
+    #     path = os.path.abspath(os.path.dirname(__file__))
+    #     path = os.path.join(path, 'scripts')
+    #     self.install_scripts(context, path)
 
     def format_pkg_list(self, config_dict):
         """
