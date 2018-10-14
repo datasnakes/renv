@@ -80,7 +80,7 @@ class RenvBuilder(EnvBuilder):
             env_dir = utils.get_default_env_path(env_name)
         if env_name:
             env_dir = os.path.join(env_dir, env_name)
-            
+
         context = self.ensure_directories(env_dir)
         # TODO-ROB: pip will eventually be beRi
         # See issue 24875. We need system_site_packages to be False
@@ -100,6 +100,8 @@ class RenvBuilder(EnvBuilder):
             # restore it and rewrite the configuration
             self.system_site_packages = True
             self.create_configuration(context)
+
+        print("\nEnvironment created in " + env_dir + "\n")
 
     def ensure_directories(self, env_dir):
         """
