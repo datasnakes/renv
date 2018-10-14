@@ -8,16 +8,6 @@ deactivate () {
         export PATH
         unset _OLD_VIRTUAL_PATH
 
-        rm "$HOME/.Rprofile"
-        if [ -f "$VIRTUAL_ENV/.Rprofile" ] ; then
-            mv "$VIRTUAL_ENV/.Rprofile" "$HOME"
-        fi
-
-        rm "$HOME/.Renviron"
-        if [ -f "$VIRTUAL_ENV/.Renviron" ] ; then
-            mv "$VIRTUAL_ENV/.Renviron" "$HOME"
-        fi
-
     fi
     if [ -n "${_OLD_VIRTUAL_PYTHONHOME:-}" ] ; then
         PYTHONHOME="${_OLD_VIRTUAL_PYTHONHOME:-}"
@@ -48,7 +38,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="/home/grabear/test"
+VIRTUAL_ENV=$1
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
@@ -78,22 +68,6 @@ if [ -z "${VIRTUAL_ENV_DISABLE_PROMPT:-}" ] ; then
     fi
     export PS1
 fi
-
-# This should move the users normal .Rprofile and .Renviron files
-# into __VENV_DIR__ if they exist.  It will then temporarily copy
-# the environments .Rprofile and .Renviron files into the home
-# directory upon activation.  Deactivation will delete these files
-# and move the users normal config file back into place.
-if [ -f ~/.Rprofile ] ; then
-    mv "$HOME/.Rprofile" "$VIRTUAL_ENV"
-fi
-
-if [ -f ~/.Renviron ] ; then
-    mv "$HOME/.Renviron" "$VIRTUAL_ENV"
-fi
-
-cp "$VIRTUAL_ENV/bin/.Rprofile" "$HOME"
-cp "$VIRTUAL_ENV/bin/.Renviron" "$HOME"
 
 # This should detect bash and zsh, which have a hash command that must
 # be called to get it to forget past commands.  Without forgetting

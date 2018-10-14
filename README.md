@@ -47,10 +47,10 @@ Options:
                                   the original R's package library as a
                                   secondary source for loading packages.
   -rp, --recommended_packages BOOLEAN
-                                  This determines wheather or not the
+                                  This determines whether or not the
                                   recommended packages are installed in theR
                                   environment along with the base packages.
-                                  In most cases it's best to keep thedefault
+                                  In most cases it's best to keep the default
                                   value.
   --clear BOOLEAN                 Deletes the contents of the environment
                                   directory if it already exists, before
@@ -154,11 +154,11 @@ REPRODUCIBLE_WORKFLOW_PKG_LIST:
 ### Why renv?
 
 Tools for creating reproducible workflows with R have been needed for a
-long time. Renv gets it's inspiration from
+long time. Renv gets its inspiration from
 [packrat](https://rstudio.github.io/packrat/), which allows you to
 create isolated package libraries, and python's
 [venv](https://docs.python.org/3/library/venv.html) module, which
-creates an environment with it's own package library **AND** python
+creates an environment with its own package library **AND** python
 binaries. Renv, therefore, helps user better manage a system with
 multiple installations of R by creating a virtual environments for
 specific versions of R that have their own R binaries (R and Rscript) as
