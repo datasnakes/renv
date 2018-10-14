@@ -1,6 +1,15 @@
 # renv (beta)
 
-Creating virtual environments for R.
+Creating virtual environments for R in Linux
+
+## Description
+
+One of the problems with using R for data analysis can be dependency issues.
+Especially for those scientists that use various versions of R or R packages
+ and have a large number of projects that they are developing with R.
+ Dependency issues are especially prevalent among those individuals or groups
+ that are developing R packages.  renv is a [Python style](https://github.com/python/cpython/blob/3.6/Lib/venv/__init__.py) virtual environment
+ manager for creating virtual environments for R.
 
 ## Installation
 
@@ -19,7 +28,7 @@ pip install dist/renv-0.2.0-py2.py3-non-any.whl
 
 ## Usage
 
-Renv is currently in beta so there may be some issues if your R has been
+Renv is currently in beta and is only supported in Linux so there may be some issues if your R has been
 installed in a way other than the default. There are probably plenty of
 unforeseen bugs, misspellings, and general cases where the code could be
 more efficient. Please submit an [issue](https://github.com/datasnakes/renv/issues)
@@ -32,15 +41,50 @@ actual release of this package.
 
 ### Commands
 
-```console
+
+### Commands
+
+Once you have renv installed, you can create an R environment by a simple command: 
+
+```
+renv -n myenv
+```
+
+An environment folder `myenv` will be created under `$HOME/beRi_envs`. 
+
+To activate the environment 
+```
+cd $HOME\beRi_envs\myenv\bin
+. ./activate 
+```
+
+To deactivate the R environment, simply issue the command
+```
+deactivate
+```
+
+
+Use `--help` to see the other configurations.
+
+```bash
 user@host:~$ renv --help
 Usage: renv [OPTIONS]
 
+Options:
 Options:
   -r, --r_path TEXT               Provide the root of the directory tree where
                                   R is installed.  This would be R's
                                   installation directory when using
                                   ./configure --prefix=<r_path>.
+  -n, --env_name TEXT             Name of the environment.
+  -d, --env_dir TEXT              A directory for creating the environment in.
+  -b, --binpath TEXT              Provide the bin directory if R was installed
+                                  when using ./configure --bindir=<binpath>.
+  -l, --libpath TEXT              Provide the lib directory if R was installed
+                                  when using ./configure --libdir=<libpath>.
+  -i, --includepath TEXT          Provide the include directory if R was
+                                  installed when using ./configure
+                                  --includedir=<includepath>.
   -sp, --system_site_packages BOOLEAN
                                   This determines whether or not the
                                   R_LIBS_USER environment variable utilizes
@@ -59,9 +103,9 @@ Options:
                                   this version of R.
   -p, --prompt TEXT               Provide an alternative prompt prefix for
                                   this environment.
-  -d, --env_dir TEXT              A directory for creating the environment in.
   --help                          Show this message and exit.
 ```
+
 
 ### Creating an R Environment
 
@@ -181,5 +225,11 @@ recreate the _.whl_.
 
 ## Maintainers
 
+<<<<<<< HEAD
 Rob Gilmore · [@grabear](https://github.com/grabear) · [✉](mailto:robgilmore127@gmail.com)  
 Shaurita Hutchins · [@sdhutchins](https://github.com/sdhutchins) · [✉](mailto:sdhutchins@outlook.com)
+=======
+Rob Gilmore | [@grabear](https://github.com/grabear) | [✉](mailto:robgilmore127@gmail.com)
+Shaurita Hutchins | [@sdhutchins](https://github.com/sdhutchins) | [✉](mailto:sdhutchins@outlook.com)
+Santina Lin | [@santina](https://github.com/santina) | [✉](mailto:hello@santina.me)
+>>>>>>> 0bbd55c6ab50fb46ef272a32345b7cdd76cc1fc8
