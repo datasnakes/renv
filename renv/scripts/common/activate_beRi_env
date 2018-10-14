@@ -1,6 +1,9 @@
 # This file must be used with "source bin/activate" *from bash*
 # you cannot run it directly
 
+# $1 environment path
+#
+
 deactivate () {
     # reset old environment variables
     if [ -n "${_OLD_VIRTUAL_PATH:-}" ] ; then
@@ -56,7 +59,7 @@ fi
 if [ -z "${VIRTUAL_ENV_DISABLE_PROMPT:-}" ] ; then
     _OLD_VIRTUAL_PS1="${PS1:-}"
     if [ "x(test) " != x ] ; then
-        PS1="(test) ${PS1:-}"
+        PS1="($2) ${PS1:-}"
     else
     if [ "`basename \"$VIRTUAL_ENV\"`" = "__" ] ; then
         # special case for Aspen magic directories
