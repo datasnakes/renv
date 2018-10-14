@@ -8,7 +8,7 @@ import os
               help="Provide the root of the directory tree where R is installed.  This would be R's installation "
                    "directory when using ./configure --prefix=<r_path>.")
 @click.option('--env_name', '-n', default=None,
-              help="Name of the environment. If given, will ignore parameter given in --env_dir ('-d')")
+              help="Name of the environment.")
 @click.option('--env_dir', '-d', default=None,
               help="A directory for creating the environment in.")
 @click.option('--binpath', '-b',
