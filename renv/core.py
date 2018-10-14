@@ -367,19 +367,19 @@ class RenvBuilder(EnvBuilder):
         activator_cookie = cookie_jar / Path(os.name)
         e_c = {
             "__VENV_DIR__": context.env_dir,
-            "__VENV_NAME": context.evn_name,
+            "__VENV_NAME__": context.evn_name,
             "__VENV_PROMPT__": context.prompt,
             "__VENV_BIN_NAME__": context.bin_name,
             "__VENV_R__": context.env_R_exe,
             "__VENV_RSCRIPT__": context.env_R_script,
             "__R_VERSION__": context.config_dict["R_VERSION"],
             "__CRAN_MIRROR__": context.config_dict["CRAN_MIRROR"],
-            "__CRANEXTRA_MIRROR_": context.config_dict["CRANEXTA_MIRROR"],
+            "__CRANEXTRA_MIRROR__": context.config_dict["CRANEXTA_MIRROR"],
             "__R_LIBS_USER__": context.config_dict["R_LIBS_USER"],
             "__R_HOME__": context.config_dict["R_ENV_HOME"],
             "__R_INCLUDE_DIR__": context.config_dict["R_INCLUDE_DIR"],
             "__STANDARD_PKG_LIST__": context.config_dict["STANDARD_PKG_LIST"],
-            "__REPRODUCIBLE_WORKFLOW_PKG_LIST": context.config_dict["REPRODUCIBLE_WORKFLOW_PKG_LIST"]
+            "__REPRODUCIBLE_WORKFLOW_PKG_LIST__": context.config_dict["REPRODUCIBLE_WORKFLOW_PKG_LIST"]
         }
         env_dir = context.env_dir
         cookiecutter(str(activator_cookie), no_input=True, extra_context=e_c, output_dir=context.bin_path)
