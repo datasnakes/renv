@@ -1,6 +1,6 @@
 import os
 import subprocess as sp
-
+from shutil import rmtree
 
 def get_r_path():
     """
@@ -64,7 +64,7 @@ def create_directory(directory, clear=False):
 
     if os.path.exists(directory):
         if clear:
-            os.rmdir(directory)
+            rmtree(directory)
         else:
             raise Exception("Environment directory " + directory +
                             " already exists. Set clear to True to erase the original directory.")
