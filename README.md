@@ -1,6 +1,6 @@
 # renv (beta)
 
-Creating virtual environments for R.
+Creating virtual environments for R in Linux
 
 ## Description
 
@@ -28,7 +28,7 @@ pip install dist/renv-0.2.0-py2.py3-non-any.whl
 
 ## Usage
 
-Renv is currently in beta so there may be some issues if your R has been
+Renv is currently in beta and is only supported in Linux so there may be some issues if your R has been
 installed in a way other than the default. There are probably plenty of
 unforeseen bugs, misspellings, and general cases where the code could be
 more efficient. Please submit an [issue](https://github.com/datasnakes/renv/issues)
