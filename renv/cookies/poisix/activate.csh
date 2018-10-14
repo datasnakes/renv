@@ -8,17 +8,17 @@ alias deactivate 'test $?_OLD_VIRTUAL_PATH != 0 && setenv PATH "$_OLD_VIRTUAL_PA
 # Unset irrelevant variables.
 deactivate nondestructive
 
-setenv VIRTUAL_ENV "__VENV_DIR__"
+setenv VIRTUAL_ENV "{{ cookiecutter.__VENV_DIR__ }}"
 
 set _OLD_VIRTUAL_PATH="$PATH"
-setenv PATH "$VIRTUAL_ENV/__VENV_BIN_NAME__:$PATH"
+setenv PATH "$VIRTUAL_ENV/{{ cookiecutter.__VENV_BIN_NAME__ }}:$PATH"
 
 
 set _OLD_VIRTUAL_PROMPT="$prompt"
 
 if (! "$?VIRTUAL_ENV_DISABLE_PROMPT") then
-    if ("__VENV_NAME__" != "") then
-        set env_name = "__VENV_NAME__"
+    if ("{{ cookiecutter.__VENV_NAME__ }}" != "") then
+        set env_name = "{{ cookiecutter.__VENV_NAME__ }}"
     else
         if (`basename "VIRTUAL_ENV"` == "__") then
             # special case for Aspen magic directories
