@@ -80,7 +80,7 @@ def create_symlink(src, dst, subfolders=[]):
         for subfolder in subfolders:
             src_folder = os.path.join(src, subfolder)
             dst_folder = os.path.join(dst, subfolder)
-            if !os.path.exists(src_folder) or !os.path.exists(dst_folder):
+            if not os.path.exists(src_folder) or not os.path.exists(dst_folder):
                 Warning("Cannot create symlink for: " + dst_folder)
             os.symlink(src_folder, dst_folder)
 

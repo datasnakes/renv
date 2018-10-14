@@ -172,9 +172,9 @@ class RenvBuilder(EnvBuilder):
         
         # Create other symbolic links in lib/R/
         utils.create_symlink(
-            os.path.join(utils.get_r_installed_root(), "lib", "R")
+            os.path.join(utils.get_r_installed_root(), "lib", "R"),
             os.path.join(env_dir, "lib", "R"), 
-            ["bin", "etc", "lib", "module", "shares"])
+            ["bin", "etc", "lib", "modules", "share"])
         
         binname = 'bin'
         r_env_libs = os.path.join(r_env_home, 'library')
