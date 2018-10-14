@@ -74,13 +74,11 @@ class RenvBuilder(EnvBuilder):
         Create a virtual environment in a directory.
         :param env_dir: The target directory to create an environment in.
         """
-        if not env_dir:
+        if env_name:
+            print("Environment name is given, so ignoring parameter --env-dir.")
             env_dir = utils.get_default_env_path(env_name)
         else:
             env_dir = os.path.abspath(env_dir)
-        if env_name:
-            env_dir = os.path.join(env_dir, env_name)
-
         context = self.ensure_directories(env_dir)
         # TODO-ROB: pip will eventually be beRi
         # See issue 24875. We need system_site_packages to be False
