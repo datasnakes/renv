@@ -64,3 +64,23 @@ def create_directory(directory, clear=False):
         raise ValueError("Unable to create directory '%r" % directory + "' for the new environment.")
     else:
         os.makedirs(directory)
+
+def create_symlink(src, dst, subfolders=[]):
+    """
+    Create symlink in the dst folder from the src folder.
+    :param src: source folder
+    :param dst: desitnation foler
+    :param subfolders: symlink to be created for these subfolders in src specifically
+    :return: None 
+    """
+    
+    if len(subfolders) == 0:
+        os.symlink(src, dst)
+    else:
+        for subfolder in subfolders:
+            src_folder = os.path.join(src, subfolder)
+            dst_folder = os.path.join(dst, subfolder)
+            if !os.path.exists(src_folder) or !os.path.exists(dst_folder):
+                Warning("Cannot create symlink for: " + dst_folder)
+            os.symlink(src_folder, dst_folder)
+
