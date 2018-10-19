@@ -132,7 +132,6 @@ class RenvBuilder(EnvBuilder):
         r_script = "Rscript"
         context.R_exe = r_exe
         context.R_script = r_script
-        context.R_version = os.path.split(self.r_path)[1]
         if self.r_bin_path:
             context.abs_R_exe = os.path.join(self.r_bin_path, r_exe)
             context.abs_R_script = os.path.join(self.r_bin_path, r_script)
@@ -140,8 +139,26 @@ class RenvBuilder(EnvBuilder):
             context.abs_R_exe = os.path.join(self.r_path, "bin", r_exe)
             context.abs_R_script = os.path.join(self.r_path, "bin", r_script)
         context.abs_R_path = self.r_path
-        logging.info(f"System R(version):  {self.r_path}({context.R_version})")
 
+        # Get the version of R
+        # Major Version
+        Rcmd = f"{context.abs_R_script} " \
+               f"-e \'R.version$major\'"
+        recommended_pkgs = subprocess.Popen([Rcmd], stderr=subprocess.PIPE, stdout=subprocess.PIPE,
+                                            shell=True, encoding='utf-8')
+        error = recommended_pkgs.stderr.readlines()
+        major = recommended_pkgs.stdout.readlines()
+        recommended_pkgs.wait()
+        # Minor Version
+        Rcmd = f"{context.abs_R_script} " \
+               f"-e \'R.version$minor\'"
+        recommended_pkgs = subprocess.Popen([Rcmd], stderr=subprocess.PIPE, stdout=subprocess.PIPE,
+                                            shell=True, encoding='utf-8')
+        error = recommended_pkgs.stderr.readlines()
+        minor = recommended_pkgs.stdout.readlines()
+        recommended_pkgs.wait()
+        context.R_version = f"{major}.{minor}"
+        logging.info(f"System R(version):  {self.r_path}({context.R_version})")
         # Begin with R-Environment R files/paths
         # Continue with system R files/paths
         if sys.platform == 'win32':  # Windows
