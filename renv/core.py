@@ -80,7 +80,7 @@ class RenvBuilder(EnvBuilder):
         if env_dir:
             env_dir = os.path.abspath(env_dir)
         else:
-            env_dir = utils.get_beri_path()
+            env_dir = utils.get_renv_path()
             if env_name:
                 env_dir = os.path.join(env_dir, env_name)
             else:
