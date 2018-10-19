@@ -1,7 +1,6 @@
 from venv import EnvBuilder
 import logging
 import os
-import shutil
 import subprocess
 import sys
 import types
@@ -386,20 +385,6 @@ class RenvBuilder(EnvBuilder):
         env_dir = context.env_dir
         cookiecutter(str(activator_cookie), no_input=True, extra_context=e_c, output_dir=context.env_dir)
 
-    # def setup_scripts(self, context):
-    #     """
-    #     Set up scripts into the created environment from a directory.
-    #     This method installs the default scripts into the environment
-    #     being created. You can prevent the default installation by overriding
-    #     this method if you really need to, or if you need to specify
-    #     a different location for the scripts to install. By default, the
-    #     'scripts' directory in the renv (not venv) package is used as the source of
-    #     scripts to install.
-    #     """
-    #     path = os.path.abspath(os.path.dirname(__file__))
-    #     path = os.path.join(path, 'scripts')
-    #     self.install_scripts(context, path)
-
     def format_pkg_list(self, config_dict):
         """
         Takes the YAML configuration information and parses/formats the R
@@ -424,15 +409,3 @@ class RenvBuilder(EnvBuilder):
             fmtd_list[list_name] = pkg_list_string
 
         return fmtd_list
-
-    # def install_r(self):
-    #     # New: install specified version of R in the R environment.
-    #     pass
-    #
-    # def setup_r_profile(self, context):
-    #     # New
-    #     pass
-    #
-    # def setup_r_environ(self):
-    #     # New
-    #     pass
