@@ -30,7 +30,7 @@ def get_user_home_dir():
     # TODO make this function cross-platform
     :return: None
     """
-    sp_out = sp.run(["echo $HOME"], shell=True, capture_output=True, encoding="utf8")
+    sp_out = sp.run(["echo $HOME"], shell=True, stdout=sp.PIPE, encoding="utf8")
     return sp_out.stdout.strip()
 
 def get_beri_path(has_root_access=False):
