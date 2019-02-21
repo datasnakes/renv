@@ -225,11 +225,7 @@ recreate the _.whl_.
 
 ## Maintainers
 
-<<<<<<< HEAD
-Rob Gilmore · [@grabear](https://github.com/grabear) · [✉](mailto:robgilmore127@gmail.com)  
-Shaurita Hutchins · [@sdhutchins](https://github.com/sdhutchins) · [✉](mailto:sdhutchins@outlook.com)
-=======
+
 Rob Gilmore | [@grabear](https://github.com/grabear) | [✉](mailto:robgilmore127@gmail.com)
 Shaurita Hutchins | [@sdhutchins](https://github.com/sdhutchins) | [✉](mailto:sdhutchins@outlook.com)
 Santina Lin | [@santina](https://github.com/santina) | [✉](mailto:hello@santina.me)
->>>>>>> 0bbd55c6ab50fb46ef272a32345b7cdd76cc1fc8
