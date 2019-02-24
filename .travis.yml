@@ -4,13 +4,12 @@ python:
   - 3.5
 
 before_install:
-- pip install poetry
+- pip install poetry nose
 
 # Install renv
 install:
 - poetry install -v
 
 # Command to run tests
-# pytest is being used as a default
-script:
-- pytest
+# nosetests is being used as a default
+script: nosetests tests/ --verbosity=3
