@@ -333,37 +333,6 @@ class RenvBuilder(EnvBuilder):
             #         shutil.copyfile(src, dst)
             #         break
 
-    # def replace_variables(self, text, context):
-    #     """
-    #     Replace variable placeholders in script text with context-specific
-    #     variables.
-    #     Return the text passed in , but with variables replaced.
-    #     :param text: The text in which to replace placeholder variables.
-    #     :param context: The information for the environment creation request
-    #                     being processed.
-    #     """
-    #
-    #     # # Old and new VENV variables
-    #     # text = text.replace('__VENV_DIR__', context.env_dir)
-    #     # text = text.replace('__VENV_NAME__', context.env_name)
-    #     # text = text.replace('__VENV_PROMPT__', context.prompt)
-    #     # text = text.replace('__VENV_BIN_NAME__', context.bin_name)
-    #     # text = text.replace('__VENV_R__', context.env_R_exe)
-    #     # text = text.replace('__VENV_RSCRIPT__', context.env_R_script)
-    #     # # R variables
-    #     # text = text.replace('__R_VERSION__', context.config_dict["R_VERSION"])
-    #     # text = text.replace('__CRAN_MIRROR__', context.config_dict["CRAN_MIRROR"])
-    #     # text = text.replace('__CRANEXTRA_MIRROR__', context.config_dict["CRANEXTRA_MIRROR"])
-    #     # # Environment variables for .Renviron
-    #     # text = text.replace('__R_LIBS_USER__', context.config_dict["R_LIBS_USER"])
-    #     # text = text.replace('__R_HOME__', context.config_dict["R_ENV_HOME"])
-    #     # text = text.replace('__R_INCLUDE_DIR__', context.config_dict["R_INCLUDE_DIR"])
-    #     # # Packages to install from .Rprofile
-    #     # text = text.replace('__STANDARD_PKG_LIST__', context.config_dict["STANDARD_PKG_LIST"])
-    #     # text = text.replace('__REPRODUCIBLE_WORKFLOW_PKG_LIST__', context.config_dict["REPRODUCIBLE_WORKFLOW_PKG_LIST"])
-    #
-    #     return text
-
     def install_scripts(self, context):
         """
         Install scripts into the created environment from a directory.
@@ -399,20 +368,6 @@ class RenvBuilder(EnvBuilder):
         }
         env_dir = context.env_dir
         cookiecutter(str(activator_cookie), no_input=True, extra_context=e_c, output_dir=context.env_dir)
-
-    # def setup_scripts(self, context):
-    #     """
-    #     Set up scripts into the created environment from a directory.
-    #     This method installs the default scripts into the environment
-    #     being created. You can prevent the default installation by overriding
-    #     this method if you really need to, or if you need to specify
-    #     a different location for the scripts to install. By default, the
-    #     'scripts' directory in the renv (not venv) package is used as the source of
-    #     scripts to install.
-    #     """
-    #     path = os.path.abspath(os.path.dirname(__file__))
-    #     path = os.path.join(path, 'scripts')
-    #     self.install_scripts(context, path)
 
     def format_pkg_list(self, config_dict):
         """

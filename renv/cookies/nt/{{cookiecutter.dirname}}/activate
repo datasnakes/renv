@@ -38,11 +38,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-<<<<<<< HEAD:renv/scripts/common/activate
-VIRTUAL_ENV=$1
-=======
 VIRTUAL_ENV="{{cookiecutter.__VENV_DIR__}}"
->>>>>>> cookiecutter_branch:renv/cookies/nt/{{cookiecutter.dirname}}/activate
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
@@ -73,8 +69,6 @@ if [ -z "${VIRTUAL_ENV_DISABLE_PROMPT:-}" ] ; then
     export PS1
 fi
 
-<<<<<<< HEAD:renv/scripts/common/activate
-=======
 # This should move the users normal .Rprofile and .Renviron files
 # into {{cookiecutter.__VENV_DIR__}} if they exist.  It will then temporarily copy
 # the environments .Rprofile and .Renviron files into the home
@@ -91,7 +85,6 @@ fi
 cp "$VIRTUAL_ENV/bin/.Rprofile" "$HOME"
 cp "$VIRTUAL_ENV/bin/.Renviron" "$HOME"
 
->>>>>>> cookiecutter_branch:renv/cookies/nt/{{cookiecutter.dirname}}/activate
 # This should detect bash and zsh, which have a hash command that must
 # be called to get it to forget past commands.  Without forgetting
 # past commands the $PATH changes we made may not be respected
