@@ -6,5 +6,5 @@ before_install:
 install:
 - poetry install -v
 script:
-- poetry build
-- pip install dist/*any.whl
+#- poetry build
+#- pip install dist/*any.whl
