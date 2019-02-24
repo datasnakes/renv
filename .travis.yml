@@ -1,0 +1,10 @@
+language: python
+python:
+  - 3.5
+before_install:
+- pip install poetry
+install:
+- poetry install -v
+before_deploy:
+- poetry build
+- pip install dist/*any.whl
