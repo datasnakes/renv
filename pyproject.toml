@@ -27,6 +27,7 @@ classifiers = [
 python = "*"
 click = "^6.7"
 pyyaml = "^3.12"
+cookiecutter = "^1.6"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.5"

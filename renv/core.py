@@ -6,6 +6,11 @@ import subprocess
 import sys
 import types
 import yaml
+import renv.utils as utils
+from pkg_resources import resource_filename
+from renv import cookies
+from pathlib import Path
+from cookiecutter.main import cookiecutter
 logger = logging.getLogger(__name__)
 
 __DEFAULT_CONFIG__ = {
@@ -30,7 +35,7 @@ class RenvBuilder(EnvBuilder):
     This class is meant to help facilitate the basic functionality of creating an
     R environment.
     """
-    def __init__(self, r_path, r_bin_path=None, r_lib_path=None, r_include_path = None,system_site_packages=False,
+    def __init__(self, r_path=None, r_bin_path=None, r_lib_path=None, r_include_path = None, system_site_packages=False,
                  recommended_packages=True, clear=False, symlinks=False, upgrade=False, prompt=None):
         """
         :param r_path:  This is the root directory of the R installation that's being
@@ -53,10 +58,13 @@ class RenvBuilder(EnvBuilder):
         super().__init__(system_site_packages=system_site_packages, clear=clear,
                          symlinks=symlinks, upgrade=upgrade, prompt=prompt)
         del self.with_pip
+        if r_path is None:
+            r_path = utils.get_r_installed_root()
         self.r_path = r_path
         self.r_bin_path = r_bin_path
         self.r_lib_path = r_lib_path
         self.r_include_path = r_include_path
+        self.clear = clear
         if self.system_site_packages:
             self.base_packages = False
             self.recommended_packages = False
@@ -64,12 +72,20 @@ class RenvBuilder(EnvBuilder):
             self.base_packages = True
             self.recommended_packages = recommended_packages
 
-    def create(self, env_dir):
+    def create(self, env_dir, env_name=None):
         """
         Create a virtual environment in a directory.
         :param env_dir: The target directory to create an environment in.
         """
-        env_dir = os.path.abspath(env_dir)
+        if env_dir:
+            env_dir = os.path.abspath(env_dir)
+        else:
+            env_dir = utils.get_beri_path()
+            if env_name:
+                env_dir = os.path.join(env_dir, env_name)
+            else:
+                Exception("Please provide the environment name.")
+
         context = self.ensure_directories(env_dir)
         # TODO-ROB: pip will eventually be beRi
         # See issue 24875. We need system_site_packages to be False
@@ -77,18 +93,22 @@ class RenvBuilder(EnvBuilder):
         true_system_site_packages = self.system_site_packages
         self.system_site_packages = False
         context.config_dict = self.create_configuration(context)
-        self.setup_r(context)
+        # self.setup_r(context)
         # TODO-ROB: pip will eventually be beRi
         # if self.with_pip:
         #     self._setup_pip(context)
         if not self.upgrade:
-            self.setup_scripts(context)
+            self.install_scripts(context)
+            self.setup_r(context)
             self.post_setup(context)
         if true_system_site_packages:
             # We had set it to False before, now
             # restore it and rewrite the configuration
+            self.setup_r(context)
             self.system_site_packages = True
             self.create_configuration(context)
+
+        print("\nEnvironment created in " + env_dir + "\n")
 
     def ensure_directories(self, env_dir):
         """
@@ -98,14 +118,6 @@ class RenvBuilder(EnvBuilder):
         :param env_dir:  The directory used for the environment.
         """
 
-        def create_if_needed(d):
-            if not os.path.exists(d):
-                os.makedirs(d)
-            elif os.path.islink(d) or os.path.isfile(d):
-                raise ValueError('Unable to create directory %r' % d)
-
-        if os.path.exists(env_dir) and self.clear:
-            self.clear_directory(env_dir)
         user_config = os.path.join(env_dir, "renv.yaml")
         # Create the context for the virtual environment
         context = types.SimpleNamespace()
@@ -114,7 +126,7 @@ class RenvBuilder(EnvBuilder):
         context.env_name = os.path.split(env_dir)[1]
         prompt = self.prompt if self.prompt is not None else context.env_name
         context.prompt = '(%s) ' % prompt
-        create_if_needed(env_dir)
+        utils.create_directory(env_dir, self.clear)
         # System R files/paths
         r_exe = "R"
         r_script = "Rscript"
@@ -149,12 +161,21 @@ class RenvBuilder(EnvBuilder):
             else:
                 r_abs_include = os.path.join(self.r_path, "include")
         # Issue 21197: create lib64 as a symlink to lib on 64-bit non-OS X POSIX
-        create_if_needed(r_env_home)
+        utils.create_directory(r_env_home, self.clear)
+        
+        # Create symlink to R 
         if (sys.maxsize > 2**32) and (os.name == 'posix') and (sys.platform != 'darwin'):
             os.mkdir(os.path.join(env_dir, 'lib64'))
             link_path = os.path.join(env_dir, 'lib64', 'R')
             if not os.path.exists(link_path):   # Issue #21643
                 os.symlink(r_env_home, link_path)
+        
+        # Create other symbolic links in lib/R/
+        utils.create_symlink(
+            os.path.join(utils.get_r_installed_root(), "lib", "R"),
+            os.path.join(env_dir, "lib", "R"), 
+            ["bin", "etc", "lib", "modules", "share", "include"])
+        
         binname = 'bin'
         r_env_libs = os.path.join(r_env_home, 'library')
         r_abs_libs = os.path.join(r_abs_home, 'library')
@@ -169,9 +190,7 @@ class RenvBuilder(EnvBuilder):
         context.bin_path = binpath
         context.env_R_exe = os.path.join(binpath, r_exe)
         context.env_R_script = os.path.join(binpath, r_script)
-        create_if_needed(context.env_R_libs)
-        create_if_needed(context.env_R_include)
-        create_if_needed(binpath)
+        utils.create_directory(context.env_R_libs, self.clear)
         logging.info(f"Environment R:  {r_env_home}")
         return context
 
@@ -314,37 +333,7 @@ class RenvBuilder(EnvBuilder):
             #         shutil.copyfile(src, dst)
             #         break
 
-    def replace_variables(self, text, context):
-        """
-        Replace variable placeholders in script text with context-specific
-        variables.
-        Return the text passed in , but with variables replaced.
-        :param text: The text in which to replace placeholder variables.
-        :param context: The information for the environment creation request
-                        being processed.
-        """
-        # Old and new VENV variables
-        text = text.replace('__VENV_DIR__', context.env_dir)
-        text = text.replace('__VENV_NAME__', context.env_name)
-        text = text.replace('__VENV_PROMPT__', context.prompt)
-        text = text.replace('__VENV_BIN_NAME__', context.bin_name)
-        text = text.replace('__VENV_R__', context.env_R_exe)
-        text = text.replace('__VENV_RSCRIPT__', context.env_R_script)
-        # R variables
-        text = text.replace('__R_VERSION__', context.config_dict["R_VERSION"])
-        text = text.replace('__CRAN_MIRROR__', context.config_dict["CRAN_MIRROR"])
-        text = text.replace('__CRANEXTRA_MIRROR__', context.config_dict["CRANEXTRA_MIRROR"])
-        # Environment variables for .Renviron
-        text = text.replace('__R_LIBS_USER__', context.config_dict["R_LIBS_USER"])
-        text = text.replace('__R_HOME__', context.config_dict["R_ENV_HOME"])
-        text = text.replace('__R_INCLUDE_DIR__', context.config_dict["R_INCLUDE_DIR"])
-        # Packages to install from .Rprofile
-        text = text.replace('__STANDARD_PKG_LIST__', context.config_dict["STANDARD_PKG_LIST"])
-        text = text.replace('__REPRODUCIBLE_WORKFLOW_PKG_LIST__', context.config_dict["REPRODUCIBLE_WORKFLOW_PKG_LIST"])
-
-        return text
-
-    def install_scripts(self, context, path):
+    def install_scripts(self, context):
         """
         Install scripts into the created environment from a directory.
         :param context: The information for the environment creation request
@@ -356,53 +345,29 @@ class RenvBuilder(EnvBuilder):
                         Placeholder variables are replaced with environment-
                         specific values.
         """
-        env_dir = context.env_dir
-        plen = len(path)
-        for root, dirs, files in os.walk(path):
-            if root == path:  # at top-level, remove irrelevant dirs
-                for d in dirs[:]:
-                    if d not in ('common', os.name):
-                        dirs.remove(d)
-                continue  # ignore files in top level
-            for f in files:
-                srcfile = os.path.join(root, f)
-                suffix = root[plen:].split(os.sep)[2:]
-                if not suffix:
-                    dstdir = env_dir
-                else:
-                    dstdir = os.path.join(env_dir, *suffix)
-                if not os.path.exists(dstdir):
-                    os.makedirs(dstdir)
-                dstfile = os.path.join(dstdir, f)
-                with open(srcfile, 'rb') as f:
-                    data = f.read()
-                if not srcfile.endswith('.exe'):
-                    try:
-                        data = data.decode('utf-8')
-                        data = self.replace_variables(data, context)
-                        data = data.encode('utf-8')
-                    except UnicodeError as e:
-                        data = None
-                        logger.warning('unable to copy script %r, '
-                                       'may be binary: %s', srcfile, e)
-                if data is not None:
-                    with open(dstfile, 'wb') as f:
-                        f.write(data)
-                    shutil.copymode(srcfile, dstfile)
+        # Get the extra_context for the cookiecutter call
 
-    def setup_scripts(self, context):
-        """
-        Set up scripts into the created environment from a directory.
-        This method installs the default scripts into the environment
-        being created. You can prevent the default installation by overriding
-        this method if you really need to, or if you need to specify
-        a different location for the scripts to install. By default, the
-        'scripts' directory in the renv (not venv) package is used as the source of
-        scripts to install.
-        """
-        path = os.path.abspath(os.path.dirname(__file__))
-        path = os.path.join(path, 'scripts')
-        self.install_scripts(context, path)
+        cookie_jar = Path(resource_filename(cookies.__name__, ''))
+        activator_cookie = cookie_jar / Path(os.name)
+        e_c = {
+            "dirname": "bin",
+            "__VENV_DIR__": context.env_dir,
+            "__VENV_NAME__": context.env_name,
+            "__VENV_PROMPT__": context.prompt,
+            "__VENV_BIN_NAME__": context.bin_name,
+            "__VENV_R__": context.env_R_exe,
+            "__VENV_RSCRIPT__": context.env_R_script,
+            "__R_VERSION__": context.config_dict["R_VERSION"],
+            "__CRAN_MIRROR__": context.config_dict["CRAN_MIRROR"],
+            "__CRANEXTRA_MIRROR__": context.config_dict["CRANEXTRA_MIRROR"],
+            "__R_LIBS_USER__": context.config_dict["R_LIBS_USER"],
+            "__R_HOME__": context.config_dict["R_ENV_HOME"],
+            "__R_INCLUDE_DIR__": context.config_dict["R_INCLUDE_DIR"],
+            "__STANDARD_PKG_LIST__": context.config_dict["STANDARD_PKG_LIST"],
+            "__REPRODUCIBLE_WORKFLOW_PKG_LIST__": context.config_dict["REPRODUCIBLE_WORKFLOW_PKG_LIST"]
+        }
+        env_dir = context.env_dir
+        cookiecutter(str(activator_cookie), no_input=True, extra_context=e_c, output_dir=context.env_dir)
 
     def format_pkg_list(self, config_dict):
         """
