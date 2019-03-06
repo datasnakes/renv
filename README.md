@@ -21,6 +21,11 @@ git clone https://github.com/datasnakes/renv.git
 
 cd renv
 
+# Make sure you have activate an environment of Python >= 3.6
+
+# Get poetry and build the project using it
+curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
+
 poetry install 
 
 poetry build
