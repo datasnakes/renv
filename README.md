@@ -21,9 +21,11 @@ git clone https://github.com/datasnakes/renv.git
 
 cd renv
 
+poetry install 
+
 poetry build
 
-pip install dist/renv-0.2.0-py2.py3-non-any.whl
+pip install dist/renv-0.2.0-py2.py3-none-any.whl
 ```
 
 ## Usage
