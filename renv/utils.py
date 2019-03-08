@@ -1,6 +1,10 @@
 import os
 import subprocess as sp
 from shutil import rmtree
+import logging
+
+logging.getLogger(__name__)
+
 
 def get_r_path():
     """
@@ -49,7 +53,7 @@ def get_beri_path(has_root_access=False):
 def create_directory(directory, clear=False):
     """
     Create directory if it does not exist yet.
-    :param clear: whether to clear the directory if it already exists
+    :param clear: Clear the directory if it already exists.
     :param directory: path of the directory
     :return: None
     """
@@ -57,13 +61,16 @@ def create_directory(directory, clear=False):
     if os.path.exists(directory):
         if clear:
             rmtree(directory)
+            logging.debug(f"{directory} has been deleted.")
         else:
-            raise Exception("Environment directory " + directory +
-                            " already exists. Set clear to True to erase the original directory.")
+            raise FileExistsError("Environment directory " + directory +
+                            " already exists. Set clear to True to delete the original directory.")
     elif os.path.islink(directory) or os.path.isfile(directory):
         raise ValueError("Unable to create directory '%r" % directory + "' for the new environment.")
     else:
         os.makedirs(directory)
+        logging.debug(f"{directory} has been created.")
+
 
 def create_symlink(src, dst, subfolders=[]):
     """
@@ -71,9 +78,9 @@ def create_symlink(src, dst, subfolders=[]):
     :param src: source folder
     :param dst: desitnation foler
     :param subfolders: symlink to be created for these subfolders in src specifically
-    :return: None 
+    :return: None
     """
-    
+
     if len(subfolders) == 0:
         os.symlink(src, dst)
     else:
@@ -83,4 +90,3 @@ def create_symlink(src, dst, subfolders=[]):
             if not os.path.exists(src_folder) or not os.path.exists(dst_folder):
                 Warning("Cannot create symlink for: " + dst_folder)
             os.symlink(src_folder, dst_folder)
-
