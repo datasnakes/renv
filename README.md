@@ -231,6 +231,6 @@ recreate the _.whl_.
 
 ## Maintainers
 
-Rob Gilmore | [@grabear](https://github.com/grabear) | [✉](mailto:robgilmore127@gmail.com)
-Santina Lin | [@santina](https://github.com/santina) | [✉](mailto:hello@santina.me)
-Shaurita Hutchins | [@sdhutchins](https://github.com/sdhutchins) | [✉](mailto:sdhutchins@outlook.com)
+Rob Gilmore | [@grabear](https://github.com/grabear) | [✉](mailto:robgilmore127@gmail.com)  
+Santina Lin | [@santina](https://github.com/santina) | [✉](mailto:hello@santina.me)  
+Shaurita Hutchins | [@sdhutchins](https://github.com/sdhutchins) | [✉](mailto:sdhutchins@outlook.com)  
