@@ -1,6 +1,7 @@
 import os
 import subprocess as sp
 from shutil import rmtree
+from subprocess import TimeoutExpired
 
 
 def get_r_path():
@@ -87,3 +88,35 @@ def create_symlink(src, dst, subfolders=[]):
                 Warning("Cannot create symlink for: " + dst_folder)
             os.symlink(src_folder, dst_folder)
 
+
+def system_r_call(rcmd_type, context):
+    """
+    Call the current R with system calls in order to obtain specific types
+    of information.
+    :param rcmd_type:  A string that designates the R command to use in the system call
+    :param context:  The context variable used in the R command.
+    :return:  Returns the stdout and stderr from the system call.
+    """
+
+    if rcmd_type == "major":
+        Rcmd = f"{context.abs_R_script} " \
+               f"-e \'R.version$major\'"
+    elif rcmd_type == "minor":
+        Rcmd = f"{context.abs_R_script} " \
+               f"-e \'R.version$minor\'"
+    elif rcmd_type == "base":
+        Rcmd = f"{context.abs_R_script} " \
+               f"-e \'base::cat(rownames(installed.packages(priority=\"base\")))\'"
+    elif rcmd_type == "recommended":
+        Rcmd = f"{context.abs_R_script} " \
+               f"-e \'base::cat(rownames(installed.packages(priority=\"recommended\")))\'"
+
+    recommended_pkgs = sp.Popen([Rcmd], stderr=sp.PIPE, stdout=sp.PIPE, shell=True, encoding='utf-8')
+
+    try:
+        stdout, stderr = recommended_pkgs.communicate(timeout=15)
+    except TimeoutExpired:
+        recommended_pkgs.kill()
+        stdout, stderr = recommended_pkgs.communicate()
+
+    return stdout, stderr
