@@ -1,7 +1,6 @@
 from venv import EnvBuilder
 import logging
 import os
-import subprocess
 import sys
 import types
 import yaml
@@ -141,22 +140,12 @@ class RenvBuilder(EnvBuilder):
 
         # Get the version of R
         # Major Version
-        Rcmd = f"{context.abs_R_script} " \
-               f"-e \'R.version$major\'"
-        recommended_pkgs = subprocess.Popen([Rcmd], stderr=subprocess.PIPE, stdout=subprocess.PIPE,
-                                            shell=True, encoding='utf-8')
-        error = recommended_pkgs.stderr.readlines()
-        major = recommended_pkgs.stdout.readlines()
-        recommended_pkgs.wait()
+        major, error = utils.system_r_call(rcmd_type="major", context=context)
         # Minor Version
-        Rcmd = f"{context.abs_R_script} " \
-               f"-e \'R.version$minor\'"
-        recommended_pkgs = subprocess.Popen([Rcmd], stderr=subprocess.PIPE, stdout=subprocess.PIPE,
-                                            shell=True, encoding='utf-8')
-        error = recommended_pkgs.stderr.readlines()
-        minor = recommended_pkgs.stdout.readlines()
-        recommended_pkgs.wait()
+        minor, error = utils.system_r_call(rcmd_type="major", context=context)
+
         context.R_version = f"{major}.{minor}"
+
         logging.info(f"System R(version):  {self.r_path}({context.R_version})")
         # Begin with R-Environment R files/paths
         # Continue with system R files/paths
