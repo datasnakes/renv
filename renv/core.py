@@ -229,24 +229,12 @@ class RenvBuilder(EnvBuilder):
                 config_dict["R_LIBS_USER"] = context.env_R_libs
                 # Get a list of the recommended packages for this version of R
                 if self.recommended_packages:
-                    Rcmd = f"{context.abs_R_script} " \
-                           f"-e \'base::cat(rownames(installed.packages(priority=\"recommended\")))\'"
-                    recommended_pkgs = subprocess.Popen([Rcmd], stderr=subprocess.PIPE, stdout=subprocess.PIPE,
-                                                        shell=True, encoding='utf-8')
-                    error = recommended_pkgs.stderr.readlines()
-                    out = recommended_pkgs.stdout.readlines()
-                    recommended_pkgs.wait()
-                    recommended_pkgs = out[0].split(" ")
+                    recommended_pkgs, error = utils.system_r_call(rcmd_type="recommended", context=context)
+                    recommended_pkgs = recommended_pkgs[0].split(" ")
                 # Get a list of the base packages for this version of R
                 if self.base_packages:
-                    Rcmd = f"{context.abs_R_script} " \
-                           f"-e \'base::cat(rownames(installed.packages(priority=\"base\")))\'"
-                    base_pkgs = subprocess.Popen([Rcmd], stderr=subprocess.PIPE, stdout=subprocess.PIPE,
-                                                        shell=True, encoding='utf-8')
-                    error = base_pkgs.stderr.readlines()
-                    out = base_pkgs.stdout.readlines()
-                    base_pkgs.wait()
-                    base_pkgs = out[0].split(" ")
+                    base_pkgs, error = utils.system_r_call(rcmd_type="recommended", context=context)
+                    base_pkgs = base_pkgs[0].split(" ")
                 # Create a list of all the packages to use
                 pkgs = recommended_pkgs + base_pkgs
                 # TODO-config: This may need to be separate for windows vs linux
