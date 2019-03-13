@@ -3,7 +3,7 @@ import subprocess as sp
 from shutil import rmtree
 import logging
 
-logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def get_r_path():
@@ -56,12 +56,11 @@ def create_directory(directory, clear=False):
     :param clear: Clear the directory if it already exists.
     :param directory: path of the directory
     :return: None
-    """
-
+    """    
     if os.path.exists(directory):
         if clear:
             rmtree(directory)
-            logging.debug(f"{directory} has been deleted.")
+            logger.debug(f"{directory} has been deleted.")
         else:
             raise FileExistsError("Environment directory " + directory +
                             " already exists. Set clear to True to delete the original directory.")
@@ -69,7 +68,7 @@ def create_directory(directory, clear=False):
         raise ValueError("Unable to create directory '%r" % directory + "' for the new environment.")
     else:
         os.makedirs(directory)
-        logging.debug(f"{directory} has been created.")
+        logger.debug(f"{directory} has been created.")
 
 
 def create_symlink(src, dst, subfolders=[]):

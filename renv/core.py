@@ -74,7 +74,8 @@ class RenvBuilder(EnvBuilder):
         # Change level of logger based on verbose paramater.
         if self.verbose:
             logging.basicConfig(format='%(levelname)s | %(name)s | line %(lineno)d: %(message)s')
-            logging.getLogger().setLevel(logging.DEBUG)
+            # Filter the debug logging
+            logging.getLogger("renv").setLevel(logging.DEBUG)
         else:
             logging.basicConfig(format='%(levelname)s: %(message)s',
                                 level=logging.INFO)
@@ -102,14 +103,14 @@ class RenvBuilder(EnvBuilder):
                 Exception("Please provide the environment name.")
 
         context = self.ensure_directories(env_dir)
-        # TODO-ROB: pip will eventually be beRi
+        # TODO: pip will eventually be beRi
         # See issue 24875. We need system_site_packages to be False
         # until after pip is installed.
         true_system_site_packages = self.system_site_packages
         self.system_site_packages = False
         context.config_dict = self.create_configuration(context)
         # self.setup_r(context)
-        # TODO-ROB: pip will eventually be beRi
+        # TODO: pip will eventually be beRi
         # if self.with_pip:
         #     self._setup_pip(context)
         if not self.upgrade:
@@ -216,6 +217,7 @@ class RenvBuilder(EnvBuilder):
         Create and/or use a configuration file indicating where the environment's R
         was copied from, and whether the system site-packages should be made
         available in the environment.
+        
         :param context: The information for the environment creation request
                         being processed.
         """
@@ -226,10 +228,15 @@ class RenvBuilder(EnvBuilder):
         path = context.user_config
         # Get the user provided YAML config if it exists
         if os.path.isfile(path):
-            with open(path, 'r', encoding='utf-8')as f:
+            with open(path, 'r', encoding='utf-8') as f:
                 user_config = yaml.load(f)
+            f.close()
+            formatted_user_config = pformat(user_config)
+            self.logger.debug(f"User configuration file imported.")
+            self.logger.debug(f"User configuration: {formatted_user_config}")
         else:
             user_config = {}
+            self.logger.debug(f"User configuration will be default.")
 
         # Open and overwrite YAML config
         with open(path, 'w', encoding='utf-8') as f:
@@ -275,6 +282,7 @@ class RenvBuilder(EnvBuilder):
             config_dict["R_ABS_HOME"] = context.abs_R_home
             config_dict["R_INCLUDE_DIR"] = context.env_R_include
             config_dict["R_VERSION"] = context.R_version
+            
             # Package lists
             config_dict.update(__DEFAULT_CONFIG__)
             pkg_lists = self.format_pkg_list(config_dict)
@@ -364,7 +372,6 @@ class RenvBuilder(EnvBuilder):
                         specific values.
         """
         # Get the extra_context for the cookiecutter call
-
         cookie_jar = Path(resource_filename(cookies.__name__, ''))
         activator_cookie = cookie_jar / Path(os.name)
         e_c = {
