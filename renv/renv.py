@@ -42,7 +42,7 @@ def renv(r_path, env_name, env_dir, binpath, libpath,
     # Print the version of renv
     if version:
         version = get_distribution('renv').version
-        print(f"renv version {version}")
+        click.echo(f"renv version {version}")
     else:
         if os.name == 'nt':
             use_symlinks = False
