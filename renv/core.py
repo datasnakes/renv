@@ -196,7 +196,7 @@ class RenvBuilder(EnvBuilder):
         context.env_R_exe = os.path.join(binpath, r_exe)
         context.env_R_script = os.path.join(binpath, r_script)
         utils.create_directory(context.env_R_libs, self.clear)
-        logging.info("Environment R:  %s" %s renv_home)
+        logging.info("Environment R:  %s" % r_env_home)
         return context
 
     def create_configuration(self, context):
