@@ -54,7 +54,8 @@ class RenvBuilder(EnvBuilder):
         :param prompt:  The prompt prefix can be customized with this parameter.
         """
         super().__init__(system_site_packages=system_site_packages, clear=clear,
-                         symlinks=symlinks, upgrade=upgrade, prompt=prompt)
+                         symlinks=symlinks, upgrade=upgrade)
+        self.prompt = prompt
         del self.with_pip
         if r_path is None:
             r_path = utils.get_r_installed_root()
