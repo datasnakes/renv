@@ -144,9 +144,9 @@ class RenvBuilder(EnvBuilder):
         # Minor Version
         minor, error = utils.system_r_call(rcmd_type="major", context=context)
 
-        context.R_version = f"{major}.{minor}"
+        context.R_version = "%s.%s" % (major, minor)
 
-        logging.info(f"System R(version):  {self.r_path}({context.R_version})")
+        logging.info("System R(version):  %s(%s)" % (self.r_path, context.R_version))
         # Begin with R-Environment R files/paths
         # Continue with system R files/paths
         if sys.platform == 'win32':  # Windows
@@ -196,7 +196,7 @@ class RenvBuilder(EnvBuilder):
         context.env_R_exe = os.path.join(binpath, r_exe)
         context.env_R_script = os.path.join(binpath, r_script)
         utils.create_directory(context.env_R_libs, self.clear)
-        logging.info(f"Environment R:  {r_env_home}")
+        logging.info("Environment R:  %s" %s renv_home)
         return context
 
     def create_configuration(self, context):
@@ -256,7 +256,7 @@ class RenvBuilder(EnvBuilder):
             pkg_lists = self.format_pkg_list(config_dict)
             config_dict.update(pkg_lists)
             config_dict.update(user_config)
-            logging.info(f"Config Dictionary:  {config_dict}")
+            logging.info("Config Dictionary:  %s" % config_dict)
 
             # Dump the configuration dictionary to the YAML file in the R environment HOME
             yaml.dump(config_dict, f, default_flow_style=False)
@@ -377,12 +377,12 @@ class RenvBuilder(EnvBuilder):
             pkg_list_string = ""
             for k, v in enumerate(pkg_dict):
                 if k == pkg_list_count:
-                    pkg_list_string = f"{pkg_list_string}{v}=\"{pkg_dict[v]}\""
+                    pkg_list_string = "%s%s=\"%s\"" % (pkg_list_string, v, pkg_dict[v])
                 else:
                     sep = ", "
-                    pkg_list_string = f"{pkg_list_string}{v}=\"{pkg_dict[v]}\"{sep}"
+                    pkg_list_string = "%s%s=\"%s\"%s" % (pkg_list_string, v, pkg_dict[v], sep)
 
-            pkg_list_string = f"list({pkg_list_string})"
+            pkg_list_string = "list(%s)" % pkg_list_string
             fmtd_list[list_name] = pkg_list_string
 
         return fmtd_list

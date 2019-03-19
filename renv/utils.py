@@ -99,17 +99,13 @@ def system_r_call(rcmd_type, context):
     """
 
     if rcmd_type == "major":
-        Rcmd = f"{context.abs_R_script} " \
-               f"-e \'R.version$major\'"
+        Rcmd = "%s -e \'R.version$major\'" % context.abs_R_script
     elif rcmd_type == "minor":
-        Rcmd = f"{context.abs_R_script} " \
-               f"-e \'R.version$minor\'"
+        Rcmd = "%s -e \'R.version$minor\'" % context.abs_R_script
     elif rcmd_type == "base":
-        Rcmd = f"{context.abs_R_script} " \
-               f"-e \'base::cat(rownames(installed.packages(priority=\"base\")))\'"
+        Rcmd = "%s -e \'base::cat(rownames(installed.packages(priority=\"base\")))\'" % context.abs_R_script
     elif rcmd_type == "recommended":
-        Rcmd = f"{context.abs_R_script} " \
-               f"-e \'base::cat(rownames(installed.packages(priority=\"recommended\")))\'"
+        Rcmd = "%s -e \'base::cat(rownames(installed.packages(priority=\"recommended\")))\'" % context.abs_R_script
 
     recommended_pkgs = sp.Popen([Rcmd], stderr=sp.PIPE, stdout=sp.PIPE, shell=True, encoding='utf-8')
 
