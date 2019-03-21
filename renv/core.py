@@ -239,7 +239,7 @@ class RenvBuilder(EnvBuilder):
                     recommended_pkgs = recommended_pkgs.split(" ")
                 # Get a list of the base packages for this version of R
                 if self.base_packages:
-                    base_pkgs, error = utils.system_r_call(rcmd_type="recommended", context=context)
+                    base_pkgs, error = utils.system_r_call(rcmd_type="base", context=context)
                     base_pkgs = base_pkgs.split(" ")
                 # Create a list of all the packages to use
                 pkgs = recommended_pkgs + base_pkgs
