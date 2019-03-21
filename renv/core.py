@@ -3,13 +3,15 @@ import logging
 import os
 import sys
 import types
-import yaml
+from pkg_resources import resource_filename, get_distribution
+from pprint import pprint, pformat
+
 import renv.utils as utils
-from pkg_resources import resource_filename
 from renv import cookies
+
+import yaml
 from pathlib import Path
 from cookiecutter.main import cookiecutter
-logger = logging.getLogger(__name__)
 
 __DEFAULT_CONFIG__ = {
     "CRAN_MIRROR": "https://cran.rstudio.com/",
@@ -30,11 +32,11 @@ class RenvBuilder(EnvBuilder):
     The EnvBuilder class can be found here:
     https://github.com/python/cpython/blob/3.6/Lib/venv/__init__.py
 
-    This class is meant to help facilitate the basic functionality of creating an
-    R environment.
+    This class is meant to help facilitate the basic functionality of creating
+    an R environment.
     """
     def __init__(self, r_path=None, r_bin_path=None, r_lib_path=None, r_include_path = None, system_site_packages=False,
-                 recommended_packages=True, clear=False, symlinks=False, upgrade=False, prompt=None):
+                 recommended_packages=True, clear=False, symlinks=False, upgrade=False, prompt=None, verbose=False):
         """
         :param r_path:  This is the root directory of the R installation that's being
         used to create the virtual environment.
@@ -52,6 +54,7 @@ class RenvBuilder(EnvBuilder):
         :param symlinks:  A switch for using system links or not.
         :param upgrade:  A switch for upgrading vs creating an environment.
         :param prompt:  The prompt prefix can be customized with this parameter.
+        :param prompt:  A switch for verbosity level of cli output.
         """
         super().__init__(system_site_packages=system_site_packages, clear=clear,
                          symlinks=symlinks, upgrade=upgrade)
@@ -64,6 +67,19 @@ class RenvBuilder(EnvBuilder):
         self.r_lib_path = r_lib_path
         self.r_include_path = r_include_path
         self.clear = clear
+        self.verbose = verbose
+
+        # Set up logger
+        # Change level of logger based on verbose paramater.
+        if self.verbose:
+            logging.basicConfig(format='%(levelname)s | %(name)s | line %(lineno)d: %(message)s')
+            # Filter the debug logging
+            logging.getLogger("renv").setLevel(logging.DEBUG)
+        else:
+            logging.basicConfig(format='%(levelname)s: %(message)s',
+                                level=logging.INFO)
+        self.logger = logging.getLogger(__name__)
+
         if self.system_site_packages:
             self.base_packages = False
             self.recommended_packages = False
@@ -86,14 +102,14 @@ class RenvBuilder(EnvBuilder):
                 Exception("Please provide the environment name.")
 
         context = self.ensure_directories(env_dir)
-        # TODO-ROB: pip will eventually be beRi
+        # TODO: pip will eventually be beRi
         # See issue 24875. We need system_site_packages to be False
         # until after pip is installed.
         true_system_site_packages = self.system_site_packages
         self.system_site_packages = False
         context.config_dict = self.create_configuration(context)
         # self.setup_r(context)
-        # TODO-ROB: pip will eventually be beRi
+        # TODO: pip will eventually be beRi
         # if self.with_pip:
         #     self._setup_pip(context)
         if not self.upgrade:
@@ -107,7 +123,7 @@ class RenvBuilder(EnvBuilder):
             self.system_site_packages = True
             self.create_configuration(context)
 
-        print("\nEnvironment created in " + env_dir + "\n")
+        self.logger.info(f"Environment created at {env_dir}")
 
     def ensure_directories(self, env_dir):
         """
@@ -118,6 +134,7 @@ class RenvBuilder(EnvBuilder):
         """
 
         user_config = os.path.join(env_dir, "renv.yaml")
+
         # Create the context for the virtual environment
         context = types.SimpleNamespace()
         context.user_config = user_config
@@ -126,11 +143,13 @@ class RenvBuilder(EnvBuilder):
         prompt = self.prompt if self.prompt is not None else context.env_name
         context.prompt = '(%s) ' % prompt
         utils.create_directory(env_dir, self.clear)
+
         # System R files/paths
         r_exe = "R"
         r_script = "Rscript"
         context.R_exe = r_exe
         context.R_script = r_script
+
         if self.r_bin_path:
             context.abs_R_exe = os.path.join(self.r_bin_path, r_exe)
             context.abs_R_script = os.path.join(self.r_bin_path, r_script)
@@ -146,8 +165,9 @@ class RenvBuilder(EnvBuilder):
         minor, error = utils.system_r_call(rcmd_type="major", context=context)
 
         context.R_version = "%s.%s" % (major, minor)
+        
 
-        logging.info("System R(version):  %s(%s)" % (self.r_path, context.R_version))
+        self.logger.info("System R(version):  %s(%s)" % (self.r_path, context.R_version))
         # Begin with R-Environment R files/paths
         # Continue with system R files/paths
         if sys.platform == 'win32':  # Windows
@@ -155,7 +175,9 @@ class RenvBuilder(EnvBuilder):
             r_abs_home = self.r_path
             r_env_include = "include"
             r_abs_include = "include"
+            logging.debug(f"System Platform: {sys.platform}")
         else:  # Linux
+            logging.debug(f"System Platform: {sys.platform}")
             r_env_home = os.path.join(env_dir, 'lib', "R")
             if self.r_lib_path:
                 r_abs_home = os.path.join(self.r_lib_path, "R")
@@ -180,13 +202,13 @@ class RenvBuilder(EnvBuilder):
             r_lib_path = os.path.join(self.r_path, "lib64", "R")
             if not os.path.exists(link_path):   # Issue #21643
                 os.symlink(r_env_home, link_path)
-        
+
         # Create other symbolic links in lib/R/
         utils.create_symlink(
             r_lib_path,
             os.path.join(env_dir, "lib", "R"), 
             ["bin", "etc", "lib", "modules", "share", "include"])
-        
+
         binname = 'bin'
         r_env_libs = os.path.join(r_env_home, 'library')
         r_abs_libs = os.path.join(r_abs_home, 'library')
@@ -202,7 +224,7 @@ class RenvBuilder(EnvBuilder):
         context.env_R_exe = os.path.join(binpath, r_exe)
         context.env_R_script = os.path.join(binpath, r_script)
         utils.create_directory(context.env_R_libs, self.clear)
-        logging.info("Environment R:  %s" % r_env_home)
+        self.logger.info("Environment R:  %s" % r_env_home")
         return context
 
     def create_configuration(self, context):
@@ -210,6 +232,7 @@ class RenvBuilder(EnvBuilder):
         Create and/or use a configuration file indicating where the environment's R
         was copied from, and whether the system site-packages should be made
         available in the environment.
+        
         :param context: The information for the environment creation request
                         being processed.
         """
@@ -220,10 +243,15 @@ class RenvBuilder(EnvBuilder):
         path = context.user_config
         # Get the user provided YAML config if it exists
         if os.path.isfile(path):
-            with open(path, 'r', encoding='utf-8')as f:
+            with open(path, 'r', encoding='utf-8') as f:
                 user_config = yaml.load(f)
+            f.close()
+            formatted_user_config = pformat(user_config)
+            self.logger.debug(f"User configuration file imported.")
+            self.logger.debug(f"User configuration: {formatted_user_config}")
         else:
             user_config = {}
+            self.logger.debug(f"User configuration will be default.")
 
         # Open and overwrite YAML config
         with open(path, 'w', encoding='utf-8') as f:
@@ -257,16 +285,18 @@ class RenvBuilder(EnvBuilder):
             config_dict["R_ABS_HOME"] = context.abs_R_home
             config_dict["R_INCLUDE_DIR"] = context.env_R_include
             config_dict["R_VERSION"] = context.R_version
+            
             # Package lists
             config_dict.update(__DEFAULT_CONFIG__)
             pkg_lists = self.format_pkg_list(config_dict)
             config_dict.update(pkg_lists)
             config_dict.update(user_config)
-            logging.info("Config Dictionary:  %s" % config_dict)
+            formatted_config_dict = pformat(config_dict)
+            self.logger.debug(f"Config Dictionary:  {formatted_config_dict}")
 
             # Dump the configuration dictionary to the YAML file in the R environment HOME
             yaml.dump(config_dict, f, default_flow_style=False)
-        # TODO-ROB:  This would only be apply under Windows.  This is called in setup_python(r)
+        # TODO:  This would only be apply under Windows.  This is called in setup_python(r)
         # if os.name == 'nt':
         #     def include_binary(self, f):
         #         if f.endswith(('.pyd', '.dll')):
@@ -303,8 +333,8 @@ class RenvBuilder(EnvBuilder):
                     if not os.path.islink(exe_path):
                         os.chmod(exe_path, 0o755)
         else:
-            # TODO-ROB: Build Windows version
-            raise OSError("renv is only currently working for some POISIX systems.")
+            # TODO: Build Windows version
+            raise OSError("renv is only currently working for some POSIX systems.")
             # subdir = 'DLLs'
             # include = self.include_binary
             # files = [f for f in os.listdir(dirname) if include(f)]
@@ -345,7 +375,6 @@ class RenvBuilder(EnvBuilder):
                         specific values.
         """
         # Get the extra_context for the cookiecutter call
-
         cookie_jar = Path(resource_filename(cookies.__name__, ''))
         activator_cookie = cookie_jar / Path(os.name)
         e_c = {
@@ -366,7 +395,8 @@ class RenvBuilder(EnvBuilder):
             "__REPRODUCIBLE_WORKFLOW_PKG_LIST__": context.config_dict["REPRODUCIBLE_WORKFLOW_PKG_LIST"]
         }
         env_dir = context.env_dir
-        cookiecutter(str(activator_cookie), no_input=True, extra_context=e_c, output_dir=context.env_dir)
+        cookiecutter(str(activator_cookie), no_input=True, extra_context=e_c,
+                     output_dir=env_dir)
 
     def format_pkg_list(self, config_dict):
         """
@@ -392,3 +422,4 @@ class RenvBuilder(EnvBuilder):
             fmtd_list[list_name] = pkg_list_string
 
         return fmtd_list
+

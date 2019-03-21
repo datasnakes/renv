@@ -1,6 +1,7 @@
 import click
 from renv.core import RenvBuilder
 import os
+from pkg_resources import get_distribution
 
 
 @click.command()
@@ -31,19 +32,28 @@ import os
               help="Upgrades the environment directory to use this version of R.")
 @click.option('--prompt', '-p', default=None,
               help="Provide an alternative prompt prefix for this environment.")
+@click.option('--verbose', '-v', is_flag=True,
+              help="Show verbose cli output.")
+@click.option('--version', '-V', is_flag=True,
+              help="Show the version of renv and exit.")
 def renv(r_path, env_name, env_dir, binpath, libpath,
          includepath, system_site_packages,
-         recommended_packages, clear, upgrade, prompt):
-
-    if os.name == 'nt':
-        use_symlinks = False
+         recommended_packages, clear, upgrade, prompt, verbose, version):
+    # Print the version of renv
+    if version:
+        version = get_distribution('renv').version
+        click.echo(f"renv version {version}")
     else:
-        use_symlinks = True
+        if os.name == 'nt':
+            use_symlinks = False
+        else:
+            use_symlinks = True
 
-    builder = RenvBuilder(r_path=r_path, r_bin_path=binpath, r_lib_path=libpath, r_include_path=includepath,
-                          system_site_packages=system_site_packages,
-                          recommended_packages=recommended_packages,
-                          clear=clear, symlinks=use_symlinks, upgrade=upgrade,
-                          prompt=prompt)
+        builder = RenvBuilder(r_path=r_path, r_bin_path=binpath, r_lib_path=libpath,
+                              r_include_path=includepath,
+                              system_site_packages=system_site_packages,
+                              recommended_packages=recommended_packages,
+                              clear=clear, symlinks=use_symlinks, upgrade=upgrade,
+                              prompt=prompt, verbose=verbose)
 
-    builder.create(env_dir, env_name)
+        builder.create(env_dir, env_name)

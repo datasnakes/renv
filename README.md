@@ -1,15 +1,14 @@
 # renv (beta)
 
-Creating virtual environments for R in Linux
+Creating virtual environments for R. (currently a Linux-only implementation)
 
 ## Description
 
-One of the problems with using R for data analysis can be dependency issues.
-Especially for those scientists that use various versions of R or R packages
- and have a large number of projects that they are developing with R.
- Dependency issues are especially prevalent among those individuals or groups
- that are developing R packages.  renv is a [Python style](https://github.com/python/cpython/blob/3.6/Lib/venv/__init__.py) virtual environment
- manager for creating virtual environments for R.
+One of the problems with using R for data analysis can be dependency issues especially for
+scientists who use multiple versions of R or R packages and have a large number of
+projects that they are developing with R. Dependency issues are especially prevalent among those individuals or groups
+that are developing R packages.  `renv` is a [Python style](https://github.com/python/cpython/blob/3.6/Lib/venv/__init__.py)
+virtual environment manager for creating virtual environments for R.
 
 ## Installation
 
@@ -21,16 +20,23 @@ git clone https://github.com/datasnakes/renv.git
 
 cd renv
 
+# Make sure you have activated an environment of Python >= 3.6
+
+# Get poetry and build the project using it
+curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
+
+poetry install
+
 poetry build
 
-pip install dist/renv-0.2.0-py2.py3-non-any.whl
+pip install dist/renv-0.2.0-py2.py3-none-any.whl
 ```
 
 ## Usage
 
 Renv is currently in beta and is only supported in Linux so there may be some issues if your R has been
 installed in a way other than the default. There are probably plenty of
-unforeseen bugs, misspellings, and general cases where the code could be
+unforeseen bugs, misspellings, and general use cases where the code could be
 more efficient. Please submit an [issue](https://github.com/datasnakes/renv/issues)
 or [PR](https://github.com/datasnakes/renv/pulls). We'd love to get
 community feedback.
@@ -41,12 +47,9 @@ actual release of this package.
 
 ### Commands
 
+Once you have renv installed, you can create an R environment by a simple command:
 
-### Commands
-
-Once you have renv installed, you can create an R environment by a simple command: 
-
-```
+```bash
 renv -n myenv
 ```
 
@@ -58,19 +61,19 @@ cd $HOME\.renv\myenv\bin
 . ./activate 
 ```
 
-To deactivate the R environment, simply issue the command
-```
+To deactivate the R environment:
+
+```bash
 deactivate
 ```
 
 
-Use `--help` to see the other configurations.
+Use `--help` to see the other command-line options.
 
-```bash
+```console
 user@host:~$ renv --help
 Usage: renv [OPTIONS]
 
-Options:
 Options:
   -r, --r_path TEXT               Provide the root of the directory tree where
                                   R is installed.  This would be R's
@@ -91,10 +94,10 @@ Options:
                                   the original R's package library as a
                                   secondary source for loading packages.
   -rp, --recommended_packages BOOLEAN
-                                  This determines whether or not the
+                                  This determines wheather or not the
                                   recommended packages are installed in theR
                                   environment along with the base packages.
-                                  In most cases it's best to keep the default
+                                  In most cases it's best to keep thedefault
                                   value.
   --clear BOOLEAN                 Deletes the contents of the environment
                                   directory if it already exists, before
@@ -103,6 +106,8 @@ Options:
                                   this version of R.
   -p, --prompt TEXT               Provide an alternative prompt prefix for
                                   this environment.
+  -v, --verbose                   Show verbose cli output.
+  -V, --version                   Show the version of renv and exit.
   --help                          Show this message and exit.
 ```
 
@@ -225,7 +230,6 @@ recreate the _.whl_.
 
 ## Maintainers
 
-
-Rob Gilmore | [@grabear](https://github.com/grabear) | [✉](mailto:robgilmore127@gmail.com)
-Shaurita Hutchins | [@sdhutchins](https://github.com/sdhutchins) | [✉](mailto:sdhutchins@outlook.com)
-Santina Lin | [@santina](https://github.com/santina) | [✉](mailto:hello@santina.me)
+Rob Gilmore | [@grabear](https://github.com/grabear) | [✉](mailto:robgilmore127@gmail.com)  
+Santina Lin | [@santina](https://github.com/santina) | [✉](mailto:hello@santina.me)  
+Shaurita Hutchins | [@sdhutchins](https://github.com/sdhutchins) | [✉](mailto:sdhutchins@outlook.com)  
