@@ -165,6 +165,8 @@ class RenvBuilder(EnvBuilder):
                 else:
                     r_abs_home = os.path.join(self.r_path, 'lib64', "R")
             r_env_include = os.path.join(r_env_home, "include")
+            r_env_share = os.path.join(r_env_home, "share")
+            r_env_doc = os.path.join(r_env_home, "doc")
             if self.r_include_path:
                 r_abs_include = self.r_include_path
             else:
@@ -197,6 +199,8 @@ class RenvBuilder(EnvBuilder):
         context.env_R_libs = r_env_libs
         context.abs_R_libs = r_abs_libs
         context.env_R_include = os.path.join(env_dir, r_env_include)
+        context.env_R_doc = os.path.join(env_dir, r_env_doc)
+        context.env_R_share = os.path.join(env_dir, r_env_share)
         context.env_bin_path = binpath = os.path.join(env_dir, binname)
         context.bin_path = binpath
         context.env_R_exe = os.path.join(binpath, r_exe)
@@ -256,6 +260,8 @@ class RenvBuilder(EnvBuilder):
             config_dict["R_ENV_HOME"] = context.env_R_home
             config_dict["R_ABS_HOME"] = context.abs_R_home
             config_dict["R_INCLUDE_DIR"] = context.env_R_include
+            config_dict["R_DOC_DIR"] = context.env_R_doc
+            config_dict["R_SHARE_DIR"] = context.env_R_share
             config_dict["R_VERSION"] = context.R_version
             # Package lists
             config_dict.update(__DEFAULT_CONFIG__)
@@ -362,6 +368,8 @@ class RenvBuilder(EnvBuilder):
             "__R_LIBS_USER__": context.config_dict["R_LIBS_USER"],
             "__R_HOME__": context.config_dict["R_ENV_HOME"],
             "__R_INCLUDE_DIR__": context.config_dict["R_INCLUDE_DIR"],
+            "__R_DOC_DIR__": context.config_dict["R_DOC_DIR"],
+            "__R_SHARE_DIR__": context.config_dict["R_SHARE_DIR"],
             "__STANDARD_PKG_LIST__": context.config_dict["STANDARD_PKG_LIST"],
             "__REPRODUCIBLE_WORKFLOW_PKG_LIST__": context.config_dict["REPRODUCIBLE_WORKFLOW_PKG_LIST"]
         }
