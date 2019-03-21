@@ -160,7 +160,10 @@ class RenvBuilder(EnvBuilder):
             if self.r_lib_path:
                 r_abs_home = os.path.join(self.r_lib_path, "R")
             else:
-                r_abs_home = os.path.join(self.r_path, 'lib', "R")
+                if sys.maxsize > 2**32:
+                    r_abs_home = os.path.join(self.r_path, 'lib64', "R")
+                else:
+                    r_abs_home = os.path.join(self.r_path, 'lib64', "R")
             r_env_include = os.path.join(r_env_home, "include")
             if self.r_include_path:
                 r_abs_include = self.r_include_path
