@@ -236,11 +236,11 @@ class RenvBuilder(EnvBuilder):
                 # Get a list of the recommended packages for this version of R
                 if self.recommended_packages:
                     recommended_pkgs, error = utils.system_r_call(rcmd_type="recommended", context=context)
-                    recommended_pkgs = recommended_pkgs[0].split(" ")
+                    recommended_pkgs = recommended_pkgs.split(" ")
                 # Get a list of the base packages for this version of R
                 if self.base_packages:
                     base_pkgs, error = utils.system_r_call(rcmd_type="recommended", context=context)
-                    base_pkgs = base_pkgs[0].split(" ")
+                    base_pkgs = base_pkgs.split(" ")
                 # Create a list of all the packages to use
                 pkgs = recommended_pkgs + base_pkgs
                 # TODO-config: This may need to be separate for windows vs linux
