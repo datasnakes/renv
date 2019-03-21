@@ -155,6 +155,8 @@ class RenvBuilder(EnvBuilder):
             r_abs_home = self.r_path
             r_env_include = "include"
             r_abs_include = "include"
+            r_env_doc = "doc"
+            r_env_share = "share"
         else:  # Linux
             r_env_home = os.path.join(env_dir, 'lib', "R")
             if self.r_lib_path:
