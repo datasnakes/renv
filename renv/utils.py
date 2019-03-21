@@ -17,13 +17,13 @@ def get_r_path():
     return sp_out.stdout.strip()
 
 
-def get_r_installed_root(r_path=None):
+def get_r_installed_root():
     """
     Get the installed root of R (without /bin/R
     :return: path to root where R is installed
     """
-    if r_path is None:
-        r_path = get_r_path()
+
+    r_path = get_r_path()
     return os.path.dirname(os.path.dirname(r_path))  # remove /bin/R
 
 
