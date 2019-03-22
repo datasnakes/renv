@@ -123,7 +123,7 @@ class RenvBuilder(EnvBuilder):
             self.system_site_packages = True
             self.create_configuration(context)
 
-        self.logger.info(f"Environment created at {env_dir}")
+        self.logger.info("Environment created at {}".format(env_dir))
 
     def ensure_directories(self, env_dir):
         """
@@ -201,7 +201,7 @@ class RenvBuilder(EnvBuilder):
             link_path = os.path.join(env_dir, 'lib64', 'R')
             r_lib_path = os.path.join(self.r_path, "lib64", "R")
             if not os.path.exists(link_path):   # Issue #21643
-                os.symlink(r_env_home, link_path, target_is_directory=True)
+                os.symlink(r_env_home, link_path)
                 self.logger.debug("Symlink created in %s" % link_path)
 
         # Create other symbolic links in lib/R/
@@ -388,7 +388,7 @@ class RenvBuilder(EnvBuilder):
             "__CRAN_MIRROR__": context.config_dict["CRAN_MIRROR"],
             "__CRANEXTRA_MIRROR__": context.config_dict["CRANEXTRA_MIRROR"],
             "__R_LIBS_USER__": context.config_dict["R_LIBS_USER"],
-            "__R_HOME__": context.config_dict["R_ENV_HOME"],
+            "__R_HOME__": "", #context.config_dict["R_ENV_HOME"],
             "__R_INCLUDE_DIR__": context.config_dict["R_INCLUDE_DIR"],
             "__STANDARD_PKG_LIST__": context.config_dict["STANDARD_PKG_LIST"],
             "__REPRODUCIBLE_WORKFLOW_PKG_LIST__": context.config_dict["REPRODUCIBLE_WORKFLOW_PKG_LIST"]
