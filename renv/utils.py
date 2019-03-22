@@ -85,14 +85,16 @@ def create_symlink(src, dst, subfolders=[]):
     """
 
     if len(subfolders) == 0:
-        os.symlink(src, dst)
+        os.symlink(src, dst, target_is_directory=True)
     else:
         for subfolder in subfolders:
             src_folder = os.path.join(src, subfolder)
             dst_folder = os.path.join(dst, subfolder)
-            if not os.path.exists(src_folder) or not os.path.exists(dst_folder):
-                Warning("Cannot create symlink for: " + dst_folder)
-            os.symlink(src_folder, dst_folder)
+            if not os.path.exists(src_folder):
+                logger.warning("Cannot create symlink from " + src_folder)
+            elif not os.path.exists(dst_folder):
+                logger.warning("Cannot create symlink at " + dst_folder)
+            os.symlink(src_folder, dst_folder, target_is_directory=True)
 
 
 def system_r_call(rcmd_type, context):

@@ -201,13 +201,12 @@ class RenvBuilder(EnvBuilder):
             link_path = os.path.join(env_dir, 'lib64', 'R')
             r_lib_path = os.path.join(self.r_path, "lib64", "R")
             if not os.path.exists(link_path):   # Issue #21643
-                os.symlink(r_env_home, link_path)
+                os.symlink(r_env_home, link_path, target_is_directory=True)
+                self.logger.debug("Symlink created in %s" % link_path)
 
         # Create other symbolic links in lib/R/
-        utils.create_symlink(
-            r_lib_path,
-            os.path.join(env_dir, "lib", "R"), 
-            ["bin", "etc", "lib", "modules", "share", "include"])
+        utils.create_symlink(r_lib_path, os.path.join(env_dir, "lib", "R"), 
+                             ["bin", "etc", "lib", "modules", "share", "include"])
 
         binname = 'bin'
         r_env_libs = os.path.join(r_env_home, 'library')
@@ -224,7 +223,7 @@ class RenvBuilder(EnvBuilder):
         context.env_R_exe = os.path.join(binpath, r_exe)
         context.env_R_script = os.path.join(binpath, r_script)
         utils.create_directory(context.env_R_libs, self.clear)
-        self.logger.info("Environment R:  %s" % r_env_home")
+        self.logger.info("Environment R:  %s" % r_env_home)
         return context
 
     def create_configuration(self, context):
