@@ -175,7 +175,8 @@ class RenvBuilder(EnvBuilder):
             r_abs_home = self.r_path
             r_env_include = "include"
             r_abs_include = "include"
-            logging.debug(f"System Platform: {sys.platform}")
+            r_env_doc = "doc"
+            r_env_share = "share"
         else:  # Linux
             logging.debug(f"System Platform: {sys.platform}")
             r_env_home = os.path.join(env_dir, 'lib', "R")
@@ -187,6 +188,8 @@ class RenvBuilder(EnvBuilder):
                 else:
                     r_abs_home = os.path.join(self.r_path, 'lib64', "R")
             r_env_include = os.path.join(r_env_home, "include")
+            r_env_share = os.path.join(r_env_home, "share")
+            r_env_doc = os.path.join(r_env_home, "doc")
             if self.r_include_path:
                 r_abs_include = self.r_include_path
             else:
@@ -205,8 +208,10 @@ class RenvBuilder(EnvBuilder):
                 self.logger.debug("Symlink created in %s" % link_path)
 
         # Create other symbolic links in lib/R/
-        utils.create_symlink(r_lib_path, os.path.join(env_dir, "lib", "R"), 
-                             ["bin", "etc", "lib", "modules", "share", "include"])
+        utils.create_symlink(
+            r_lib_path,
+            os.path.join(env_dir, "lib", "R"), 
+            ["bin", "etc", "lib", "modules", "share", "include", "doc", "tests"])
 
         binname = 'bin'
         r_env_libs = os.path.join(r_env_home, 'library')
@@ -218,6 +223,8 @@ class RenvBuilder(EnvBuilder):
         context.env_R_libs = r_env_libs
         context.abs_R_libs = r_abs_libs
         context.env_R_include = os.path.join(env_dir, r_env_include)
+        context.env_R_doc = os.path.join(env_dir, r_env_doc)
+        context.env_R_share = os.path.join(env_dir, r_env_share)
         context.env_bin_path = binpath = os.path.join(env_dir, binname)
         context.bin_path = binpath
         context.env_R_exe = os.path.join(binpath, r_exe)
@@ -283,6 +290,8 @@ class RenvBuilder(EnvBuilder):
             config_dict["R_ENV_HOME"] = context.env_R_home
             config_dict["R_ABS_HOME"] = context.abs_R_home
             config_dict["R_INCLUDE_DIR"] = context.env_R_include
+            config_dict["R_DOC_DIR"] = context.env_R_doc
+            config_dict["R_SHARE_DIR"] = context.env_R_share
             config_dict["R_VERSION"] = context.R_version
             
             # Package lists
@@ -291,7 +300,7 @@ class RenvBuilder(EnvBuilder):
             config_dict.update(pkg_lists)
             config_dict.update(user_config)
             formatted_config_dict = pformat(config_dict)
-            self.logger.debug(f"Config Dictionary:  {formatted_config_dict}")
+            self.logger.debug("Config Dictionary:  %s" % formatted_config_dict)
 
             # Dump the configuration dictionary to the YAML file in the R environment HOME
             yaml.dump(config_dict, f, default_flow_style=False)
@@ -388,8 +397,11 @@ class RenvBuilder(EnvBuilder):
             "__CRAN_MIRROR__": context.config_dict["CRAN_MIRROR"],
             "__CRANEXTRA_MIRROR__": context.config_dict["CRANEXTRA_MIRROR"],
             "__R_LIBS_USER__": context.config_dict["R_LIBS_USER"],
+            "__R_LIBS_SITE__": context.config_dict["R_LIBS_USER"],
             "__R_HOME__": "", #context.config_dict["R_ENV_HOME"],
             "__R_INCLUDE_DIR__": context.config_dict["R_INCLUDE_DIR"],
+            "__R_DOC_DIR__": context.config_dict["R_DOC_DIR"],
+            "__R_SHARE_DIR__": context.config_dict["R_SHARE_DIR"],
             "__STANDARD_PKG_LIST__": context.config_dict["STANDARD_PKG_LIST"],
             "__REPRODUCIBLE_WORKFLOW_PKG_LIST__": context.config_dict["REPRODUCIBLE_WORKFLOW_PKG_LIST"]
         }
