@@ -5,6 +5,7 @@ import sys
 import types
 from pkg_resources import resource_filename, get_distribution
 from pprint import pprint, pformat
+import re
 
 import renv.utils as utils
 from renv import cookies
@@ -72,7 +73,7 @@ class RenvBuilder(EnvBuilder):
         # Set up logger
         # Change level of logger based on verbose paramater.
         if self.verbose:
-            logging.basicConfig(format='%(levelname)s | %(name)s | line %(lineno)d: %(message)s')
+            logging.basicConfig(format='[%(levelname)s | %(name)s - line %(lineno)d]: %(message)s')
             # Filter the debug logging
             logging.getLogger("renv").setLevel(logging.DEBUG)
         else:
@@ -99,7 +100,7 @@ class RenvBuilder(EnvBuilder):
             if env_name:
                 env_dir = os.path.join(env_dir, env_name)
             else:
-                Exception("Please provide the environment name.")
+                self.logger.exception("Please provide the environment name.")
 
         context = self.ensure_directories(env_dir)
         # TODO: pip will eventually be beRi
@@ -162,12 +163,12 @@ class RenvBuilder(EnvBuilder):
         # Major Version
         major, error = utils.system_r_call(rcmd_type="major", context=context)
         # Minor Version
-        minor, error = utils.system_r_call(rcmd_type="major", context=context)
-
-        context.R_version = "%s.%s" % (major, minor)
+        minor, error = utils.system_r_call(rcmd_type="minor", context=context)
         
-
-        self.logger.info("System R(version):  %s(%s)" % (self.r_path, context.R_version))
+        major = re.findall('"([^"]*)"', major)
+        minor = re.findall('"([^"]*)"', minor)
+        context.R_version = "%s.%s" % (str(major[0]), str(minor[0]))
+        self.logger.debug("The system R version is {}".format(context.R_version))
         # Begin with R-Environment R files/paths
         # Continue with system R files/paths
         if sys.platform == 'win32':  # Windows
@@ -253,11 +254,11 @@ class RenvBuilder(EnvBuilder):
                 user_config = yaml.load(f)
             f.close()
             formatted_user_config = pformat(user_config)
-            self.logger.debug(f"User configuration file imported.")
-            self.logger.debug(f"User configuration: {formatted_user_config}")
+            self.logger.debug("User configuration file imported.")
+            self.logger.debug("User configuration: {}".format(formatted_user_config))
         else:
             user_config = {}
-            self.logger.debug(f"User configuration will be default.")
+            self.logger.debug("User configuration will be default.")
 
         # Open and overwrite YAML config
         with open(path, 'w', encoding='utf-8') as f:
@@ -271,10 +272,12 @@ class RenvBuilder(EnvBuilder):
                 if self.recommended_packages:
                     recommended_pkgs, error = utils.system_r_call(rcmd_type="recommended", context=context)
                     recommended_pkgs = recommended_pkgs.split(" ")
+                    self.logger.debug("Recommended pkgs are: %s" % recommended_pkgs)
                 # Get a list of the base packages for this version of R
                 if self.base_packages:
                     base_pkgs, error = utils.system_r_call(rcmd_type="base", context=context)
                     base_pkgs = base_pkgs.split(" ")
+                    self.logger.debug("Base pkgs are: %s" % base_pkgs)
                 # Create a list of all the packages to use
                 pkgs = recommended_pkgs + base_pkgs
                 # TODO-config: This may need to be separate for windows vs linux
@@ -398,7 +401,7 @@ class RenvBuilder(EnvBuilder):
             "__CRANEXTRA_MIRROR__": context.config_dict["CRANEXTRA_MIRROR"],
             "__R_LIBS_USER__": context.config_dict["R_LIBS_USER"],
             "__R_LIBS_SITE__": context.config_dict["R_LIBS_USER"],
-            "__R_HOME__": "", #context.config_dict["R_ENV_HOME"],
+            "__R_HOME__": context.config_dict["R_ENV_HOME"],
             "__R_INCLUDE_DIR__": context.config_dict["R_INCLUDE_DIR"],
             "__R_DOC_DIR__": context.config_dict["R_DOC_DIR"],
             "__R_SHARE_DIR__": context.config_dict["R_SHARE_DIR"],

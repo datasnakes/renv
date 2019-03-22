@@ -69,7 +69,7 @@ def create_directory(directory, clear=False):
             raise FileExistsError("Environment directory " + directory +
                             " already exists. Set clear to True to delete the original directory.")
     elif os.path.islink(directory) or os.path.isfile(directory):
-        raise ValueError("Unable to create directory '%r" % directory + "' for the new environment.")
+        logger.error(ValueError("Unable to create directory '%r" % directory + "' for the new environment."))
     else:
         os.makedirs(directory)
         logger.debug(f"{directory} has been created.")
