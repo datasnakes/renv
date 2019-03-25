@@ -124,7 +124,7 @@ class RenvBuilder(EnvBuilder):
             self.system_site_packages = True
             self.create_configuration(context)
 
-        self.logger.info("Environment created at {}".format(env_dir))
+        self.logger.info("Environment created at %s" % env_dir)
 
     def ensure_directories(self, env_dir):
         """
@@ -168,7 +168,7 @@ class RenvBuilder(EnvBuilder):
         major = re.findall('"([^"]*)"', major)
         minor = re.findall('"([^"]*)"', minor)
         context.R_version = "%s.%s" % (str(major[0]), str(minor[0]))
-        self.logger.debug("The system R version is {}".format(context.R_version))
+        self.logger.debug("The system R version is %s" % context.R_version)
         # Begin with R-Environment R files/paths
         # Continue with system R files/paths
         if sys.platform == 'win32':  # Windows
@@ -179,7 +179,7 @@ class RenvBuilder(EnvBuilder):
             r_env_doc = "doc"
             r_env_share = "share"
         else:  # Linux
-            logging.debug(f"System Platform: {sys.platform}")
+            logging.debug("System Platform: %s" % sys.platform)
             r_env_home = os.path.join(env_dir, 'lib', "R")
             if self.r_lib_path:
                 r_abs_home = os.path.join(self.r_lib_path, "R")
@@ -200,7 +200,7 @@ class RenvBuilder(EnvBuilder):
 
         r_lib_path = os.path.join(self.r_path, "lib", "R")
         # Create symlink to R 
-        if (sys.maxsize > 2**32) and (os.name == 'posix') and (sys.platform != 'darwin'):
+        if (sys.maxsize == 2**63-1) and (os.name == 'posix') and (sys.platform != 'darwin'):
             os.mkdir(os.path.join(env_dir, 'lib64'))
             link_path = os.path.join(env_dir, 'lib64', 'R')
             r_lib_path = os.path.join(self.r_path, "lib64", "R")
@@ -255,7 +255,7 @@ class RenvBuilder(EnvBuilder):
             f.close()
             formatted_user_config = pformat(user_config)
             self.logger.debug("User configuration file imported.")
-            self.logger.debug("User configuration: {}".format(formatted_user_config))
+            self.logger.debug("User configuration: %s" % formatted_user_config)
         else:
             user_config = {}
             self.logger.debug("User configuration will be default.")
