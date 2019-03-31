@@ -165,7 +165,7 @@ class RenvBuilder(EnvBuilder):
                 if sys.maxsize > 2**32:
                     r_abs_home = os.path.join(self.r_path, 'lib64', "R")
                 else:
-                    r_abs_home = os.path.join(self.r_path, 'lib64', "R")
+                    r_abs_home = os.path.join(self.r_path, 'lib', "R")
             r_env_include = os.path.join(r_env_home, "include")
             r_env_share = os.path.join(r_env_home, "share")
             r_env_doc = os.path.join(r_env_home, "doc")
