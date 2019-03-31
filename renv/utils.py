@@ -33,8 +33,8 @@ def get_user_home_dir():
     # TODO make this function cross-platform
     :return: None
     """
-    sp_out = sp.run(["echo $HOME"], shell=True, stdout=sp.PIPE, encoding="utf8")
-    return sp_out.stdout.strip()
+    sp_out = os.environ['HOME']
+    return sp_out.strip()
 
 
 def get_renv_path(has_root_access=False):
