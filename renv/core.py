@@ -143,7 +143,7 @@ class RenvBuilder(EnvBuilder):
         # Major Version
         major, error = utils.system_r_call(rcmd_type="major", context=context)
         # Minor Version
-        minor, error = utils.system_r_call(rcmd_type="major", context=context)
+        minor, error = utils.system_r_call(rcmd_type="minor", context=context)
 
         context.R_version = "%s.%s" % (major, minor)
 
