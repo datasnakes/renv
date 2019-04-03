@@ -1,8 +1,6 @@
 from venv import EnvBuilder
 import logging
 import os
-import shutil
-import subprocess
 import sys
 import types
 import yaml
@@ -56,7 +54,8 @@ class RenvBuilder(EnvBuilder):
         :param prompt:  The prompt prefix can be customized with this parameter.
         """
         super().__init__(system_site_packages=system_site_packages, clear=clear,
-                         symlinks=symlinks, upgrade=upgrade, prompt=prompt)
+                         symlinks=symlinks, upgrade=upgrade)
+        self.prompt = prompt
         del self.with_pip
         if r_path is None:
             r_path = utils.get_r_installed_root()
@@ -80,7 +79,7 @@ class RenvBuilder(EnvBuilder):
         if env_dir:
             env_dir = os.path.abspath(env_dir)
         else:
-            env_dir = utils.get_beri_path()
+            env_dir = utils.get_renv_path()
             if env_name:
                 env_dir = os.path.join(env_dir, env_name)
             else:
@@ -132,7 +131,6 @@ class RenvBuilder(EnvBuilder):
         r_script = "Rscript"
         context.R_exe = r_exe
         context.R_script = r_script
-        context.R_version = os.path.split(self.r_path)[1]
         if self.r_bin_path:
             context.abs_R_exe = os.path.join(self.r_bin_path, r_exe)
             context.abs_R_script = os.path.join(self.r_bin_path, r_script)
@@ -140,8 +138,16 @@ class RenvBuilder(EnvBuilder):
             context.abs_R_exe = os.path.join(self.r_path, "bin", r_exe)
             context.abs_R_script = os.path.join(self.r_path, "bin", r_script)
         context.abs_R_path = self.r_path
-        logging.info(f"System R(version):  {self.r_path}({context.R_version})")
 
+        # Get the version of R
+        # Major Version
+        major, error = utils.system_r_call(rcmd_type="major", context=context)
+        # Minor Version
+        minor, error = utils.system_r_call(rcmd_type="minor", context=context)
+
+        context.R_version = "%s.%s" % (major, minor)
+
+        logging.info("System R(version):  %s(%s)" % (self.r_path, context.R_version))
         # Begin with R-Environment R files/paths
         # Continue with system R files/paths
         if sys.platform == 'win32':  # Windows
@@ -149,32 +155,41 @@ class RenvBuilder(EnvBuilder):
             r_abs_home = self.r_path
             r_env_include = "include"
             r_abs_include = "include"
+            r_env_doc = "doc"
+            r_env_share = "share"
         else:  # Linux
             r_env_home = os.path.join(env_dir, 'lib', "R")
             if self.r_lib_path:
                 r_abs_home = os.path.join(self.r_lib_path, "R")
             else:
-                r_abs_home = os.path.join(self.r_path, 'lib', "R")
+                if sys.maxsize > 2**32:
+                    r_abs_home = os.path.join(self.r_path, 'lib64', "R")
+                else:
+                    r_abs_home = os.path.join(self.r_path, 'lib', "R")
             r_env_include = os.path.join(r_env_home, "include")
+            r_env_share = os.path.join(r_env_home, "share")
+            r_env_doc = os.path.join(r_env_home, "doc")
             if self.r_include_path:
                 r_abs_include = self.r_include_path
             else:
                 r_abs_include = os.path.join(self.r_path, "include")
         # Issue 21197: create lib64 as a symlink to lib on 64-bit non-OS X POSIX
         utils.create_directory(r_env_home, self.clear)
-        
+
+        r_lib_path = os.path.join(self.r_path, "lib", "R")
         # Create symlink to R 
         if (sys.maxsize > 2**32) and (os.name == 'posix') and (sys.platform != 'darwin'):
             os.mkdir(os.path.join(env_dir, 'lib64'))
             link_path = os.path.join(env_dir, 'lib64', 'R')
+            r_lib_path = os.path.join(self.r_path, "lib64", "R")
             if not os.path.exists(link_path):   # Issue #21643
                 os.symlink(r_env_home, link_path)
         
         # Create other symbolic links in lib/R/
         utils.create_symlink(
-            os.path.join(utils.get_r_installed_root(), "lib", "R"),
+            r_lib_path,
             os.path.join(env_dir, "lib", "R"), 
-            ["bin", "etc", "lib", "modules", "share", "include"])
+            ["bin", "etc", "lib", "modules", "share", "include", "doc", "tests"])
         
         binname = 'bin'
         r_env_libs = os.path.join(r_env_home, 'library')
@@ -186,12 +201,14 @@ class RenvBuilder(EnvBuilder):
         context.env_R_libs = r_env_libs
         context.abs_R_libs = r_abs_libs
         context.env_R_include = os.path.join(env_dir, r_env_include)
+        context.env_R_doc = os.path.join(env_dir, r_env_doc)
+        context.env_R_share = os.path.join(env_dir, r_env_share)
         context.env_bin_path = binpath = os.path.join(env_dir, binname)
         context.bin_path = binpath
         context.env_R_exe = os.path.join(binpath, r_exe)
         context.env_R_script = os.path.join(binpath, r_script)
         utils.create_directory(context.env_R_libs, self.clear)
-        logging.info(f"Environment R:  {r_env_home}")
+        logging.info("Environment R:  %s" % r_env_home)
         return context
 
     def create_configuration(self, context):
@@ -224,24 +241,12 @@ class RenvBuilder(EnvBuilder):
                 config_dict["R_LIBS_USER"] = context.env_R_libs
                 # Get a list of the recommended packages for this version of R
                 if self.recommended_packages:
-                    Rcmd = f"{context.abs_R_script} " \
-                           f"-e \'base::cat(rownames(installed.packages(priority=\"recommended\")))\'"
-                    recommended_pkgs = subprocess.Popen([Rcmd], stderr=subprocess.PIPE, stdout=subprocess.PIPE,
-                                                        shell=True, encoding='utf-8')
-                    error = recommended_pkgs.stderr.readlines()
-                    out = recommended_pkgs.stdout.readlines()
-                    recommended_pkgs.wait()
-                    recommended_pkgs = out[0].split(" ")
+                    recommended_pkgs, error = utils.system_r_call(rcmd_type="recommended", context=context)
+                    recommended_pkgs = recommended_pkgs.split(" ")
                 # Get a list of the base packages for this version of R
                 if self.base_packages:
-                    Rcmd = f"{context.abs_R_script} " \
-                           f"-e \'base::cat(rownames(installed.packages(priority=\"base\")))\'"
-                    base_pkgs = subprocess.Popen([Rcmd], stderr=subprocess.PIPE, stdout=subprocess.PIPE,
-                                                        shell=True, encoding='utf-8')
-                    error = base_pkgs.stderr.readlines()
-                    out = base_pkgs.stdout.readlines()
-                    base_pkgs.wait()
-                    base_pkgs = out[0].split(" ")
+                    base_pkgs, error = utils.system_r_call(rcmd_type="base", context=context)
+                    base_pkgs = base_pkgs.split(" ")
                 # Create a list of all the packages to use
                 pkgs = recommended_pkgs + base_pkgs
                 # TODO-config: This may need to be separate for windows vs linux
@@ -257,13 +262,15 @@ class RenvBuilder(EnvBuilder):
             config_dict["R_ENV_HOME"] = context.env_R_home
             config_dict["R_ABS_HOME"] = context.abs_R_home
             config_dict["R_INCLUDE_DIR"] = context.env_R_include
+            config_dict["R_DOC_DIR"] = context.env_R_doc
+            config_dict["R_SHARE_DIR"] = context.env_R_share
             config_dict["R_VERSION"] = context.R_version
             # Package lists
             config_dict.update(__DEFAULT_CONFIG__)
             pkg_lists = self.format_pkg_list(config_dict)
             config_dict.update(pkg_lists)
             config_dict.update(user_config)
-            logging.info(f"Config Dictionary:  {config_dict}")
+            logging.info("Config Dictionary:  %s" % config_dict)
 
             # Dump the configuration dictionary to the YAML file in the R environment HOME
             yaml.dump(config_dict, f, default_flow_style=False)
@@ -361,8 +368,11 @@ class RenvBuilder(EnvBuilder):
             "__CRAN_MIRROR__": context.config_dict["CRAN_MIRROR"],
             "__CRANEXTRA_MIRROR__": context.config_dict["CRANEXTRA_MIRROR"],
             "__R_LIBS_USER__": context.config_dict["R_LIBS_USER"],
+            "__R_LIBS_SITE__": context.config_dict["R_LIBS_USER"],
             "__R_HOME__": context.config_dict["R_ENV_HOME"],
             "__R_INCLUDE_DIR__": context.config_dict["R_INCLUDE_DIR"],
+            "__R_DOC_DIR__": context.config_dict["R_DOC_DIR"],
+            "__R_SHARE_DIR__": context.config_dict["R_SHARE_DIR"],
             "__STANDARD_PKG_LIST__": context.config_dict["STANDARD_PKG_LIST"],
             "__REPRODUCIBLE_WORKFLOW_PKG_LIST__": context.config_dict["REPRODUCIBLE_WORKFLOW_PKG_LIST"]
         }
@@ -384,24 +394,12 @@ class RenvBuilder(EnvBuilder):
             pkg_list_string = ""
             for k, v in enumerate(pkg_dict):
                 if k == pkg_list_count:
-                    pkg_list_string = f"{pkg_list_string}{v}=\"{pkg_dict[v]}\""
+                    pkg_list_string = "%s%s=\"%s\"" % (pkg_list_string, v, pkg_dict[v])
                 else:
                     sep = ", "
-                    pkg_list_string = f"{pkg_list_string}{v}=\"{pkg_dict[v]}\"{sep}"
+                    pkg_list_string = "%s%s=\"%s\"%s" % (pkg_list_string, v, pkg_dict[v], sep)
 
-            pkg_list_string = f"list({pkg_list_string})"
+            pkg_list_string = "list(%s)" % pkg_list_string
             fmtd_list[list_name] = pkg_list_string
 
         return fmtd_list
-
-    # def install_r(self):
-    #     # New: install specified version of R in the R environment.
-    #     pass
-    #
-    # def setup_r_profile(self, context):
-    #     # New
-    #     pass
-    #
-    # def setup_r_environ(self):
-    #     # New
-    #     pass

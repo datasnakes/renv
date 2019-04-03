@@ -1,6 +1,8 @@
 import os
 import subprocess as sp
 from shutil import rmtree
+from subprocess import TimeoutExpired
+
 
 def get_r_path():
     """
@@ -20,6 +22,7 @@ def get_r_installed_root():
     Get the installed root of R (without /bin/R
     :return: path to root where R is installed
     """
+
     r_path = get_r_path()
     return os.path.dirname(os.path.dirname(r_path))  # remove /bin/R
 
@@ -30,20 +33,21 @@ def get_user_home_dir():
     # TODO make this function cross-platform
     :return: None
     """
-    sp_out = sp.run(["echo $HOME"], shell=True, stdout=sp.PIPE, encoding="utf8")
-    return sp_out.stdout.strip()
+    sp_out = os.environ['HOME']
+    return sp_out.strip()
 
-def get_beri_path(has_root_access=False):
+
+def get_renv_path(has_root_access=False):
     """
     Get the default R environment path
     # TODO make this function cross-platform
     :param has_root_access: whether user has root access in Linux.
-    :return: path to beRi_envs, inclusive.
+    :return: path to .renv, inclusive.
     """
     if has_root_access:
-        return os.path.join(get_r_installed_root(), "beRi_envs")
+        return os.path.join(get_r_installed_root(), ".renv")
     else:
-        return os.path.join(get_user_home_dir(), "beRi_envs")
+        return os.path.join(get_user_home_dir(), ".renv")
 
 
 def create_directory(directory, clear=False):
@@ -65,6 +69,7 @@ def create_directory(directory, clear=False):
     else:
         os.makedirs(directory)
 
+
 def create_symlink(src, dst, subfolders=[]):
     """
     Create symlink in the dst folder from the src folder.
@@ -84,3 +89,31 @@ def create_symlink(src, dst, subfolders=[]):
                 Warning("Cannot create symlink for: " + dst_folder)
             os.symlink(src_folder, dst_folder)
 
+
+def system_r_call(rcmd_type, context):
+    """
+    Call the current R with system calls in order to obtain specific types
+    of information.
+    :param rcmd_type:  A string that designates the R command to use in the system call
+    :param context:  The context variable used in the R command.
+    :return:  Returns the stdout and stderr from the system call.
+    """
+
+    if rcmd_type == "major":
+        rcmd = "%s -e \'R.version$major\'" % context.abs_R_script
+    elif rcmd_type == "minor":
+        rcmd = "%s -e \'R.version$minor\'" % context.abs_R_script
+    elif rcmd_type == "base":
+        rcmd = "%s -e \'base::cat(rownames(installed.packages(priority=\"base\")))\'" % context.abs_R_script
+    elif rcmd_type == "recommended":
+        rcmd = "%s -e \'base::cat(rownames(installed.packages(priority=\"recommended\")))\'" % context.abs_R_script
+
+    recommended_pkgs = sp.Popen([rcmd], stderr=sp.PIPE, stdout=sp.PIPE, shell=True, encoding='utf-8')
+
+    try:
+        stdout, stderr = recommended_pkgs.communicate(timeout=15)
+    except TimeoutExpired:
+        recommended_pkgs.kill()
+        stdout, stderr = recommended_pkgs.communicate()
+
+    return stdout, stderr

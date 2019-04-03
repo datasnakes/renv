@@ -57,11 +57,11 @@ Once you have renv installed, you can create an R environment by a simple comman
 renv -n myenv
 ```
 
-An environment folder `myenv` will be created under `$HOME/beRi_envs`. 
+An environment folder `myenv` will be created under `$HOME/.renv`.
 
 To activate the environment 
 ```
-cd $HOME\beRi_envs\myenv\bin
+cd $HOME\.renv\myenv\bin
 . ./activate 
 ```
 
