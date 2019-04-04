@@ -73,6 +73,21 @@ R environment.
         cookiecutter(str(init_cookie), no_input=True, extra_context=e_c, output_dir=str(self.path))
 
 
+class LinuxRenvBuilder(BaseRenvBuilder):
+
+    def __init__(self, env_name=None, path=None, name=None, r_path=None, r_bin=None, r_lib=None, r_include=None,
+                 recommended_packages=True, clear=False, symlinks=False, upgrade=False, prompt=None):
+        super().__init__(env_name=env_name, path=path, name=name, r_path=r_path, r_bin=r_bin, r_lib=r_lib, r_include=r_include,
+                         recommended_packages=recommended_packages, clear=clear, symlinks=symlinks, upgrade=upgrade,
+                         prompt=prompt)
+        self.usr_cfg_file = self.env_dir / "renv.yaml"
+        self.R_version = self.r_path.stem
+        if not self.bin_path:
+            self.bin_path = self.r_path / "bin"
+        self.R_exe = self.bin_path / "R"
+        self.Rscript_exe = self.bin_path / "R"
+
+
 class RenvBuilder(EnvBuilder):
 
     def __init__(self, r_path=None, r_bin_path=None, r_lib_path=None, r_include_path=None, system_site_packages=False,
