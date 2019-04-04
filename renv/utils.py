@@ -37,8 +37,8 @@ def get_user_home_dir():
     # TODO make this function cross-platform
     :return: None
     """
-    sp_out = sp.run(["echo $HOME"], shell=True, stdout=sp.PIPE, encoding="utf8")
-    return sp_out.stdout.strip()
+    sp_out = os.environ['HOME']
+    return sp_out.strip()
 
 
 def get_renv_path(has_root_access=False):
@@ -107,15 +107,15 @@ def system_r_call(rcmd_type, context):
     """
 
     if rcmd_type == "major":
-        Rcmd = "%s -e \'R.version$major\'" % context.abs_R_script
+        rcmd = "%s -e \'R.version$major\'" % context.abs_R_script
     elif rcmd_type == "minor":
-        Rcmd = "%s -e \'R.version$minor\'" % context.abs_R_script
+        rcmd = "%s -e \'R.version$minor\'" % context.abs_R_script
     elif rcmd_type == "base":
-        Rcmd = "%s -e \'base::cat(rownames(installed.packages(priority=\"base\")))\'" % context.abs_R_script
+        rcmd = "%s -e \'base::cat(rownames(installed.packages(priority=\"base\")))\'" % context.abs_R_script
     elif rcmd_type == "recommended":
-        Rcmd = "%s -e \'base::cat(rownames(installed.packages(priority=\"recommended\")))\'" % context.abs_R_script
+        rcmd = "%s -e \'base::cat(rownames(installed.packages(priority=\"recommended\")))\'" % context.abs_R_script
 
-    recommended_pkgs = sp.Popen([Rcmd], stderr=sp.PIPE, stdout=sp.PIPE, shell=True, encoding='utf-8')
+    recommended_pkgs = sp.Popen([rcmd], stderr=sp.PIPE, stdout=sp.PIPE, shell=True, encoding='utf-8')
 
     try:
         stdout, stderr = recommended_pkgs.communicate(timeout=15)

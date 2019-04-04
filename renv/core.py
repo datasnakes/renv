@@ -164,11 +164,12 @@ class RenvBuilder(EnvBuilder):
         major, error = utils.system_r_call(rcmd_type="major", context=context)
         # Minor Version
         minor, error = utils.system_r_call(rcmd_type="minor", context=context)
-        
+
         major = re.findall('"([^"]*)"', major)
         minor = re.findall('"([^"]*)"', minor)
         context.R_version = "%s.%s" % (str(major[0]), str(minor[0]))
         self.logger.debug("The system R version is %s" % context.R_version)
+
         # Begin with R-Environment R files/paths
         # Continue with system R files/paths
         if sys.platform == 'win32':  # Windows
@@ -187,7 +188,7 @@ class RenvBuilder(EnvBuilder):
                 if sys.maxsize > 2**32:
                     r_abs_home = os.path.join(self.r_path, 'lib64', "R")
                 else:
-                    r_abs_home = os.path.join(self.r_path, 'lib64', "R")
+                    r_abs_home = os.path.join(self.r_path, 'lib', "R")
             r_env_include = os.path.join(r_env_home, "include")
             r_env_share = os.path.join(r_env_home, "share")
             r_env_doc = os.path.join(r_env_home, "doc")
@@ -199,7 +200,7 @@ class RenvBuilder(EnvBuilder):
         utils.create_directory(r_env_home, self.clear)
 
         r_lib_path = os.path.join(self.r_path, "lib", "R")
-        # Create symlink to R 
+        # Create symlink to R
         if (sys.maxsize == 2**63-1) and (os.name == 'posix') and (sys.platform != 'darwin'):
             os.mkdir(os.path.join(env_dir, 'lib64'))
             link_path = os.path.join(env_dir, 'lib64', 'R')
@@ -211,7 +212,7 @@ class RenvBuilder(EnvBuilder):
         # Create other symbolic links in lib/R/
         utils.create_symlink(
             r_lib_path,
-            os.path.join(env_dir, "lib", "R"), 
+            os.path.join(env_dir, "lib", "R"),
             ["bin", "etc", "lib", "modules", "share", "include", "doc", "tests"])
 
         binname = 'bin'
@@ -239,7 +240,7 @@ class RenvBuilder(EnvBuilder):
         Create and/or use a configuration file indicating where the environment's R
         was copied from, and whether the system site-packages should be made
         available in the environment.
-        
+
         :param context: The information for the environment creation request
                         being processed.
         """
@@ -296,7 +297,7 @@ class RenvBuilder(EnvBuilder):
             config_dict["R_DOC_DIR"] = context.env_R_doc
             config_dict["R_SHARE_DIR"] = context.env_R_share
             config_dict["R_VERSION"] = context.R_version
-            
+
             # Package lists
             config_dict.update(__DEFAULT_CONFIG__)
             pkg_lists = self.format_pkg_list(config_dict)
