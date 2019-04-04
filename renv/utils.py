@@ -2,6 +2,7 @@ import os
 import subprocess as sp
 from shutil import rmtree
 
+
 def get_r_path():
     """
     Get current R installed path in Linux
@@ -32,6 +33,7 @@ def get_user_home_dir():
     """
     sp_out = sp.run(["echo $HOME"], shell=True, stdout=sp.PIPE, encoding="utf8")
     return sp_out.stdout.strip()
+
 
 def get_beri_path(has_root_access=False):
     """
@@ -64,6 +66,7 @@ def create_directory(directory, clear=False):
         raise ValueError("Unable to create directory '%r" % directory + "' for the new environment.")
     else:
         os.makedirs(directory)
+
 
 def create_symlink(src, dst, subfolders=[]):
     """

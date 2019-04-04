@@ -26,15 +26,51 @@ __DEFAULT_CONFIG__ = {
 }
 
 
-class RenvBuilder(EnvBuilder):
+class BaseRenvBuilder(object):
     """
-    The RenvBuilder class is a rework of the venv.EnvBuilder class.
-    The EnvBuilder class can be found here:
-    https://github.com/python/cpython/blob/3.6/Lib/venv/__init__.py
+The RenvBuilder class is a rework of the venv.EnvBuilder class.
+The EnvBuilder class can be found here:
+https://github.com/python/cpython/blob/3.6/Lib/venv/__init__.py
 
-    This class is meant to help facilitate the basic functionality of creating an
-    R environment.
-    """
+This class is meant to help facilitate the basic functionality of creating an
+R environment.
+"""
+
+    def __init__(self, path=None, name=None, r_path=None, r_bin=None, r_lib=None, r_include=None, recommended_packages=True,
+                 clear=False, symlinks=False, upgrade=False, prompt=None, init=None):
+        # Set up path to renv config directory
+        self.path = Path(path)
+        self.name = name
+        self.renv_path = self.path / name
+
+        # Set the class variables that represent the system's R installation
+        self.r_path = Path(r_path)
+        self.r_bin = Path(r_bin)
+        self.r_lib = Path(r_lib)
+        self.r_include = Path(r_include)
+
+        # Set boolean/None class variables
+        self.clear = clear
+        self.recommended_packages = recommended_packages
+        self.symlinks = symlinks
+        self.upgrade = upgrade
+        self.prompt = prompt
+
+        self.cookie_jar = Path(resource_filename(cookies.__name__, ''))
+        if init:
+            if self.renv_path.exists():
+                raise FileExistsError("The rinse path you have set already exists: %s" % self.rinse_path)
+            elif not self.renv_path.exists():
+                self.initial_setup()
+            elif not self.renv_path.exists():
+                raise EnvironmentError("You have not initialized rinse yet.  Please run 'rinse init' to continue.")
+
+    def initial_setup(self):
+        pass
+
+
+class RenvBuilder(EnvBuilder):
+
     def __init__(self, r_path=None, r_bin_path=None, r_lib_path=None, r_include_path = None, system_site_packages=False,
                  recommended_packages=True, clear=False, symlinks=False, upgrade=False, prompt=None):
         """
