@@ -36,25 +36,32 @@ This class is meant to help facilitate the basic functionality of creating an
 R environment.
 """
 
-    def __init__(self, path=None, name=None, r_path=None, r_bin=None, r_lib=None, r_include=None, recommended_packages=True,
+    def __init__(self, env_name=None, path=None, name=None, r_path=None, r_bin=None, r_lib=None, r_include=None, recommended_packages=True,
                  clear=False, symlinks=False, upgrade=False, prompt=None, init=None):
         # Set up path to renv config directory
-        self.path = Path(path)
+        self.path = Path(path).expanduser().absolute()
         self.name = name
         self.renv_path = self.path / name
 
+        # Set up virtual environment class variables
+        self.env_name = env_name
+        self.env_dir = self.renv_path / "cran" / self.env_name
+
         # Set the class variables that represent the system's R installation
         self.r_path = Path(r_path)
-        self.bin_path = Path(r_bin)
-        self.lib_path = Path(r_lib)
-        self.include_path = Path(r_include)
+        self.bin_path = r_bin
+        self.lib_path = r_lib
+        self.include_path = r_include
 
         # Set boolean/None class variables
         self.clear = clear
         self.recommended_packages = recommended_packages
         self.symlinks = symlinks
         self.upgrade = upgrade
-        self.prompt = prompt
+        if prompt:
+            self.prompt = '(%s) ' % prompt
+        else:
+            self.prompt = '(%s) ' % self.env_name
 
         self.cookie_jar = Path(resource_filename(cookies.__name__, ''))
         if init:
