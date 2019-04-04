@@ -16,7 +16,7 @@ def get_r_path():
     """
     sp_out = sp.run(["which R"], shell=True, stdout=sp.PIPE, encoding="utf8")
     if sp_out.returncode:
-        raise Exception("Could not get the default R path. Is R installed?")
+        logger.exception("Could not get the default R path. Is R installed?")
 
     return sp_out.stdout.strip()
 
@@ -60,19 +60,18 @@ def create_directory(directory, clear=False):
     :param clear: Clear the directory if it already exists.
     :param directory: path of the directory
     :return: None
-    """    
+    """
     if os.path.exists(directory):
         if clear:
             rmtree(directory)
-            logger.debug(f"{directory} has been deleted.")
+            logger.debug("%s has been deleted." % directory)
         else:
-            raise FileExistsError("Environment directory " + directory +
-                            " already exists. Set clear to True to delete the original directory.")
+            logger.error("Environment directory %s exists. Set clear to True to delete the original directory." % directory)
     elif os.path.islink(directory) or os.path.isfile(directory):
         logger.error(ValueError("Unable to create directory '%r" % directory + "' for the new environment."))
     else:
         os.makedirs(directory)
-        logger.debug(f"{directory} has been created.")
+        logger.debug("%s has been created." % directory)
 
 
 def create_symlink(src, dst, subfolders=[]):
