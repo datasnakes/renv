@@ -1,6 +1,6 @@
 from venv import EnvBuilder
 import logging
-import os
+from os import environ
 import shutil
 import subprocess
 import sys
@@ -45,9 +45,9 @@ R environment.
 
         # Set the class variables that represent the system's R installation
         self.r_path = Path(r_path)
-        self.r_bin = Path(r_bin)
-        self.r_lib = Path(r_lib)
-        self.r_include = Path(r_include)
+        self.bin_path = Path(r_bin)
+        self.lib_path = Path(r_lib)
+        self.include_path = Path(r_include)
 
         # Set boolean/None class variables
         self.clear = clear
@@ -59,19 +59,23 @@ R environment.
         self.cookie_jar = Path(resource_filename(cookies.__name__, ''))
         if init:
             if self.renv_path.exists():
-                raise FileExistsError("The rinse path you have set already exists: %s" % self.rinse_path)
+                raise FileExistsError("The rinse path you have set already exists: %s" % self.renv_path)
             elif not self.renv_path.exists():
                 self.initial_setup()
             elif not self.renv_path.exists():
                 raise EnvironmentError("You have not initialized rinse yet.  Please run 'rinse init' to continue.")
 
     def initial_setup(self):
-        pass
+        init_cookie = self.cookie_jar / Path("init")
+        e_c = {
+            "renv_init_dir": self.name
+        }
+        cookiecutter(str(init_cookie), no_input=True, extra_context=e_c, output_dir=str(self.path))
 
 
 class RenvBuilder(EnvBuilder):
 
-    def __init__(self, r_path=None, r_bin_path=None, r_lib_path=None, r_include_path = None, system_site_packages=False,
+    def __init__(self, r_path=None, r_bin_path=None, r_lib_path=None, r_include_path=None, system_site_packages=False,
                  recommended_packages=True, clear=False, symlinks=False, upgrade=False, prompt=None):
         """
         :param r_path:  This is the root directory of the R installation that's being
