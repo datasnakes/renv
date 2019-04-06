@@ -36,7 +36,7 @@ This class is meant to help facilitate the basic functionality of creating an
 R environment.
 """
 
-    def __init__(self, env_name=None, path=None, name=None, r_path=None, r_bin=None, r_lib=None, r_include=None, recommended_packages=True,
+    def __init__(self, env_name=None, path=None, name=None, r_home=None, r_bin=None, r_lib=None, r_include=None, recommended_packages=True,
                  clear=False, symlinks=False, upgrade=False, prompt=None, init=None):
         # Set up path to renv config directory
         self.path = Path(path).expanduser().absolute()
@@ -48,7 +48,7 @@ R environment.
         self.env_dir = self.renv_path / "cran" / self.env_name
 
         # Set the class variables that represent the system's R installation
-        self.r_path = Path(r_path)
+        self.r_home = Path(r_home)
         self.bin_path = r_bin
         self.lib_path = r_lib
         self.include_path = r_include
@@ -82,15 +82,15 @@ R environment.
 
 class LinuxRenvBuilder(BaseRenvBuilder):
 
-    def __init__(self, env_name=None, path=None, name=None, r_path=None, r_bin=None, r_lib=None, r_include=None,
+    def __init__(self, env_name=None, path=None, name=None, r_home=None, r_bin=None, r_lib=None, r_include=None,
                  recommended_packages=True, clear=False, symlinks=False, upgrade=False, prompt=None):
-        super().__init__(env_name=env_name, path=path, name=name, r_path=r_path, r_bin=r_bin, r_lib=r_lib, r_include=r_include,
+        super().__init__(env_name=env_name, path=path, name=name, r_home=r_home, r_bin=r_bin, r_lib=r_lib, r_include=r_include,
                          recommended_packages=recommended_packages, clear=clear, symlinks=symlinks, upgrade=upgrade,
                          prompt=prompt)
         self.usr_cfg_file = self.env_dir / "renv.yaml"
-        self.R_version = self.r_path.stem
+        self.R_version = self.r_home.stem
         if not self.bin_path:
-            self.bin_path = self.r_path / "bin"
+            self.bin_path = self.r_home / "bin"
         self.R_exe = self.bin_path / "R"
         self.Rscript_exe = self.bin_path / "R"
 

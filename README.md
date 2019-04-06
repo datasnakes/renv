@@ -79,10 +79,10 @@ Usage: renv [OPTIONS]
 
 Options:
 Options:
-  -r, --r_path TEXT               Provide the root of the directory tree where
+  -r, --r_home TEXT               Provide the root of the directory tree where
                                   R is installed.  This would be R's
                                   installation directory when using
-                                  ./configure --prefix=<r_path>.
+                                  ./configure --prefix=<r_home>.
   -n, --env_name TEXT             Name of the environment.
   -d, --env_dir TEXT              A directory for creating the environment in.
   -b, --binpath TEXT              Provide the bin directory if R was installed

@@ -4,9 +4,9 @@ import os
 
 
 @click.command()
-@click.option('--r_path', '-r', default=None,
+@click.option('--r_home', '-r', default=None,
               help="Provide the root of the directory tree where R is installed.  This would be R's installation "
-                   "directory when using ./configure --prefix=<r_path>.")
+                   "directory when using ./configure --prefix=<r_home>.")
 @click.option('--env_name', '-n', default=None,
               help="Name of the environment.")
 @click.option('--env_dir', '-d', default=None,
@@ -31,7 +31,7 @@ import os
               help="Upgrades the environment directory to use this version of R.")
 @click.option('--prompt', '-p', default=None,
               help="Provide an alternative prompt prefix for this environment.")
-def renv(r_path, env_name, env_dir, binpath, libpath,
+def renv(r_home, env_name, env_dir, binpath, libpath,
          includepath, system_site_packages,
          recommended_packages, clear, upgrade, prompt):
 
@@ -40,7 +40,7 @@ def renv(r_path, env_name, env_dir, binpath, libpath,
     else:
         use_symlinks = True
 
-    builder = RenvBuilder(r_path=r_path, r_bin_path=binpath, r_lib_path=libpath, r_include_path=includepath,
+    builder = RenvBuilder(r_home=r_home, r_bin_path=binpath, r_lib_path=libpath, r_include_path=includepath,
                           system_site_packages=system_site_packages,
                           recommended_packages=recommended_packages,
                           clear=clear, symlinks=use_symlinks, upgrade=upgrade,
