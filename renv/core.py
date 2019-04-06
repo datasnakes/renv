@@ -159,6 +159,14 @@ class LinuxRenvBuilder(BaseRenvBuilder):
         if self.infodir.exists():
             self.env_infodir.symlink_to(self.infodir)
 
+    def create_etc_symlink(self):
+        env_lib_home = self.env_libdir / "R"
+        sys_lib_home = self.libdir / "R"
+        # create system link files
+        etc_files = listdir(str(Path(sys_lib_home / "etc")))
+        for file in etc_files:
+            if file != "Rprofile.site":
+                Path(env_lib_home / "etc" / file).symlink_to(sys_lib_home / "etc" / file)
 
 
 
