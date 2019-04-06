@@ -5,15 +5,15 @@ import os
 
 @click.command()
 @click.option('--r_home', '-r', default=None,
-              help="Provide the root of the directory tree where R is installed.  This would be R's installation "
-                   "directory when using ./configure --prefix=<r_home>.")
+              help="Provide the root of the directory tree where R is installed (%R_HOME).  This would be R's "
+                   "installation directory when using ./configure --prefix=<r_home>.")
 @click.option('--env_name', '-n', default=None,
               help="Name of the environment.")
-@click.option('--env_dir', '-d', default=None,
+@click.option('--env_home', '-d', default=None,
               help="A directory for creating the environment in.")
-@click.option('--binpath', '-b',
+@click.option('--bindir', '-b',
               help="Provide the bin directory if R was installed when using ./configure --bindir=<binpath>.")
-@click.option('--libpath', '-l',
+@click.option('--libdir', '-l',
               help="Provide the lib directory if R was installed when using ./configure --libdir=<libpath>.")
 @click.option('--includepath', '-i',
               help="Provide the include directory if R was installed when using ./configure --includedir=<includepath>.")
@@ -31,7 +31,7 @@ import os
               help="Upgrades the environment directory to use this version of R.")
 @click.option('--prompt', '-p', default=None,
               help="Provide an alternative prompt prefix for this environment.")
-def renv(r_home, env_name, env_dir, binpath, libpath,
+def renv(r_home, env_name, env_home, bindir, libdir,
          includepath, system_site_packages,
          recommended_packages, clear, upgrade, prompt):
 
@@ -40,10 +40,10 @@ def renv(r_home, env_name, env_dir, binpath, libpath,
     else:
         use_symlinks = True
 
-    builder = RenvBuilder(r_home=r_home, r_bin_path=binpath, r_lib_path=libpath, r_include_path=includepath,
+    builder = RenvBuilder(r_home=r_home, bindir_path=bindir, libdir=libdir, r_include_path=includepath,
                           system_site_packages=system_site_packages,
                           recommended_packages=recommended_packages,
                           clear=clear, symlinks=use_symlinks, upgrade=upgrade,
                           prompt=prompt)
 
-    builder.create(env_dir, env_name)
+    builder.create(env_home, env_name)

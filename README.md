@@ -84,7 +84,7 @@ Options:
                                   installation directory when using
                                   ./configure --prefix=<r_home>.
   -n, --env_name TEXT             Name of the environment.
-  -d, --env_dir TEXT              A directory for creating the environment in.
+  -d, --env_home TEXT              A directory for creating the environment in.
   -b, --binpath TEXT              Provide the bin directory if R was installed
                                   when using ./configure --bindir=<binpath>.
   -l, --libpath TEXT              Provide the lib directory if R was installed

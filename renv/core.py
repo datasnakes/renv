@@ -36,7 +36,7 @@ This class is meant to help facilitate the basic functionality of creating an
 R environment.
 """
 
-    def __init__(self, env_name=None, path=None, name=None, r_home=None, r_bin=None, r_lib=None, r_include=None, recommended_packages=True,
+    def __init__(self, env_name=None, path=None, name=None, r_home=None, recommended_packages=True,
                  clear=False, symlinks=False, upgrade=False, prompt=None, init=None):
         # Set up path to renv config directory
         self.path = Path(path).expanduser().absolute()
@@ -45,13 +45,10 @@ R environment.
 
         # Set up virtual environment class variables
         self.env_name = env_name
-        self.env_dir = self.renv_path / "cran" / self.env_name
+        self.env_home = self.renv_path / "cran" / self.env_name
 
         # Set the class variables that represent the system's R installation
         self.r_home = Path(r_home)
-        self.bin_path = r_bin
-        self.lib_path = r_lib
-        self.include_path = r_include
 
         # Set boolean/None class variables
         self.clear = clear
@@ -82,17 +79,52 @@ R environment.
 
 class LinuxRenvBuilder(BaseRenvBuilder):
 
-    def __init__(self, env_name=None, path=None, name=None, r_home=None, r_bin=None, r_lib=None, r_include=None,
-                 recommended_packages=True, clear=False, symlinks=False, upgrade=False, prompt=None):
-        super().__init__(env_name=env_name, path=path, name=name, r_home=r_home, r_bin=r_bin, r_lib=r_lib, r_include=r_include,
+    def __init__(self, env_name=None, path=None, name=None, r_home=None, bindir=None, libdir=None, mandir=None,
+                 rincludedir=None, rdocdir=None, rsharedir=None, infodir=None, recommended_packages=True, clear=False, symlinks=False,
+                 upgrade=False, prompt=None):
+
+        super().__init__(env_name=env_name, path=path, name=name, r_home=r_home,
                          recommended_packages=recommended_packages, clear=clear, symlinks=symlinks, upgrade=upgrade,
                          prompt=prompt)
-        self.usr_cfg_file = self.env_dir / "renv.yaml"
+        # ****************** SYSTEM R ****************
+        #
+        # Get installation directories.  These mimic parameters in source installation.  (./configure --help)
+        # See https://cran.r-project.org/doc/manuals/R-admin.html#Installation for info on these directories.
+        self.bindir = bindir
+        if not self.bindir:
+            self.bindir = self.r_home / "bin"
+        self.libdir = libdir
+        self.mandir = mandir
+        if not self.mandir:
+            self.mandir = self.r_home / "share" / "man"
+        self.rincludedir = rincludedir
+        self.rdocdir = rdocdir
+        self.rsharedir = rsharedir
+        self.infodir = infodir
+
+        # Here LIBnn is usually ‘lib’, but may be ‘lib64’ on some 64-bit Linux systems
+        # See previous link
+        if sys.maxsize > 2**32:
+            self.libnn = "lib64"
+        else:
+            self.libnn = "lib"
+        if not self.libdir:
+            self.libdir = self.r_home / self.libnn
+        if not self.rincludedir:
+            self.rincludedir = self.libdir / "R" / "include"
+        if not self.rdocdir:
+            self.rdocdir = self.libdir / "R" / "doc"
+        if not self.rsharedir:
+            self.rsharedir = self.libdir / "R" / "share"
+        if not self.infodir:
+            self.infodir = self.r_home / "info"
+
+        # Start setting other variables.
         self.R_version = self.r_home.stem
-        if not self.bin_path:
-            self.bin_path = self.r_home / "bin"
-        self.R_exe = self.bin_path / "R"
-        self.Rscript_exe = self.bin_path / "R"
+        self.rlibrary = self.libdir / "R" / "library"
+
+        # ****************** Virtual Environment R ****************
+        self.usr_cfg_file = self.env_home / "renv.yaml"
 
 
 class RenvBuilder(EnvBuilder):
