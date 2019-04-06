@@ -49,6 +49,7 @@ R environment.
 
         # Set the class variables that represent the system's R installation
         self.r_home = Path(r_home)
+        self.R_version = self.r_home.stem
 
         # Set boolean/None class variables
         self.clear = clear
@@ -120,11 +121,19 @@ class LinuxRenvBuilder(BaseRenvBuilder):
             self.infodir = self.r_home / "info"
 
         # Start setting other variables.
-        self.R_version = self.r_home.stem
         self.rlibrary = self.libdir / "R" / "library"
 
         # ****************** Virtual Environment R ****************
         self.usr_cfg_file = self.env_home / "renv.yaml"
+        self.env_libdir = self.env_home / self.libnn
+        self.env_bindir = self.env_home / "bin"
+        self.env_mandir = self.env_home / "share" / "man"
+        self.env_includedir = self.env_libdir / "R" / "include"
+        self.env_docdir = self.env_libdir / "R" / "doc"
+        self.env_sharedir = self.env_libdir / "R" / "share"
+        self.env_infodir = self.env_home / "info"
+        self.env_library = self.libdir / "R" / "library"
+
 
 
 class RenvBuilder(EnvBuilder):
