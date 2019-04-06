@@ -1,6 +1,6 @@
 from venv import EnvBuilder
 import logging
-from os import environ
+from os import environ, listdir
 import shutil
 import subprocess
 import sys
@@ -133,6 +133,32 @@ class LinuxRenvBuilder(BaseRenvBuilder):
         self.env_sharedir = self.env_libdir / "R" / "share"
         self.env_infodir = self.env_home / "info"
         self.env_library = self.libdir / "R" / "library"
+
+    def create_env_dirs(self):
+        env_lib_home = self.env_libdir / "R"
+        sys_lib_home = self.libdir / "R"
+
+        # create directories
+        if not self.env_home.exists():
+            self.env_home.mkdir()
+        env_lib_home.mkdir(parents=True)  # make home and env_libdir
+        Path(env_lib_home / "etc").mkdir()
+        Path(env_lib_home / "library").mkdir()
+
+        # create directory system links
+        Path(env_lib_home / "bin").symlink_to(sys_lib_home / "bin")
+        Path(env_lib_home / "module").symlink_to(sys_lib_home / "modules")
+        self.env_includedir.symlink_to(self.rincludedir)
+        self.env_docdir.symlink_to(self.rdocdir)
+        self.env_sharedir.symlink_to(self.rsharedir)
+
+        if Path(sys_lib_home / "tests").exists():
+            Path(env_lib_home / "tests").symlink_to(sys_lib_home / "tests")
+        if Path(self.mandir / "man1").exists():
+            self.env_mandir.symlink_to(self.mandir)
+        if self.infodir.exists():
+            self.env_infodir.symlink_to(self.infodir)
+
 
 
 
