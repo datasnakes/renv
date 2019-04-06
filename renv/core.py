@@ -168,6 +168,10 @@ class LinuxRenvBuilder(BaseRenvBuilder):
             if file != "Rprofile.site":
                 Path(env_lib_home / "etc" / file).symlink_to(sys_lib_home / "etc" / file)
 
+    def create_library_symlink(self):
+        # logic for sym-linking base/recommended R packages
+        # see old create_configuration() method
+        pass
 
 
 class RenvBuilder(EnvBuilder):
