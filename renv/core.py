@@ -29,10 +29,22 @@ R environment.
 """
 
     def __init__(self, env_name=None, path=None, name=None, r_home=None, recommended_packages=True,
-                 clear=False, symlinks=False, upgrade=False, prompt=None, init=None):
+                 clear=False, symlinks=False, upgrade=False, prompt=None, init=None, verbose=None):
+        # Set up logger
+        # Change level of logger based on verbose paramater.
+        if self.verbose:
+            logging.basicConfig(format='[%(levelname)s | %(name)s - line %(lineno)d]: %(message)s')
+            # Filter the debug logging
+            logging.getLogger("renv").setLevel(logging.DEBUG)
+        else:
+            logging.basicConfig(format='%(levelname)s: %(message)s',
+                                level=logging.INFO)
+        self.logger = logging.getLogger(__name__)
+
         # Set up cran variables
         self.cran_mirror = "https://cran.rstudio.com/"
         self.cranextra_mirror = "https://mirrors.nics.utk.edu/cran/"
+
         # Set up path to renv config directory
         self.path = Path(path).expanduser().absolute()
         self.name = name
@@ -44,17 +56,25 @@ R environment.
 
         # Set the class variables that represent the system's R installation
         self.r_home = Path(r_home)
+        if not self.r_home.exists():
+            raise FileNotFoundError("%s does not exist." % self.r_home)
+
+        self.logger.debug("Target Installation:  %s" % str(self.r_home))
+        self.logger.debug("Virtual Environment:  %s" % str(self.env_home))
 
         # Set boolean/None class variables
         self.clear = clear
         self.recommended_packages = recommended_packages
         self.symlinks = symlinks
         self.upgrade = upgrade
+
+        # Set up promtp
         if prompt:
             self.prompt = '(%s) ' % prompt
         else:
             self.prompt = '(%s) ' % self.env_name
 
+        # Initialize renv if necessary
         self.cookie_jar = Path(resource_filename(cookies.__name__, ''))
         if init:
             if self.renv_path.exists():
@@ -65,6 +85,7 @@ R environment.
                 raise EnvironmentError("You have not initialized rinse yet.  Please run 'rinse init' to continue.")
 
     def initial_setup(self):
+        self.logger.info("Initializing renv for the first time...")
         init_cookie = self.cookie_jar / Path("init")
         e_c = {
             "renv_init_dir": self.name
@@ -127,6 +148,7 @@ class LinuxRenvBuilder(BaseRenvBuilder):
         self.r_major_ver = major
         self.r_minor_ver = minor
         self.r_version = "%s.%s" % (str(major[0]), str(minor[0]))
+        self.logger.debug("The target R version is %s." % self.r_version)
 
         # ****************** Virtual Environment R ****************
         self.usr_cfg_file = self.env_home / "renv.yaml"
@@ -140,29 +162,42 @@ class LinuxRenvBuilder(BaseRenvBuilder):
         self.env_library = self.libdir / "R" / "library"
 
     def create_env_dirs(self):
+        self.logger.info("Creating renv directories...")
         env_lib_home = self.env_libdir / "R"
         sys_lib_home = self.libdir / "R"
 
         # create directories
         if not self.env_home.exists():
             self.env_home.mkdir()
+            self.logger.debug(str(self.env_home))
         env_lib_home.mkdir(parents=True)  # make home and env_libdir
+        self.logger.debug(str(env_lib_home))
         Path(env_lib_home / "etc").mkdir()
+        self.logger.debug(str(env_lib_home / "etc"))
         Path(env_lib_home / "library").mkdir()
+        self.logger.debug(str(env_lib_home / "library"))
 
         # create directory system links
         Path(env_lib_home / "bin").symlink_to(sys_lib_home / "bin")
-        Path(env_lib_home / "module").symlink_to(sys_lib_home / "modules")
+        self.logger.debug(str(env_lib_home / "bin"))
+        Path(env_lib_home / "modules").symlink_to(sys_lib_home / "modules")
+        self.logger.debug(str(env_lib_home / "modules"))
         self.env_includedir.symlink_to(self.rincludedir)
+        self.logger.debug(str(self.env_includedir))
         self.env_docdir.symlink_to(self.rdocdir)
+        self.logger.debug(str(self.env_docdir))
         self.env_sharedir.symlink_to(self.rsharedir)
+        self.logger.debug(str(self.env_sharedir))
 
         if Path(sys_lib_home / "tests").exists():
             Path(env_lib_home / "tests").symlink_to(sys_lib_home / "tests")
+            self.logger.debug(str(env_lib_home / "tests"))
         if Path(self.mandir / "man1").exists():
             self.env_mandir.symlink_to(self.mandir)
+            self.logger.debug(str(self.env_mandir))
         if self.infodir.exists():
             self.env_infodir.symlink_to(self.infodir)
+            self.logger.debug(str(self.env_infodir))
 
     def create_etc_symlink(self):
         env_lib_home = self.env_libdir / "R"
@@ -172,39 +207,30 @@ class LinuxRenvBuilder(BaseRenvBuilder):
         for file in etc_files:
             if file != "Rprofile.site":
                 Path(env_lib_home / "etc" / file).symlink_to(sys_lib_home / "etc" / file)
+                self.logger.debug(str(env_lib_home / "etc" / file))
 
     def create_library_symlink(self):
-        # logic for sym-linking base/recommended R packages
-        # see old create_configuration() method
-        config_dict = dict()
-        recommended_pkgs = list()
-        base_pkgs = list()
-        if Path(self.usr_cfg_file).exists():
-            with open(str(self.usr_cfg_file), 'r', encoding='utf-8') as f:
-                user_config = yaml.load(f)
+        # Get base packages from system R
+        base_pkgs, error = utils.system_r_call(rcmd_type="base", rscript=str(self.bindir / "Rscript"))
+        base_pkgs = base_pkgs.split(" ")
+        self.logger.debug("Using base packages...")
+        # Get recommended packages from system R
+        if self.recommended_packages:
+            recommended_pkgs, error = utils.system_r_call(rcmd_type="recommended", rscript=str(self.bindir / "Rscript"))
+            recommended_pkgs = recommended_pkgs.split(" ")
+            self.logger.debug("Using recommended packages...")
+            pkgs = base_pkgs + recommended_pkgs
         else:
-            user_config = {}
-
-        with open(self.usr_cfg_file, 'w', encoding='utf-8') as f:
-            config_dict["R_LIBS_USER"] = self.env_library
-
-            # Get base packages from system R
-            base_pkgs, error = utils.system_r_call(rcmd_type="base", rscript=str(self.bindir / "Rscript"))
-            base_pkgs = base_pkgs.split(" ")
-            # Get recommended packages from system R
-            if self.recommended_packages:
-                recommended_pkgs, error = utils.system_r_call(rcmd_type="recommended", rscript=str(self.bindir / "Rscript"))
-                recommended_pkgs = recommended_pkgs.split(" ")
-                pkgs = base_pkgs + recommended_pkgs
-            else:
-                pkgs = base_pkgs
-            # symlink the packages to the environment
-            for pkg in pkgs:
-                pkg_path = self.rlibrary / pkg
-                env_pkg_path = self.env_library / pkg
-                env_pkg_path.symlink_to(pkg_path)
+            pkgs = base_pkgs
+        # symlink the packages to the environment
+        for pkg in pkgs:
+            self.logger.debug(str(pkg))
+            pkg_path = self.rlibrary / pkg
+            env_pkg_path = self.env_library / pkg
+            env_pkg_path.symlink_to(pkg_path)
 
     def setup_templates(self):
+        self.logger.debug("Setting up templated files...")
         activator_cookie = self.cookie_jar / 'posix'
         e_c = {
             "dirname": "bin",
@@ -228,6 +254,7 @@ class LinuxRenvBuilder(BaseRenvBuilder):
         shutil.move(str(self.env_bindir / "Rprofile.site"), str(self.env_libdir / "R" / "etc"))
 
     def create_r_symlink(self):
+        self.logger.debug("Setting up R executables...")
         # Set up symlinks of r executables
         for suffix in ("R", "Rscript"):
             env_exe = self.env_bindir / suffix
@@ -235,12 +262,11 @@ class LinuxRenvBuilder(BaseRenvBuilder):
             if not env_exe.exists():
                 if sys_exe.exists():
                     env_exe.symlink_to(sys_exe)
+                    self.logger.debug(suffix)
                 else:
                     raise FileNotFoundError("%s does not exist." % str(sys_exe))
             else:
                 raise FileExistsError("%s already exists." % env_exe)
-
-
 
 
 class RenvBuilder(EnvBuilder):
