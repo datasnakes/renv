@@ -237,6 +237,7 @@ class LinuxRenvBuilder(BaseRenvBuilder):
             "__R_SHARE_DIR__": str(self.env_sharedir)
         }
         cookiecutter(str(activator_cookie), no_input=True, extra_context=e_c, output_dir=self.env_home)
+        shutil.move(str(self.env_bindir / "Rprofile.site"), str(self.env_libdir / "R" / "etc"))
 
 
 class RenvBuilder(EnvBuilder):
