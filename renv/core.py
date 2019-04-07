@@ -267,3 +267,17 @@ class LinuxRenvBuilder(BaseRenvBuilder):
                     raise FileNotFoundError("%s does not exist." % str(sys_exe))
             else:
                 raise FileExistsError("%s already exists." % env_exe)
+
+
+class MacRenvBuilder(BaseRenvBuilder):
+
+    def __init__(self):
+        raise NotImplementedError("Creating virtual environments for R with renv on MacOS is not supported at this "
+                                  "time.")
+
+
+class WindowsRenvBuilder(BaseRenvBuilder):
+
+    def __init__(self):
+        raise NotImplementedError("Creating virtual environments for R with renv on Windows is not supported at this "
+                                  "time.")
