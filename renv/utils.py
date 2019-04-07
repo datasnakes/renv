@@ -75,7 +75,6 @@ def create_directory(directory, clear=False):
         logger.debug("%s has been created." % directory)
 
 
-
 def create_symlink(src, dst, subfolders=[]):
     """
     Create symlink in the dst folder from the src folder.
@@ -98,23 +97,23 @@ def create_symlink(src, dst, subfolders=[]):
             os.symlink(src_folder, dst_folder, target_is_directory=True)
 
 
-def system_r_call(rcmd_type, context):
+def system_r_call(rcmd_type, rscript):
     """
     Call the current R with system calls in order to obtain specific types
     of information.
     :param rcmd_type:  A string that designates the R command to use in the system call
-    :param context:  The context variable used in the R command.
+    :param rscript:  The absolute path to the desired Rscript exe.
     :return:  Returns the stdout and stderr from the system call.
     """
 
     if rcmd_type == "major":
-        rcmd = "%s -e \'R.version$major\'" % context.abs_R_script
+        rcmd = "%s -e \'R.version$major\'" % rscript
     elif rcmd_type == "minor":
-        rcmd = "%s -e \'R.version$minor\'" % context.abs_R_script
+        rcmd = "%s -e \'R.version$minor\'" % rscript
     elif rcmd_type == "base":
-        rcmd = "%s -e \'base::cat(rownames(installed.packages(priority=\"base\")))\'" % context.abs_R_script
+        rcmd = "%s -e \'base::cat(rownames(installed.packages(priority=\"base\")))\'" % rscript
     elif rcmd_type == "recommended":
-        rcmd = "%s -e \'base::cat(rownames(installed.packages(priority=\"recommended\")))\'" % context.abs_R_script
+        rcmd = "%s -e \'base::cat(rownames(installed.packages(priority=\"recommended\")))\'" % rscript
 
     recommended_pkgs = sp.Popen([rcmd], stderr=sp.PIPE, stdout=sp.PIPE, shell=True, encoding='utf-8')
 
