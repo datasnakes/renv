@@ -1,12 +1,27 @@
 import os
+import sys
 import subprocess as sp
 from shutil import rmtree
 from subprocess import TimeoutExpired
-
+import renv
 import logging
 
 logger = logging.getLogger(__name__)
 
+
+def get_system_venv():
+    if os.name == "posix":
+        if sys.platform == "darwin":
+            renv.MacRenvBuilder()
+        elif "linux" in str(sys.platform):
+            return renv.LinuxRenvBuilder
+        else:
+            raise OSError("renv does not support %s operating system at this time." % sys.platform)
+    elif os.name == "nt":
+        if sys.platform == "win32":
+            renv.WindowsRenvBuilder()
+        else:
+            raise OSError("renv does not support %s operating system at this time." % sys.platform)
 
 
 def get_r_path():
