@@ -17,18 +17,6 @@ import yaml
 from pathlib import Path
 from cookiecutter.main import cookiecutter
 
-__DEFAULT_CONFIG__ = {
-    "CRAN_MIRROR": "https://cran.rstudio.com/",
-    "CRANEXTRA_MIRROR": "https://mirrors.nics.utk.edu/cran/",
-    "STANDARD_PKG_LIST": {
-        "BiocInstaller": "Bioconductor",
-        "devtools": "Devtools"
-    },
-    "REPRODUCIBLE_WORKFLOW_PKG_LIST": {
-        "tidyverse": "Tidyverse"
-    }
-}
-
 
 class BaseRenvBuilder(object):
     """
@@ -238,6 +226,21 @@ class LinuxRenvBuilder(BaseRenvBuilder):
         }
         cookiecutter(str(activator_cookie), no_input=True, extra_context=e_c, output_dir=self.env_home)
         shutil.move(str(self.env_bindir / "Rprofile.site"), str(self.env_libdir / "R" / "etc"))
+
+    def create_r_symlink(self):
+        # Set up symlinks of r executables
+        for suffix in ("R", "Rscript"):
+            env_exe = self.env_bindir / suffix
+            sys_exe = self.bindir / suffix
+            if not env_exe.exists():
+                if sys_exe.exists():
+                    env_exe.symlink_to(sys_exe)
+                else:
+                    raise FileNotFoundError("%s does not exist." % str(sys_exe))
+            else:
+                raise FileExistsError("%s already exists." % env_exe)
+
+
 
 
 class RenvBuilder(EnvBuilder):
