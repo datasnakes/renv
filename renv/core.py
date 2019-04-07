@@ -53,7 +53,6 @@ R environment.
 
         # Set the class variables that represent the system's R installation
         self.r_home = Path(r_home)
-        self.R_version = self.r_home.stem
 
         # Set boolean/None class variables
         self.clear = clear
@@ -126,6 +125,17 @@ class LinuxRenvBuilder(BaseRenvBuilder):
 
         # Start setting other variables.
         self.rlibrary = self.libdir / "R" / "library"
+
+        # R version
+        major, error = utils.system_r_call(rcmd_type="major", rscript=str(self.bindir / "Rscript"))
+        # Minor Version
+        minor, error = utils.system_r_call(rcmd_type="minor", rscript=str(self.bindir / "Rscript"))
+        major = re.findall('"([^"]*)"', major)
+        minor = re.findall('"([^"]*)"', minor)
+
+        self.r_major_ver = major
+        self.r_minor_ver = minor
+        self.r_version = "%s.%s" % (str(major[0]), str(minor[0]))
 
         # ****************** Virtual Environment R ****************
         self.usr_cfg_file = self.env_home / "renv.yaml"
