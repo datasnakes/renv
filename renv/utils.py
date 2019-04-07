@@ -124,3 +124,29 @@ def system_r_call(rcmd_type, rscript):
         stdout, stderr = recommended_pkgs.communicate()
 
     return stdout, stderr
+
+
+def format_pkg_list(config_dict):
+    """
+    Takes the YAML configuration information and parses/formats the R
+    package list for use with an "Rscript -e **" call.
+    :param config_dict:  The configuration dictionary created with the YAML file.
+    """
+    config_dict = {k: v for k, v in config_dict.items() if "PKG_LIST" in k}
+    fmtd_list = dict()
+
+    for list_name in config_dict:
+        pkg_dict = config_dict[list_name]
+        pkg_list_count = len(pkg_dict) - 1
+        pkg_list_string = ""
+        for k, v in enumerate(pkg_dict):
+            if k == pkg_list_count:
+                pkg_list_string = "%s%s=\"%s\"" % (pkg_list_string, v, pkg_dict[v])
+            else:
+                sep = ", "
+                pkg_list_string = "%s%s=\"%s\"%s" % (pkg_list_string, v, pkg_dict[v], sep)
+
+        pkg_list_string = "list(%s)" % pkg_list_string
+        fmtd_list[list_name] = pkg_list_string
+
+    return fmtd_list
