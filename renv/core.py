@@ -171,7 +171,19 @@ class LinuxRenvBuilder(BaseRenvBuilder):
     def create_library_symlink(self):
         # logic for sym-linking base/recommended R packages
         # see old create_configuration() method
-        pass
+        config_dict = dict()
+        recommended_pkgs = list()
+        base_pkgs = list()
+        if Path(self.usr_cfg_file).exists():
+            with open(str(self.usr_cfg_file), 'r', encoding='utf-8') as f:
+                user_config = yaml.load(f)
+        else:
+            user_config = {}
+
+        with open(self.usr_cfg_file, 'w', encoding='utf-8') as f:
+            config_dict["R_LIBS_USER"] = self.env_library
+            if self.recommended_packages:
+                Rcmd =
 
 
 class RenvBuilder(EnvBuilder):
