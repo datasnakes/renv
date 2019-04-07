@@ -42,6 +42,9 @@ R environment.
 
     def __init__(self, env_name=None, path=None, name=None, r_home=None, recommended_packages=True,
                  clear=False, symlinks=False, upgrade=False, prompt=None, init=None):
+        # Set up cran variables
+        self.cran_mirror = "https://cran.rstudio.com/"
+        self.cranextra_mirror = "https://mirrors.nics.utk.edu/cran/"
         # Set up path to renv config directory
         self.path = Path(path).expanduser().absolute()
         self.name = name
@@ -196,8 +199,44 @@ class LinuxRenvBuilder(BaseRenvBuilder):
 
         with open(self.usr_cfg_file, 'w', encoding='utf-8') as f:
             config_dict["R_LIBS_USER"] = self.env_library
+
+            # Get base packages from system R
+            base_pkgs, error = utils.system_r_call(rcmd_type="base", rscript=str(self.bindir / "Rscript"))
+            base_pkgs = base_pkgs.split(" ")
+            # Get recommended packages from system R
             if self.recommended_packages:
-                Rcmd =
+                recommended_pkgs, error = utils.system_r_call(rcmd_type="recommended", rscript=str(self.bindir / "Rscript"))
+                recommended_pkgs = recommended_pkgs.split(" ")
+                pkgs = base_pkgs + recommended_pkgs
+            else:
+                pkgs = base_pkgs
+            # symlink the packages to the environment
+            for pkg in pkgs:
+                pkg_path = self.rlibrary / pkg
+                env_pkg_path = self.env_library / pkg
+                env_pkg_path.symlink_to(pkg_path)
+
+    def setup_templates(self):
+        activator_cookie = self.cookie_jar / 'posix'
+        e_c = {
+            "dirname": "bin",
+            "__VENV_DIR__": str(self.env_home),
+            "__VENV_NAME__": self.env_name,
+            "__VENV_PROMPT__": self.prompt,
+            "__VENV_BIN_NAME__": "bin",  # Why???
+            "__VENV_R__": str(self.env_bindir / "R"),
+            "__VENV_RSCRIPT__": str(self.env_bindir / "Rscript"),
+            "__R_VERSION__": self.r_version,
+            "__CRAN_MIRROR__": self.cran_mirror,
+            "__CRANEXTRA_MIRROR__": self.cranextra_mirror,
+            "__R_LIBS_USER__": self.env_library,
+            "__R_LIBS_SITE__": self.env_library,
+            "__R_HOME__": str(self.env_home),
+            "__R_INCLUDE_DIR__": str(self.env_includedir),
+            "__R_DOC_DIR__": str(self.env_docdir),
+            "__R_SHARE_DIR__": str(self.env_sharedir)
+        }
+        cookiecutter(str(activator_cookie), no_input=True, extra_context=e_c, output_dir=self.env_home)
 
 
 class RenvBuilder(EnvBuilder):
