@@ -45,28 +45,27 @@ R environment.
         self.renv_path = self.path / name
 
         # Set up virtual environment class variables
-        if env_name:
-            self.env_name = env_name
-            self.env_home = self.renv_path / "cran" / self.env_name
+        self.env_name = env_name
+        self.env_home = self.renv_path / "cran" / self.env_name
 
-            # Set the class variables that represent the system's R installation
-            self.r_home = Path(r_home)
-            if not self.r_home.exists():
-                raise FileNotFoundError("%s does not exist." % self.r_home)
+        # Set the class variables that represent the system's R installation
+        self.r_home = Path(r_home)
+        if not self.r_home.exists():
+            raise FileNotFoundError("%s does not exist." % self.r_home)
 
-            self.logger.debug("Target Installation:  %s" % str(self.r_home))
-            self.logger.debug("Virtual Environment:  %s" % str(self.env_home))
+        self.logger.debug("Target Installation:  %s" % str(self.r_home))
+        self.logger.debug("Virtual Environment:  %s" % str(self.env_home))
 
-            # Set boolean/None class variables
-            self.clear = clear
-            self.recommended_packages = recommended_packages
-            self.upgrade = upgrade
+        # Set boolean/None class variables
+        self.clear = clear
+        self.recommended_packages = recommended_packages
+        self.upgrade = upgrade
 
-            # Set up promtp
-            if prompt:
-                self.prompt = '(%s) ' % prompt
-            else:
-                self.prompt = '(%s) ' % self.env_name
+        # Set up promtp
+        if prompt:
+            self.prompt = '(%s) ' % prompt
+        else:
+            self.prompt = '(%s) ' % self.env_name
 
         # Initialize renv if necessary
         self.cookie_jar = Path(resource_filename(cookies.__name__, ''))
