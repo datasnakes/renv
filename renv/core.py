@@ -59,7 +59,6 @@ R environment.
         # Set boolean/None class variables
         self.clear = clear
         self.recommended_packages = recommended_packages
-        self.symlinks = symlinks
         self.upgrade = upgrade
 
         # Set up promtp
@@ -91,11 +90,11 @@ class LinuxRenvBuilder(BaseRenvBuilder):
 
     def __init__(self, env_name=None, path=None, name=None, r_home=None, bindir=None, libdir=None, mandir=None,
                  rincludedir=None, rdocdir=None, rsharedir=None, infodir=None, recommended_packages=True, clear=False,
-                 upgrade=False, prompt=None):
+                 upgrade=False, prompt=None, verbose=None):
 
         super().__init__(env_name=env_name, path=path, name=name, r_home=r_home,
                          recommended_packages=recommended_packages, clear=clear, upgrade=upgrade,
-                         prompt=prompt)
+                         prompt=prompt, verbose=verbose)
         # ****************** SYSTEM R ****************
         #
         # Get installation directories.  These mimic parameters in source installation.  (./configure --help)
