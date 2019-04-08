@@ -42,6 +42,9 @@ def renv(ctx, r_home, env_name, path, name, bindir, libdir, includedir, recommen
 
     venvR = get_system_venv()
     ctx.obj['venvR'] = venvR
+    venvR(env_name=env_name, path=path, name=name, r_home=r_home, recommended_packages=recommended_packages,
+          clear=clear, upgrade=upgrade, prompt=prompt, verbose=verbose, bindir=bindir, libdir=libdir,
+          includedir=includedir)
 
 
 @renv.command(help="Initialize renv using the <path>/<name>.")
