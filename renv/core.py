@@ -1,18 +1,11 @@
-from venv import EnvBuilder
 import logging
-import os
 from os import environ, listdir
 import shutil
-import subprocess
 import sys
-import types
 from pkg_resources import resource_filename, get_distribution
-from pprint import pprint, pformat
 import re
-
 import renv.utils as utils
 from renv import cookies
-
 import yaml
 from pathlib import Path
 from cookiecutter.main import cookiecutter
@@ -29,9 +22,10 @@ R environment.
 """
 
     def __init__(self, env_name=None, path=None, name=None, r_home=None, recommended_packages=True,
-                 clear=False, symlinks=False, upgrade=False, prompt=None, init=None, verbose=None):
+                 clear=False, upgrade=False, prompt=None, init=None, verbose=None):
         # Set up logger
         # Change level of logger based on verbose paramater.
+        self.verbose = verbose
         if self.verbose:
             logging.basicConfig(format='[%(levelname)s | %(name)s - line %(lineno)d]: %(message)s')
             # Filter the debug logging
@@ -96,11 +90,11 @@ R environment.
 class LinuxRenvBuilder(BaseRenvBuilder):
 
     def __init__(self, env_name=None, path=None, name=None, r_home=None, bindir=None, libdir=None, mandir=None,
-                 rincludedir=None, rdocdir=None, rsharedir=None, infodir=None, recommended_packages=True, clear=False, symlinks=False,
+                 rincludedir=None, rdocdir=None, rsharedir=None, infodir=None, recommended_packages=True, clear=False,
                  upgrade=False, prompt=None):
 
         super().__init__(env_name=env_name, path=path, name=name, r_home=r_home,
-                         recommended_packages=recommended_packages, clear=clear, symlinks=symlinks, upgrade=upgrade,
+                         recommended_packages=recommended_packages, clear=clear, upgrade=upgrade,
                          prompt=prompt)
         # ****************** SYSTEM R ****************
         #
