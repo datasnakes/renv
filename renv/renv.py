@@ -2,7 +2,7 @@ import click
 from renv import BaseRenvBuilder, get_system_venv
 
 
-@click.group()
+@click.group(invoke_without_command=True)
 @click.option('--r_home', '-r', default=None,
               help="Provide the root of the directory tree where R is installed ($R_HOME).  This would be R's "
                    "installation directory when using ./configure --prefix=<r_home>.")
