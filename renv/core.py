@@ -155,6 +155,13 @@ class LinuxRenvBuilder(BaseRenvBuilder):
         self.env_infodir = self.env_home / "info"
         self.env_library = self.libdir / "R" / "library"
 
+    def build_venv(self):
+        self.create_env_dirs()
+        self.create_etc_symlink()
+        self.create_library_symlink()
+        self.setup_templates()
+        self.create_r_symlink()
+
     def create_env_dirs(self):
         self.logger.info("Creating renv directories...")
         env_lib_home = self.env_libdir / "R"
