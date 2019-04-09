@@ -12,11 +12,11 @@ from renv import BaseRenvBuilder, get_system_venv
               help="An absolute installation path for renv.", show_default=True)
 @click.option("--name", "-n", default=".renv",
               help="A directory name for renv.", show_default=True)
-@click.option('--bindir', '-b',
+@click.option('--bindir', '-b', default=None,
               help="Provide the bin directory if R was installed when using ./configure --bindir=<binpath>.")
-@click.option('--libdir', '-l',
+@click.option('--libdir', '-l', default=None,
               help="Provide the lib directory if R was installed when using ./configure --libdir=<libpath>.")
-@click.option('--includedir', '-i',
+@click.option('--includedir', '-i', default=None,
               help="Provide the include directory if R was installed when using ./configure --includedir=<includepath>.")
 @click.option('--recommended_packages', '-rp', type=bool, default=True,
               help="This determines wheather or not the recommended packages are installed in the"
