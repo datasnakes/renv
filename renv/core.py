@@ -194,7 +194,8 @@ class LinuxRenvBuilder(BaseRenvBuilder):
             Path(env_lib_home / "tests").symlink_to(sys_lib_home / "tests")
             self.logger.debug(str(env_lib_home / "tests"))
         if Path(self.mandir / "man1").exists():
-            self.env_mandir.symlink_to(self.mandir)
+            self.env_mandir.mkdir(parents=True)
+            Path(self.env_mandir / "man1").symlink_to(self.mandir / "man1")
             self.logger.debug(str(self.env_mandir))
         if self.infodir.exists():
             self.env_infodir.symlink_to(self.infodir)
