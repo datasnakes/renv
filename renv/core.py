@@ -153,7 +153,7 @@ class LinuxRenvBuilder(BaseRenvBuilder):
         self.env_docdir = self.env_libdir / "R" / "doc"
         self.env_sharedir = self.env_libdir / "R" / "share"
         self.env_infodir = self.env_home / "info"
-        self.env_library = self.libdir / "R" / "library"
+        self.env_library = self.env_libdir / "R" / "library"
 
     def build_venv(self):
         self.create_env_dirs()
