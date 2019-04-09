@@ -29,7 +29,7 @@ from renv import BaseRenvBuilder, get_system_venv
               help="Upgrades the environment directory to use this version of R.")
 @click.option('--prompt', '-p', default=None,
               help="Provide an alternative prompt prefix for this environment.")
-@click.option('--verbose', '-v', is_flag=True,
+@click.option('--verbose', '-v', is_flag=True, default=False,
               help="Show verbose cli output.")
 @click.pass_context
 def renv(ctx, r_home, env_name, path, name, bindir, libdir, includedir, recommended_packages, clear,
