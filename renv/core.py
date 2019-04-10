@@ -1,12 +1,8 @@
-import logging
 from os import environ, listdir
-import shutil
-import sys
+import sys, platform, logging, re, shutil, yaml
 from pkg_resources import resource_filename, get_distribution
-import re
 import renv.utils as utils
 from renv import cookies
-import yaml
 from pathlib import Path
 from cookiecutter.main import cookiecutter
 
@@ -114,7 +110,7 @@ class LinuxRenvBuilder(BaseRenvBuilder):
 
         # Here LIBnn is usually ‘lib’, but may be ‘lib64’ on some 64-bit Linux systems
         # See previous link
-        if sys.maxsize > 2**32:
+        if sys.maxsize > 2**32 or platform.architecture()[0] == "64bit":
             self.libnn = "lib64"
         else:
             self.libnn = "lib"
