@@ -179,6 +179,8 @@ class LinuxRenvBuilder(BaseRenvBuilder):
         self.logger.debug(str(env_lib_home / "bin"))
         Path(env_lib_home / "modules").symlink_to(sys_lib_home / "modules")
         self.logger.debug(str(env_lib_home / "modules"))
+        Path(env_lib_home / "lib").symlink_to(sys_lib_home / "lib")
+        self.logger.debug(str(env_lib_home / "lib"))
         self.env_includedir.symlink_to(self.rincludedir)
         self.logger.debug(str(self.env_includedir))
         self.env_docdir.symlink_to(self.rdocdir)
