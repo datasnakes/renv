@@ -219,9 +219,9 @@ class LinuxRenvBuilder(BaseRenvBuilder):
             recommended_pkgs, error = utils.system_r_call(rcmd_type="recommended", rscript=str(self.bindir / "Rscript"))
             recommended_pkgs = recommended_pkgs.split(" ")
             self.logger.debug("Using recommended packages...")
-            pkgs = base_pkgs + recommended_pkgs
+            pkgs = set(base_pkgs + recommended_pkgs)
         else:
-            pkgs = base_pkgs
+            pkgs = set(base_pkgs)
         # symlink the packages to the environment
         for pkg in pkgs:
             self.logger.debug(str(pkg))
