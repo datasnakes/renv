@@ -234,7 +234,7 @@ class LinuxRenvBuilder(BaseRenvBuilder):
         activator_cookie = self.cookie_jar / 'posix'
         e_c = {
             "dirname": "bin",
-            "__R_HOME__": str(self.libdir / "R"),
+            "__R_HOME__": str(self.env_libdir / "R"),
             "__VENV_DIR__": str(self.env_home),
             "__VENV_NAME__": self.env_name,
             "__VENV_PROMPT__": self.prompt,
