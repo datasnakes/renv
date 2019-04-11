@@ -119,10 +119,23 @@ class LinuxRenvBuilder(BaseRenvBuilder):
         # See previous link
         if sys.maxsize > 2**32 or platform.architecture()[0] == "64bit":
             self.libnn = "lib64"
+            self.not_libnn = "lib"
         else:
             self.libnn = "lib"
+            self.not_libnn = "lib64"
         if not self.libdir:
-            self.libdir = self.r_home / self.libnn
+            # sometime 64-bit still uses lib (vs lib64)
+            if Path(self.r_home / self.libnn).exists():
+                self.libdir = self.r_home / self.libnn
+            elif Path(self.r_home / self.not_libnn).exists():
+                _tmp = self.not_libnn
+                self.not_libnn = self.libnn
+                self.libnn = _tmp
+                self.libdir = self.r_home / self.libnn
+            else:
+                self.libdir = self.r_home / "<libnn>"
+                raise FileNotFoundError("%s does not exist" % self.libdir)
+        # Initialize path variables in the libdir
         if not self.rincludedir:
             self.rincludedir = self.libdir / "R" / "include"
         if not self.rdocdir:
