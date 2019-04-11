@@ -1,10 +1,17 @@
+import sys
+import platform
+import logging
+import re
+import shutil
+import yaml
 from os import environ, listdir
-import sys, platform, logging, re, shutil, yaml
 from pkg_resources import resource_filename, get_distribution
+from pathlib import Path
+
+from cookiecutter.main import cookiecutter
+
 import renv.utils as utils
 from renv import cookies
-from pathlib import Path
-from cookiecutter.main import cookiecutter
 
 
 class BaseRenvBuilder(object):
