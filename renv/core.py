@@ -65,7 +65,7 @@ R environment.
             self.recommended_packages = recommended_packages
             self.upgrade = upgrade
 
-            # Set up promtp
+            # Set up prompt
             if prompt:
                 self.prompt = '(%s) ' % prompt
             else:

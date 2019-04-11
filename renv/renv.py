@@ -3,10 +3,10 @@ from renv import BaseRenvBuilder, get_system_venv
 
 
 @click.group(invoke_without_command=True)
-@click.option('--r_home', '-r', default=None,
+@click.option('--r_home', '-r', default=None, required=True,
               help="Provide the root of the directory tree where R is installed ($R_HOME).  This would be R's "
                    "installation directory when using ./configure --prefix=<r_home>.")
-@click.option('--env_name', '-e', default=None,
+@click.option('--env_name', '-e', default=None, required=True,
               help="Name of the environment.")
 @click.option("--path", "-p", default="~/.beRi",
               help="An absolute installation path for renv.", show_default=True)
@@ -42,12 +42,10 @@ def renv(ctx, r_home, env_name, path, name, bindir, libdir, includedir, recommen
 
     venvR = get_system_venv()
     ctx.obj['venvR'] = venvR
-    if r_home and env_name:
-        builder = venvR(env_name=env_name, path=path, name=name, r_home=r_home, recommended_packages=recommended_packages,
-              clear=clear, upgrade=upgrade, prompt=prompt, verbose=verbose, bindir=bindir, libdir=libdir,
-              rincludedir=includedir)
-        builder.build_venv()
-
+    builder = venvR(env_name=env_name, path=path, name=name, r_home=r_home, recommended_packages=recommended_packages,
+          clear=clear, upgrade=upgrade, prompt=prompt, verbose=verbose, bindir=bindir, libdir=libdir,
+          rincludedir=includedir)
+    builder.build_venv()
 
 @renv.command(help="Initialize renv using the <path>/<name>.")
 @click.pass_context
