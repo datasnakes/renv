@@ -45,8 +45,9 @@ def renv(ctx, r_home, env_name, path, name, bindir, libdir, includedir, recommen
     builder = venvR(env_name=env_name, path=path, name=name, r_home=r_home, recommended_packages=recommended_packages,
           clear=clear, upgrade=upgrade, prompt=prompt, verbose=verbose, bindir=bindir, libdir=libdir,
           rincludedir=includedir)
-    builder.build_venv()
-
+    env_bin = builder.build_venv()
+    click.secho("To activate: source " + env_bin+ "/activate",
+               fg="green")
 @renv.command(help="Initialize renv using the <path>/<name>.")
 @click.pass_context
 def init(ctx):
