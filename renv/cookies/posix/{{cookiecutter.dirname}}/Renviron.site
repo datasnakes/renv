@@ -1,4 +1,5 @@
 R_HOME={{cookiecutter.__R_HOME__}}
+R_LIBS={{cookiecutter.__R_LIBS_USER__}}
 R_LIBS_USER={{cookiecutter.__R_LIBS_USER__}}
 R_LIBS_SITE={{cookiecutter.__R_LIBS_SITE__}}
 R_INCLUDE_DIR={{cookiecutter.__R_INCLUDE_DIR__}}

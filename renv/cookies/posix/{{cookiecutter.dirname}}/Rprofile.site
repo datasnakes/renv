@@ -1,6 +1,6 @@
 # Force R to always use the virtual environment library by default
 .Library.site <- "{{cookiecutter.__R_LIBS_SITE__}}"
-#.Library <- "{{cookiecutter.__R_LIBS_SITE__}}"
+utils::assignInNamespace(x=".Library", value="{{cookiecutter.__R_LIBS_SITE__}}", ns="base")
 # This overwrites the .libPaths function in order to control where packages are installed
 # by other functions/packages (e.g. install.packages, remotes::, devtools::)
 #assignInNamespace(x=".libPaths", value= "{{cookiecutter.__R_LIBS_SITE__}}", ns="base")
