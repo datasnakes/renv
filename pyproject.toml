@@ -3,8 +3,8 @@ name = "renv"
 version = "0.2.0"
 license = "MIT"
 description = """The renv package is a CLI tool for creating environments for the R statistical programming
-language.  It takes advantage of the python venv module, and it's modular EnvBuilder class."""
-authors = ["Rob Gilmore <robgilmore127@gmail.com>", "Shaurita Hutchins <sdhutchins@outlook.com>"]
+language.  It takes advantage of the python venv module and its modular EnvBuilder class."""
+authors = ["Rob Gilmore <robgilmore127@gmail.com>", "Shaurita Hutchins <sdhutchins@outlook.com>", "Santina Lin <santina424@gmail.com>"]
 readme = "README.md"
 repository = "https://github.com/datasnakes/renv"
 keywords = ["R", "virtual", "environment", "reproducible", "statistics"]
@@ -24,7 +24,7 @@ classifiers = [
     ]
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = ">=3.4"
 click = "^6.7"
 pyyaml = "^3.12"
 cookiecutter = "^1.6"
