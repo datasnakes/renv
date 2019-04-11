@@ -205,7 +205,7 @@ class LinuxRenvBuilder(BaseRenvBuilder):
         # create system link files
         etc_files = listdir(str(Path(sys_lib_home / "etc")))
         for file in etc_files:
-            if file != "Rprofile.site":
+            if file != "Rprofile.site" or file != "Renviron.site":
                 Path(env_lib_home / "etc" / file).symlink_to(sys_lib_home / "etc" / file)
                 self.logger.debug(str(env_lib_home / "etc" / file))
 
@@ -234,6 +234,7 @@ class LinuxRenvBuilder(BaseRenvBuilder):
         activator_cookie = self.cookie_jar / 'posix'
         e_c = {
             "dirname": "bin",
+            "__R_HOME__": str(self.libdir / "R"),
             "__VENV_DIR__": str(self.env_home),
             "__VENV_NAME__": self.env_name,
             "__VENV_PROMPT__": self.prompt,
@@ -245,13 +246,13 @@ class LinuxRenvBuilder(BaseRenvBuilder):
             "__CRANEXTRA_MIRROR__": self.cranextra_mirror,
             "__R_LIBS_USER__": str(self.env_library),
             "__R_LIBS_SITE__": str(self.env_library),
-            "__R_HOME__": str(self.env_home),
             "__R_INCLUDE_DIR__": str(self.env_includedir),
             "__R_DOC_DIR__": str(self.env_docdir),
             "__R_SHARE_DIR__": str(self.env_sharedir)
         }
         cookiecutter(str(activator_cookie), no_input=True, extra_context=e_c, output_dir=self.env_home)
         shutil.move(str(self.env_bindir / "Rprofile.site"), str(self.env_libdir / "R" / "etc"))
+        shutil.move(str(self.env_bindir / "Renviron.site"), str(self.env_libdir / "R" / "etc"))
 
     def create_r_symlink(self):
         self.logger.debug("Setting up R executables...")
