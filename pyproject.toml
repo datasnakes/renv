@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "renv"
-version = "0.2.0"
+version = "0.3.0"
 license = "MIT"
 description = """The renv package is a CLI tool for creating environments for the R statistical programming
 language.  It takes advantage of the python venv module and its modular EnvBuilder class."""
