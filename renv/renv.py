@@ -6,7 +6,7 @@ from renv import BaseRenvBuilder, get_system_venv
 @click.option('--r_home', '-r', default=None,
               help="Provide the root of the directory tree where R is installed ($R_HOME).  This would be R's "
                    "installation directory when using ./configure --prefix=<r_home>.")
-@click.option('--env_name', '-n', default=None,
+@click.option('--env_name', '-e', default=None,
               help="Name of the environment.")
 @click.option("--path", "-p", default="~/.beRi",
               help="An absolute installation path for renv.", show_default=True)
