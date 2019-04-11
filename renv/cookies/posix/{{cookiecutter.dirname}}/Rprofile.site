@@ -3,4 +3,4 @@
 .Library <- "{{cookiecutter.__R_LIBS_SITE__}}"
 # This overwrites the .libPaths function in order to control where packages are installed
 # by other functions/packages (e.g. install.packages, remotes::, devtools::)
-assignInNamespace(x=".libPaths", value= "{{cookiecutter.__R_LIBS_SITE__}}", ns="base")
+#assignInNamespace(x=".libPaths", value= "{{cookiecutter.__R_LIBS_SITE__}}", ns="base")
