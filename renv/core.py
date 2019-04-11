@@ -241,6 +241,8 @@ class LinuxRenvBuilder(BaseRenvBuilder):
             "__VENV_BIN_NAME__": "bin",  # Why???
             "__VENV_R__": str(self.env_bindir / "R"),
             "__VENV_RSCRIPT__": str(self.env_bindir / "Rscript"),
+            "__VENV_R_PROFILE__": str(self.libdir / "R" / "etc" / "Rprofile.site"),
+            "__VENV_R_ENVIRON__": str(self.libdir / "R" / "etc" / "Renviron.site"),
             "__R_VERSION__": self.r_version,
             "__CRAN_MIRROR__": self.cran_mirror,
             "__CRANEXTRA_MIRROR__": self.cranextra_mirror,
