@@ -28,6 +28,8 @@ deactivate () {
     fi
 
     unset VIRTUAL_ENV
+    unset R_PROFILE
+    unset R_ENVIRON
     if [ ! "$1" = "nondestructive" ] ; then
     # Self destruct!
         unset -f deactivate
@@ -38,7 +40,11 @@ deactivate () {
 deactivate nondestructive
 
 VIRTUAL_ENV="{{cookiecutter.__VENV_DIR__}}"
+R_PROFILE="{{cookiecutter.__VENV_R_PROFILE__}}"
+R_ENVIRON="{{cookiecutter.__VENV_R_ENVIRON__}}"
 export VIRTUAL_ENV
+export R_PROFILE
+export R_ENVIRON
 
 _OLD_VIRTUAL_PATH="$PATH"
 PATH="$VIRTUAL_ENV/bin:$PATH"
