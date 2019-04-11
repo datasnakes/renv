@@ -65,7 +65,7 @@ R environment.
             self.recommended_packages = recommended_packages
             self.upgrade = upgrade
 
-            # Set up promtp
+            # Set up prompt
             if prompt:
                 self.prompt = '(%s) ' % prompt
             else:
@@ -75,11 +75,11 @@ R environment.
         self.cookie_jar = Path(resource_filename(cookies.__name__, ''))
         if init:
             if self.renv_path.exists():
-                raise FileExistsError("The rinse path you have set already exists: %s" % self.renv_path)
+                self.logger.error("The renv path you have set already exists: %s" % self.renv_path)
             elif not self.renv_path.exists():
                 self.initial_setup()
             elif not self.renv_path.exists():
-                raise EnvironmentError("You have not initialized rinse yet.  Please run 'rinse init' to continue.")
+                self.logger.error("You have not initialized renv yet.  Please run 'renv init' to continue.")
 
     def initial_setup(self):
         self.logger.info("Initializing renv for the first time...")
@@ -177,16 +177,27 @@ class LinuxRenvBuilder(BaseRenvBuilder):
         self.create_library_symlink()
         self.setup_templates()
         self.create_r_symlink()
+        self.logger.info("%s has been created." % self.env_name)
+        return str(self.env_bindir)
 
     def create_env_dirs(self):
-        self.logger.info("Creating renv directories...")
-        env_lib_home = self.env_libdir / "R"
-        sys_lib_home = self.libdir / "R"
+        # Delete the environment if clear is True.
+        if self.clear:
+            shutil.rmtree(self.env_home)
+            self.logger.debug("%s has been deleted." % self.env_home)
 
         # create directories
         if not self.env_home.exists():
             self.env_home.mkdir()
-            self.logger.debug(str(self.env_home))
+            self.logger.info("Environment home created at %s" % str(self.env_home))
+        elif self.env_home.exists():
+            self.logger.error("%s already exists. Remove using --clear." % self.env_home)
+            sys.exit()
+        
+        self.logger.info("Creating environment home subdirectories...")
+        env_lib_home = self.env_libdir / "R"
+        sys_lib_home = self.libdir / "R"
+        
         env_lib_home.mkdir(parents=True)  # make home and env_libdir
         self.logger.debug(str(env_lib_home))
         Path(env_lib_home / "etc").mkdir()
@@ -244,13 +255,13 @@ class LinuxRenvBuilder(BaseRenvBuilder):
             pkgs = set(base_pkgs)
         # symlink the packages to the environment
         for pkg in pkgs:
-            self.logger.debug(str(pkg))
+            self.logger.debug("Creating symlink for %s" % str(pkg))
             pkg_path = self.rlibrary / pkg
             env_pkg_path = self.env_library / pkg
             env_pkg_path.symlink_to(pkg_path)
 
     def setup_templates(self):
-        self.logger.debug("Setting up templated files...")
+        self.logger.debug("Creating templated files...")
         activator_cookie = self.cookie_jar / 'posix'
         e_c = {
             "dirname": "bin",
@@ -287,9 +298,9 @@ class LinuxRenvBuilder(BaseRenvBuilder):
                     env_exe.symlink_to(sys_exe)
                     self.logger.debug(suffix)
                 else:
-                    raise FileNotFoundError("%s does not exist." % str(sys_exe))
+                    self.logger.error("%s does not exist." % str(sys_exe))
             else:
-                raise FileExistsError("%s already exists." % env_exe)
+                self.logger.error("%s already exists." % env_exe)
 
 
 class MacRenvBuilder(BaseRenvBuilder):
