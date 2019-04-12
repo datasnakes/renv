@@ -75,12 +75,12 @@ user@host:~$ renv --help
 Usage: renv [OPTIONS]
 
 Options:
-  -r, --r_path TEXT               Provide the root of the directory tree where
+  -r, --r_home TEXT               Provide the root of the directory tree where
                                   R is installed.  This would be R's
                                   installation directory when using
-                                  ./configure --prefix=<r_path>.
+                                  ./configure --prefix=<r_home>.
   -n, --env_name TEXT             Name of the environment.
-  -d, --env_dir TEXT              A directory for creating the environment in.
+  -d, --env_home TEXT              A directory for creating the environment in.
   -b, --binpath TEXT              Provide the bin directory if R was installed
                                   when using ./configure --bindir=<binpath>.
   -l, --libpath TEXT              Provide the lib directory if R was installed
@@ -232,4 +232,4 @@ recreate the _.whl_.
 
 Rob Gilmore | [@grabear](https://github.com/grabear) | [✉](mailto:robgilmore127@gmail.com)  
 Santina Lin | [@santina](https://github.com/santina) | [✉](mailto:santina424@gmail.com)  
-Shaurita Hutchins | [@sdhutchins](https://github.com/sdhutchins) | [✉](mailto:sdhutchins@outlook.com)  
+Shaurita Hutchins | [@sdhutchins](https://github.com/sdhutchins) | [✉](mailto:sdhutchins@outlook.com)

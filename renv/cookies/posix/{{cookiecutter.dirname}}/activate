@@ -7,17 +7,6 @@ deactivate () {
         PATH="${_OLD_VIRTUAL_PATH:-}"
         export PATH
         unset _OLD_VIRTUAL_PATH
-
-        rm "$HOME/.Rprofile"
-        if [ -f "$VIRTUAL_ENV/.Rprofile" ] ; then
-            mv "$VIRTUAL_ENV/.Rprofile" "$HOME"
-        fi
-
-        rm "$HOME/.Renviron"
-        if [ -f "$VIRTUAL_ENV/.Renviron" ] ; then
-            mv "$VIRTUAL_ENV/.Renviron" "$HOME"
-        fi
-
     fi
     if [ -n "${_OLD_VIRTUAL_PYTHONHOME:-}" ] ; then
         PYTHONHOME="${_OLD_VIRTUAL_PYTHONHOME:-}"
@@ -39,6 +28,8 @@ deactivate () {
     fi
 
     unset VIRTUAL_ENV
+    unset R_PROFILE
+    unset R_ENVIRON
     if [ ! "$1" = "nondestructive" ] ; then
     # Self destruct!
         unset -f deactivate
@@ -49,7 +40,11 @@ deactivate () {
 deactivate nondestructive
 
 VIRTUAL_ENV="{{cookiecutter.__VENV_DIR__}}"
+R_PROFILE="{{cookiecutter.__VENV_R_PROFILE__}}"
+R_ENVIRON="{{cookiecutter.__VENV_R_ENVIRON__}}"
 export VIRTUAL_ENV
+export R_PROFILE
+export R_ENVIRON
 
 _OLD_VIRTUAL_PATH="$PATH"
 PATH="$VIRTUAL_ENV/bin:$PATH"
@@ -78,22 +73,6 @@ if [ -z "${VIRTUAL_ENV_DISABLE_PROMPT:-}" ] ; then
     fi
     export PS1
 fi
-
-# This should move the users normal .Rprofile and .Renviron files
-# into {{cookiecutter.__VENV_DIR__}} if they exist.  It will then temporarily copy
-# the environments .Rprofile and .Renviron files into the home
-# directory upon activation.  Deactivation will delete these files
-# and move the users normal config file back into place.
-if [ -f ~/.Rprofile ] ; then
-    mv "$HOME/.Rprofile" "$VIRTUAL_ENV"
-fi
-
-if [ -f ~/.Renviron ] ; then
-    mv "$HOME/.Renviron" "$VIRTUAL_ENV"
-fi
-
-cp "$VIRTUAL_ENV/bin/.Rprofile" "$HOME"
-cp "$VIRTUAL_ENV/bin/.Renviron" "$HOME"
 
 # This should detect bash and zsh, which have a hash command that must
 # be called to get it to forget past commands.  Without forgetting
