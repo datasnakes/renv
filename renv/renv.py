@@ -37,23 +37,21 @@ def renv(ctx, r_home, env_name, path, name, bindir, libdir, includedir, recommen
     ctx.ensure_object(dict)
     ctx.obj['path'] = path
     ctx.obj['name'] = name
+    ctx.obj['env_name'] = env_name
+    ctx.obj['r_home'] = r_home
     if path != "~/.beRi":
         raise NotImplementedError("Renv only supports installing into the home directory at this time.")
 
-
-    venvR = get_system_venv()
-    ctx.obj['venvR'] = venvR
     if env_name and r_home:
+        venvR = get_system_venv()
+        ctx.obj['venvR'] = venvR
         builder = venvR(env_name=env_name, path=path, name=name, r_home=r_home, recommended_packages=recommended_packages,
               clear=clear, upgrade=upgrade, prompt=prompt, verbose=verbose, bindir=bindir, libdir=libdir,
               rincludedir=includedir)
         env_bin = builder.build_venv()
-        click.secho("To activate: source " + env_bin+ "/activate",
-                   fg="green")
-    elif env_name is None and init is None:
-        click.secho("Missing -e/--env_name parameter", fg="red")
-    elif r_home is None and init is None:
-        click.secho("Missing -r/--r_home parameter", fg="red")
+        click.secho("To activate: source " + env_bin + "/activate", fg="green")
+
+
 @renv.command(help="Initialize renv using the <path>/<name>.")
 @click.pass_context
 def init(ctx):
