@@ -66,7 +66,7 @@ deactivate
 Use `--help` to see the other command-line options.
 
 ```console
-user:~$ renv --help
+user@host:~$ renv --help
 Usage: renv [OPTIONS] COMMAND [ARGS]...
 
 Options:
