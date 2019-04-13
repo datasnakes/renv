@@ -3,10 +3,10 @@ from renv import BaseRenvBuilder, get_system_venv
 
 
 @click.group(invoke_without_command=True)
-@click.option('--r_home', '-r', default=None, required=True,
+@click.option('--r_home', '-r', default=None,
               help="Provide the root of the directory tree where R is installed ($R_HOME).  This would be R's "
                    "installation directory when using ./configure --prefix=<r_home>.")
-@click.option('--env_name', '-e', default=None, required=True,
+@click.option('--env_name', '-e', default=None,
               help="Name of the environment.")
 @click.option("--path", "-p", default="~/.beRi",
               help="An absolute installation path for renv.", show_default=True)
@@ -37,17 +37,21 @@ def renv(ctx, r_home, env_name, path, name, bindir, libdir, includedir, recommen
     ctx.ensure_object(dict)
     ctx.obj['path'] = path
     ctx.obj['name'] = name
+    ctx.obj['env_name'] = env_name
+    ctx.obj['r_home'] = r_home
     if path != "~/.beRi":
         raise NotImplementedError("Renv only supports installing into the home directory at this time.")
 
-    venvR = get_system_venv()
-    ctx.obj['venvR'] = venvR
-    builder = venvR(env_name=env_name, path=path, name=name, r_home=r_home, recommended_packages=recommended_packages,
-          clear=clear, upgrade=upgrade, prompt=prompt, verbose=verbose, bindir=bindir, libdir=libdir,
-          rincludedir=includedir)
-    env_bin = builder.build_venv()
-    click.secho("To activate: source " + env_bin+ "/activate",
-               fg="green")
+    if env_name and r_home:
+        venvR = get_system_venv()
+        ctx.obj['venvR'] = venvR
+        builder = venvR(env_name=env_name, path=path, name=name, r_home=r_home, recommended_packages=recommended_packages,
+              clear=clear, upgrade=upgrade, prompt=prompt, verbose=verbose, bindir=bindir, libdir=libdir,
+              rincludedir=includedir)
+        env_bin = builder.build_venv()
+        click.secho("To activate: source " + env_bin + "/activate", fg="green")
+
+
 @renv.command(help="Initialize renv using the <path>/<name>.")
 @click.pass_context
 def init(ctx):
