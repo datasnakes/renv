@@ -37,15 +37,23 @@ R environment.
             logging.basicConfig(format='%(levelname)s: %(message)s',
                                 level=logging.INFO)
         self.logger = logging.getLogger(__name__)
-
+               
         # Set up cran variables
         self.cran_mirror = "https://cran.rstudio.com/"
         self.cranextra_mirror = "https://mirrors.nics.utk.edu/cran/"
+        
 
         # Set up path to renv config directory
         self.path = Path(path).expanduser().absolute()
         self.name = name
         self.renv_path = self.path / name
+        
+        # Set variable/path of cookies template
+        self.cookie_jar = Path(resource_filename(cookies.__name__, ''))
+        
+        # Initialize renv if necessary
+        if init:
+            self.initial_setup()
 
         # Set up virtual environment class variables
         if env_name and r_home:
@@ -55,7 +63,8 @@ R environment.
             # Set the class variables that represent the system's R installation
             self.r_home = Path(r_home)
             if not self.r_home.exists():
-                raise FileNotFoundError("%s does not exist." % self.r_home)
+                self.logger.error("%s does not exist." % self.r_home)
+                sys.exit() # Throw system exit if R home isn't found.
 
             self.logger.debug("Target Installation:  %s" % str(self.r_home))
             self.logger.debug("Virtual Environment:  %s" % str(self.env_home))
@@ -70,25 +79,24 @@ R environment.
                 self.prompt = '(%s) ' % prompt
             else:
                 self.prompt = '(%s) ' % self.env_name
-
-        # Initialize renv if necessary
-        self.cookie_jar = Path(resource_filename(cookies.__name__, ''))
-        if init:
-            if self.renv_path.exists():
-                self.logger.error("The renv path you have set already exists: %s" % self.renv_path)
-            elif not self.renv_path.exists():
-                self.initial_setup()
-            elif not self.renv_path.exists():
+        else:
+            if not self.renv_path.exists():
                 self.logger.error("You have not initialized renv yet.  Please run 'renv init' to continue.")
+                sys.exit()
+                    
 
     def initial_setup(self):
-        self.logger.info("Initializing renv for the first time...")
-        init_cookie = self.cookie_jar / Path("init")
-        e_c = {
-            "renv_init_dir": self.name
-        }
-        cookiecutter(str(init_cookie), no_input=True, extra_context=e_c, output_dir=str(self.path))
-
+        """Initialize the .renv directory structure."""
+        if self.renv_path.exists():
+            self.logger.error("The renv path you have set already exists: %s" % self.renv_path)
+        elif not self.renv_path.exists():
+            self.logger.info("Initializing renv for the first time...")
+            init_cookie = self.cookie_jar / Path("init")
+            e_c = {
+                "renv_init_dir": self.name
+            }
+            cookiecutter(str(init_cookie), no_input=True, extra_context=e_c, output_dir=str(self.path))
+            
 
 class LinuxRenvBuilder(BaseRenvBuilder):
 
