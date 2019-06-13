@@ -1,26 +1,23 @@
 import click
-from renv.core import RenvBuilder
-import os
-from pkg_resources import get_distribution
+from renv import BaseRenvBuilder, get_system_venv
 
 
-@click.command()
-@click.option('--r_path', '-r', default=None,
-              help="Provide the root of the directory tree where R is installed.  This would be R's installation "
-                   "directory when using ./configure --prefix=<r_path>.")
-@click.option('--env_name', '-n', default=None,
+@click.group(invoke_without_command=True)
+@click.option('--r_home', '-r', default=None,
+              help="Provide the root of the directory tree where R is installed ($R_HOME).  This would be R's "
+                   "installation directory when using ./configure --prefix=<r_home>.")
+@click.option('--env_name', '-e', default=None,
               help="Name of the environment.")
-@click.option('--env_dir', '-d', default=None,
-              help="A directory for creating the environment in.")
-@click.option('--binpath', '-b',
+@click.option("--path", "-p", default="~/.beRi",
+              help="An absolute installation path for renv.", show_default=True)
+@click.option("--name", "-n", default=".renv",
+              help="A directory name for renv.", show_default=True)
+@click.option('--bindir', '-b', default=None,
               help="Provide the bin directory if R was installed when using ./configure --bindir=<binpath>.")
-@click.option('--libpath', '-l',
+@click.option('--libdir', '-l', default=None,
               help="Provide the lib directory if R was installed when using ./configure --libdir=<libpath>.")
-@click.option('--includepath', '-i',
+@click.option('--includedir', '-i', default=None,
               help="Provide the include directory if R was installed when using ./configure --includedir=<includepath>.")
-@click.option('--system_site_packages', '-sp', type=bool, default=False,
-              help="This determines whether or not the R_LIBS_USER environment variable utilizes the "
-                   "original R's package library as a secondary source for loading packages.")
 @click.option('--recommended_packages', '-rp', type=bool, default=True,
               help="This determines wheather or not the recommended packages are installed in the"
                    "R environment along with the base packages.  In most cases it's best to keep the"
@@ -32,28 +29,31 @@ from pkg_resources import get_distribution
               help="Upgrades the environment directory to use this version of R.")
 @click.option('--prompt', '-p', default=None,
               help="Provide an alternative prompt prefix for this environment.")
-@click.option('--verbose', '-v', is_flag=True,
+@click.option('--verbose', '-v', is_flag=True, default=False,
               help="Show verbose cli output.")
-@click.option('--version', '-V', is_flag=True,
-              help="Show the version of renv and exit.")
-def renv(r_path, env_name, env_dir, binpath, libpath,
-         includepath, system_site_packages,
-         recommended_packages, clear, upgrade, prompt, verbose, version):
-    # Print the version of renv
-    if version:
-        version = get_distribution('renv').version
-        click.echo("renv version {}".format(version))
-    else:
-        if os.name == 'nt':
-            use_symlinks = False
-        else:
-            use_symlinks = True
+@click.pass_context
+def renv(ctx, r_home, env_name, path, name, bindir, libdir, includedir, recommended_packages, clear,
+         upgrade, prompt, verbose):
+    ctx.ensure_object(dict)
+    ctx.obj['path'] = path
+    ctx.obj['name'] = name
+    ctx.obj['env_name'] = env_name
+    ctx.obj['r_home'] = r_home
+    if path != "~/.beRi":
+        raise NotImplementedError("Renv only supports installing into the home directory at this time.")
 
-        builder = RenvBuilder(r_path=r_path, r_bin_path=binpath, r_lib_path=libpath,
-                              r_include_path=includepath,
-                              system_site_packages=system_site_packages,
-                              recommended_packages=recommended_packages,
-                              clear=clear, symlinks=use_symlinks, upgrade=upgrade,
-                              prompt=prompt, verbose=verbose)
+    if env_name and r_home:
+        venvR = get_system_venv()
+        ctx.obj['venvR'] = venvR
+        builder = venvR(env_name=env_name, path=path, name=name, r_home=r_home, recommended_packages=recommended_packages,
+              clear=clear, upgrade=upgrade, prompt=prompt, verbose=verbose, bindir=bindir, libdir=libdir,
+              rincludedir=includedir)
+        env_bin = builder.build_venv()
+        click.secho("To activate: source " + env_bin + "/activate", fg="green")
 
-        builder.create(env_dir, env_name)
+
+@renv.command(help="Initialize renv using the <path>/<name>.")
+@click.pass_context
+def init(ctx):
+    # Initialize renv
+    BaseRenvBuilder(path=ctx.obj['path'], name=ctx.obj['name'], init=True)
