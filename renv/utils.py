@@ -10,23 +10,30 @@ logger = logging.getLogger(__name__)
 
 
 def get_system_venv():
+    """[summary]
+
+    :return: [description]
+    :rtype: [type]
+    """
     if os.name == "posix":
         if sys.platform == "darwin":
             renv.MacRenvBuilder()
         elif "linux" in str(sys.platform):
             return renv.LinuxRenvBuilder
         else:
-            logger.error("renv does not support %s operating system at this time." % sys.platform)
+            logger.error(
+                "renv does not support %s operating system at this time." % sys.platform)
     elif os.name == "nt":
         if sys.platform == "win32":
             renv.WindowsRenvBuilder()
         else:
-            logger.error("renv does not support %s operating system at this time." % sys.platform)
+            logger.error(
+                "renv does not support %s operating system at this time." % sys.platform)
 
 
 def get_r_path():
-    """
-    Get current R installed path in Linux
+    """Get current R installed path in Linux.
+
     # TODO make this function cross-platform
     :return: path to R
     """
@@ -38,8 +45,8 @@ def get_r_path():
 
 
 def get_r_installed_root():
-    """
-    Get the installed root of R (without /bin/R
+    """Get the installed root of R (without /bin/R).
+
     :return: path to root where R is installed
     """
 
@@ -48,8 +55,7 @@ def get_r_installed_root():
 
 
 def get_user_home_dir():
-    """
-    Get home directory in Linux where users can create directory.
+    """Get home directory in Linux where users can create directory.
     # TODO make this function cross-platform
     :return: None
     """
@@ -58,8 +64,8 @@ def get_user_home_dir():
 
 
 def get_renv_path(has_root_access=False):
-    """
-    Get the default R environment path
+    """Get the default R environment path.
+
     # TODO make this function cross-platform
     :param has_root_access: whether user has root access in Linux.
     :return: path to .renv, inclusive.
@@ -71,8 +77,8 @@ def get_renv_path(has_root_access=False):
 
 
 def create_directory(directory, clear=False):
-    """
-    Create directory if it does not exist yet.
+    """Create directory if it does not exist yet.
+
     :param clear: Clear the directory if it already exists.
     :param directory: path of the directory
     :return: None
@@ -82,9 +88,11 @@ def create_directory(directory, clear=False):
             rmtree(directory)
             logger.debug("%s has been deleted." % directory)
         else:
-            logger.error("Environment directory %s exists. Set clear to True to delete the original directory." % directory)
+            logger.error(
+                "Environment directory %s exists. Set clear to True to delete the original directory." % directory)
     elif os.path.islink(directory) or os.path.isfile(directory):
-        logger.error(ValueError("Unable to create directory '%r" % directory + "' for the new environment."))
+        logger.error(ValueError("Unable to create directory '%r" %
+                                directory + "' for the new environment."))
     else:
         os.makedirs(directory)
         logger.debug("%s has been created." % directory)
@@ -130,7 +138,8 @@ def system_r_call(rcmd_type, rscript):
     elif rcmd_type == "recommended":
         rcmd = "%s -e \'base::cat(rownames(installed.packages(priority=\"recommended\")))\'" % rscript
 
-    recommended_pkgs = sp.Popen([rcmd], stderr=sp.PIPE, stdout=sp.PIPE, shell=True, encoding='utf-8')
+    recommended_pkgs = sp.Popen(
+        [rcmd], stderr=sp.PIPE, stdout=sp.PIPE, shell=True, encoding='utf-8')
 
     try:
         stdout, stderr = recommended_pkgs.communicate(timeout=15)
@@ -156,10 +165,12 @@ def format_pkg_list(config_dict):
         pkg_list_string = ""
         for k, v in enumerate(pkg_dict):
             if k == pkg_list_count:
-                pkg_list_string = "%s%s=\"%s\"" % (pkg_list_string, v, pkg_dict[v])
+                pkg_list_string = "%s%s=\"%s\"" % (
+                    pkg_list_string, v, pkg_dict[v])
             else:
                 sep = ", "
-                pkg_list_string = "%s%s=\"%s\"%s" % (pkg_list_string, v, pkg_dict[v], sep)
+                pkg_list_string = "%s%s=\"%s\"%s" % (
+                    pkg_list_string, v, pkg_dict[v], sep)
 
         pkg_list_string = "list(%s)" % pkg_list_string
         fmtd_list[list_name] = pkg_list_string
