@@ -4,6 +4,10 @@
 # renv (beta)
 
 Creating virtual environments for R. (currently a Linux-only implementation)
+# hackseq19
+
+For hackseq19 we intend to design a working implementation or prototype of renv for Windows 
+and MacOS.  The current implementation only works for Linux.
 
 ## Description
 
