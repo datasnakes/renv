@@ -25,18 +25,9 @@ This package is being managed with [`poetry`](https://github.com/sdispater/poetr
 pip install renv
 ```
 
-## Usage
-
-Renv is currently in beta and is only supported in Linux so there may be some issues if your R has been
-installed in a way other than the default. There are probably plenty of
-unforeseen bugs, misspellings, and general use cases where the code could be
-more efficient. Please submit an [issue](https://github.com/datasnakes/renv/issues)
+Please submit an [issue](https://github.com/datasnakes/renv/issues)
 or [PR](https://github.com/datasnakes/renv/pulls). We'd love to get
 community feedback.
-
-The default .Rprofile also prompts you to install some commonly used
-packages. The functionality of this is useful, but will change for the
-actual release of this package.
 
 ### Commands
 
@@ -165,67 +156,6 @@ Warning messages:
 >
 
 ```
-## Features
-
-1.  Creates a default R virtual environment using default config settings
-    or a YAML file in the pre-existing environment directory.
-2.  Manages the user's and the environment's .Rprofile and .Renviron
-    files.
-
-Below is an example of the YAML config file (there may be mistakes or
-missing keys). Try to use absolute paths.
-
-```yaml
-R_ABS_HOME: "/home/grabear/R-installs/R-3.4.3/lib64/R"
-R_ENV_HOME: "/home/grabear/rna-brain"
-R_LIBS_USER: "/home/grabear/rna-brain/lib64/R/library"
-R_INCLUDE_DIR: "/home/grabear/rna-brain/lib64/R/include"
-R_VERSION: "3.4.3"
-
-# LIST OF DEFAULT variables for .Rprofile
-CRAN_MIRROR: "https://cran.rstudio.com/"
-CRANEXTRA_MIRROR: "https://mirrors.nics.utk.edu/cran/"
-
-# Determine how to format this for .Rprofile
-STANDARD_PKG_LIST:
-  BiocInstaller: "Bioconductor"
-  devtools: "Devtools"
-  tidyverse: "Tidyverse"
-
-REPRODUCIBLE_WORKFLOW_PKG_LIST:
-  packrat: "Packrat"
-  miniCRAN: "MiniCRAN"
-```
-
-## Questions ???
-
-### Why renv?
-
-Tools for creating reproducible workflows with R have been needed for a
-long time. Renv gets its inspiration from
-[packrat](https://rstudio.github.io/packrat/), which allows you to
-create isolated package libraries, and python's
-[venv](https://docs.python.org/3/library/venv.html) module, which
-creates an environment with its own package library **AND** python
-binaries. Renv, therefore, helps user better manage a system with
-multiple installations of R by creating a virtual environments for
-specific versions of R that have their own R binaries (R and Rscript) as
-well as their own isolated package libraries.
-
-### Why click and poetry?
-
-Click is used over argparse for speed of development. It requires an
-extra dependency, but it's easy to use and what we know. Poetry is used
-for similar reasons. It's a developing project, so we may have regrets
-later down the road, but for now it's proven to be a very useful tool.
-
-### Why not develop everything in R?
-
-Again, we are going with what we know. We aren't unfamiliar with
-programming or making packages with R, but we are way better at
-developing and maintaining python code. Virtual environments are already
-widely used for the python language, which means we don't have to
-recreate the _.whl_.
 
 ## Maintainers
 
