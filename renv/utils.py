@@ -18,10 +18,8 @@ def get_system_venv():
         else:
             logger.error("renv does not support %s operating system at this time." % sys.platform)
     elif os.name == "nt":
-        if sys.platform == "win32":
-            renv.WindowsRenvBuilder()
-        else:
-            logger.error("renv does not support %s operating system at this time." % sys.platform)
+        # This executes for 32 and 64 bit systems
+        return renv.WindowsRenvBuilder
 
 
 def get_r_path():
