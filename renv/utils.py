@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 def get_system_venv():
     if os.name == "posix":
         if sys.platform == "darwin":
-            renv.MacRenvBuilder()
+            return renv.MacRenvBuilder
         elif "linux" in str(sys.platform):
             return renv.LinuxRenvBuilder
         else:
