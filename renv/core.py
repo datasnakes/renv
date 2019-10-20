@@ -5,6 +5,7 @@ import re
 import shutil
 import yaml
 import os
+import time
 from os import environ, listdir
 from pkg_resources import resource_filename, get_distribution
 from pathlib import Path
@@ -157,9 +158,9 @@ class LinuxRenvBuilder(BaseRenvBuilder):
         self.rlibrary = self.libdir / "R" / "library"
 
         # R version
-        major, error = utils.system_r_call(rcmd_type="major", rscript=str(self.bindir / "Rscript"))
+        major, error = utils.system_r_call(rcmd_type="major", rscript=str(self.bindir / "Rscript"), system_os="posix")
         # Minor Version
-        minor, error = utils.system_r_call(rcmd_type="minor", rscript=str(self.bindir / "Rscript"))
+        minor, error = utils.system_r_call(rcmd_type="minor", rscript=str(self.bindir / "Rscript"), system_os="posix")
         major = re.findall('"([^"]*)"', major)
         minor = re.findall('"([^"]*)"', minor)
 
@@ -250,12 +251,12 @@ class LinuxRenvBuilder(BaseRenvBuilder):
 
     def create_library_symlink(self):
         # Get base packages from system R
-        base_pkgs, error = utils.system_r_call(rcmd_type="base", rscript=str(self.bindir / "Rscript"))
+        base_pkgs, error = utils.system_r_call(rcmd_type="base", rscript=str(self.bindir / "Rscript"), system_os="posix")
         base_pkgs = base_pkgs.split(" ")
         self.logger.debug("Using base packages...")
         # Get recommended packages from system R
         if self.recommended_packages:
-            recommended_pkgs, error = utils.system_r_call(rcmd_type="recommended", rscript=str(self.bindir / "Rscript"))
+            recommended_pkgs, error = utils.system_r_call(rcmd_type="recommended", rscript=str(self.bindir / "Rscript"), system_os="posix")
             recommended_pkgs = recommended_pkgs.split(" ")
             self.logger.debug("Using recommended packages...")
             pkgs = set(base_pkgs + recommended_pkgs)
@@ -354,14 +355,18 @@ class WindowsRenvBuilder(BaseRenvBuilder):
 
         # Start setting other variables.
         self.rlibrary = self.r_home / "library"
-        major, error = utils.system_r_call(rcmd_type="major", rscript=str(self.bindir / "Rscript"))
+        print(str(self.bindir))
+        major, error = utils.system_r_call(rcmd_type="major", rscript=str(self.bindir / "Rscript"), system_os="windows")
         # Minor Version
-        minor, error = utils.system_r_call(rcmd_type="minor", rscript=str(self.bindir / "Rscript"))
+        minor, error = utils.system_r_call(rcmd_type="minor", rscript=str(self.bindir / "Rscript"), system_os="windows")
+        print(major)
+        print(minor)
         major = re.findall('"([^"]*)"', major)
         minor = re.findall('"([^"]*)"', minor)
 
         self.r_major_ver = major
         self.r_minor_ver = minor
+
         self.r_version = "%s.%s" % (str(major[0]), str(minor[0]))
         self.logger.debug("The target R version is %s." % self.r_version)
 
@@ -389,6 +394,7 @@ class WindowsRenvBuilder(BaseRenvBuilder):
         # Delete the environment if clear is True.
         if self.clear:
             shutil.rmtree(self.env_home)
+            time.sleep(5)
             self.logger.debug("%s has been deleted." % self.env_home)
 
         # create directories
@@ -401,7 +407,6 @@ class WindowsRenvBuilder(BaseRenvBuilder):
 
         shutil.copytree(str(self.etcdir), str(self.env_etcdir))
         shutil.copytree(str(self.rdocdir), str(self.env_docdir))
-        shutil.copytree(str(self.etcdir), str(self.env_etcdir))
         shutil.copytree(str(self.rincludedir), str(self.env_includedir))
         shutil.copytree(str(self.rlibrary), str(self.env_library))
         shutil.copytree(str(self.modulesdir), str(self.env_modulesdir))
@@ -434,10 +439,12 @@ class WindowsRenvBuilder(BaseRenvBuilder):
         }
         cookiecutter(str(activator_cookie), no_input=True, extra_context=e_c, output_dir=self.env_home)
         for file in listdir(str(self.bindir)):
-            if os.path.isdir(file):
-                shutil.copytree(str(self.bindir / file), str(self.env_bindir))
+            print(file)
+            if os.path.isdir(str(self.bindir / file)):
+                shutil.copytree(str(self.bindir / file), str(self.env_bindir / file))
             else:
-                shutil.copy(str(self.bindir / file), str(self.env_bindir))
+                shutil.copy(str(self.bindir / file), str(self.env_bindir / file))
+
         if os.path.exists(str(self.env_etcdir / "Rprofile.site")):
             os.remove(str(self.env_etcdir / "Rprofile.site"))
         if os.path.exists(str(self.env_etcdir / "Renviron.site")):
