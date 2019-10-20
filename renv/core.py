@@ -322,7 +322,7 @@ class WindowsRenvBuilder(BaseRenvBuilder):
 
     def __init__(self, env_name=None, path=None, name=None, r_home=None, bindir=None, mandir=None,
                  rincludedir=None, rdocdir=None, rsharedir=None, infodir=None, recommended_packages=True, clear=False,
-                 upgrade=False, prompt=None, verbose=None):
+                 upgrade=False, prompt=None, verbose=None, libdir=None):
 
         super().__init__(env_name=env_name, path=path, name=name, r_home=r_home,
                          recommended_packages=recommended_packages, clear=clear, upgrade=upgrade,
