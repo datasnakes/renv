@@ -4,6 +4,7 @@ import logging
 import re
 import shutil
 import yaml
+import os
 from os import environ, listdir
 from pkg_resources import resource_filename, get_distribution
 from pathlib import Path
@@ -403,5 +404,37 @@ class WindowsRenvBuilder(BaseRenvBuilder):
         shutil.copytree(str(self.Tcldir), str(self.env_Tcldir))
         shutil.copytree(str(self.testsdir), str(self.env_testsdir))
 
-
-
+    def setup_templates(self):
+        self.logger.debug("Creating templated files...")
+        activator_cookie = self.cookie_jar / 'nt'
+        e_c = {
+            "dirname": "bin",
+            "__R_HOME__": str(self.env_home),
+            "__VENV_DIR__": str(self.env_home),
+            "__VENV_NAME__": self.env_name,
+            "__VENV_PROMPT__": self.prompt,
+            "__VENV_BIN_NAME__": "bin",  # Why???
+            "__VENV_R__": str(self.env_bindir / "R"),
+            "__VENV_RSCRIPT__": str(self.env_bindir / "Rscript"),
+            "__VENV_R_PROFILE__": str(self.env_etcdir / "Rprofile.site"),
+            "__R_VERSION__": self.r_version,
+            "__CRAN_MIRROR__": self.cran_mirror,
+            "__CRANEXTRA_MIRROR__": self.cranextra_mirror,
+            "__R_LIBS_USER__": str(self.env_library),
+            "__R_LIBS_SITE__": str(self.env_library),
+            "__R_INCLUDE_DIR__": str(self.env_includedir),
+            "__R_DOC_DIR__": str(self.env_docdir),
+            "__R_SHARE_DIR__": str(self.env_sharedir)
+        }
+        cookiecutter(str(activator_cookie), no_input=True, extra_context=e_c, output_dir=self.env_home)
+        for file in listdir(str(self.bindir)):
+            if os.path.isdir(file):
+                shutil.copytree(str(self.bindir / file), str(self.env_bindir))
+            else:
+                shutil.copy(str(self.bindir / file), str(self.env_bindir))
+        if os.path.exists(str(self.env_etcdir / "Rprofile.site")):
+            os.remove(str(self.env_etcdir / "Rprofile.site"))
+        if os.path.exists(str(self.env_etcdir / "Renviron.site")):
+            os.remove(str(self.env_etcdir / "Renviron.site"))
+        shutil.move(str(self.env_bindir / "Rprofile.site"), str(self.env_etcdir))
+        shutil.move(str(self.env_bindir / "Renviron.site"), str(self.env_etcdir))
