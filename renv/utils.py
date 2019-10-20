@@ -110,7 +110,7 @@ def create_symlink(src, dst, subfolders=[]):
             os.symlink(src_folder, dst_folder, target_is_directory=True)
 
 
-def system_r_call(rcmd_type, rscript):
+def system_r_call(rcmd_type, rscript, system_os):
     """
     Call the current R with system calls in order to obtain specific types
     of information.
@@ -118,17 +118,26 @@ def system_r_call(rcmd_type, rscript):
     :param rscript:  The absolute path to the desired Rscript exe.
     :return:  Returns the stdout and stderr from the system call.
     """
-
-    if rcmd_type == "major":
-        rcmd = "%s -e \'R.version$major\'" % rscript
-    elif rcmd_type == "minor":
-        rcmd = "%s -e \'R.version$minor\'" % rscript
-    elif rcmd_type == "base":
-        rcmd = "%s -e \'base::cat(rownames(installed.packages(priority=\"base\")))\'" % rscript
-    elif rcmd_type == "recommended":
-        rcmd = "%s -e \'base::cat(rownames(installed.packages(priority=\"recommended\")))\'" % rscript
-
-    recommended_pkgs = sp.Popen([rcmd], stderr=sp.PIPE, stdout=sp.PIPE, shell=True, encoding='utf-8')
+    if system_os == "posix":
+        if rcmd_type == "major":
+            rcmd = "%s -e \'R.version$major\'" % rscript
+        elif rcmd_type == "minor":
+            rcmd = "%s -e \'R.version$minor\'" % rscript
+        elif rcmd_type == "base":
+            rcmd = "%s -e \'base::cat(rownames(installed.packages(priority=\"base\")))\'" % rscript
+        elif rcmd_type == "recommended":
+            rcmd = "%s -e \'base::cat(rownames(installed.packages(priority=\"recommended\")))\'" % rscript
+        recommended_pkgs = sp.Popen([rcmd], stderr=sp.PIPE, stdout=sp.PIPE, shell=True, encoding='utf-8')
+    elif system_os == "windows":
+        if rcmd_type == "major":
+            rcmd = "%s -e \"R.version$major\"" % rscript
+        elif rcmd_type == "minor":
+            rcmd = "%s -e \"R.version$minor\"" % rscript
+        elif rcmd_type == "base":
+            rcmd = "%s -e \"base::cat(rownames(installed.packages(priority=\"base\")))\"" % rscript
+        elif rcmd_type == "recommended":
+            rcmd = "%s -e \"base::cat(rownames(installed.packages(priority=\"recommended\")))\"" % rscript
+        recommended_pkgs = sp.Popen(rcmd, stderr=sp.PIPE, stdout=sp.PIPE, shell=True, encoding='utf-8')
 
     try:
         stdout, stderr = recommended_pkgs.communicate(timeout=15)
