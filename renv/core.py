@@ -402,8 +402,7 @@ class WindowsRenvBuilder(BaseRenvBuilder):
             self.env_home.mkdir()
             self.logger.info("Environment home created at %s" % str(self.env_home))
         elif self.env_home.exists():
-            self.logger.error("%s already exists. Remove using --clear." % self.env_home)
-            sys.exit()
+            self.logger.exception("%s already exists. Remove using --clear." % self.env_home)
 
         shutil.copytree(str(self.etcdir), str(self.env_etcdir))
         shutil.copytree(str(self.rdocdir), str(self.env_docdir))
