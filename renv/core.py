@@ -4,6 +4,8 @@ import logging
 import re
 import shutil
 import yaml
+import os
+import time
 from os import environ, listdir
 from pkg_resources import resource_filename, get_distribution
 from pathlib import Path
@@ -83,7 +85,6 @@ R environment.
             if not self.renv_path.exists():
                 self.logger.error("You have not initialized renv yet.  Please run 'renv init' to continue.")
                 sys.exit()
-                    
 
     def initial_setup(self):
         """Initialize the .renv directory structure."""
@@ -157,9 +158,9 @@ class LinuxRenvBuilder(BaseRenvBuilder):
         self.rlibrary = self.libdir / "R" / "library"
 
         # R version
-        major, error = utils.system_r_call(rcmd_type="major", rscript=str(self.bindir / "Rscript"))
+        major, error = utils.system_r_call(rcmd_type="major", rscript=str(self.bindir / "Rscript"), system_os="posix")
         # Minor Version
-        minor, error = utils.system_r_call(rcmd_type="minor", rscript=str(self.bindir / "Rscript"))
+        minor, error = utils.system_r_call(rcmd_type="minor", rscript=str(self.bindir / "Rscript"), system_os="posix")
         major = re.findall('"([^"]*)"', major)
         minor = re.findall('"([^"]*)"', minor)
 
@@ -250,12 +251,12 @@ class LinuxRenvBuilder(BaseRenvBuilder):
 
     def create_library_symlink(self):
         # Get base packages from system R
-        base_pkgs, error = utils.system_r_call(rcmd_type="base", rscript=str(self.bindir / "Rscript"))
+        base_pkgs, error = utils.system_r_call(rcmd_type="base", rscript=str(self.bindir / "Rscript"), system_os="posix")
         base_pkgs = base_pkgs.split(" ")
         self.logger.debug("Using base packages...")
         # Get recommended packages from system R
         if self.recommended_packages:
-            recommended_pkgs, error = utils.system_r_call(rcmd_type="recommended", rscript=str(self.bindir / "Rscript"))
+            recommended_pkgs, error = utils.system_r_call(rcmd_type="recommended", rscript=str(self.bindir / "Rscript"), system_os="posix")
             recommended_pkgs = recommended_pkgs.split(" ")
             self.logger.debug("Using recommended packages...")
             pkgs = set(base_pkgs + recommended_pkgs)
@@ -320,6 +321,133 @@ class MacRenvBuilder(BaseRenvBuilder):
 
 class WindowsRenvBuilder(BaseRenvBuilder):
 
-    def __init__(self):
-        raise NotImplementedError("Creating virtual environments for R with renv on Windows is not supported at this "
-                                  "time.")
+    def __init__(self, env_name=None, path=None, name=None, r_home=None, bindir=None, mandir=None,
+                 rincludedir=None, rdocdir=None, rsharedir=None, infodir=None, recommended_packages=True, clear=False,
+                 upgrade=False, prompt=None, verbose=None, libdir=None):
+
+        super().__init__(env_name=env_name, path=path, name=name, r_home=r_home,
+                         recommended_packages=recommended_packages, clear=clear, upgrade=upgrade,
+                         prompt=prompt, verbose=verbose)
+
+        self.bindir = bindir
+        if not self.bindir:
+            self.bindir = self.r_home / "bin"
+        self.mandir = mandir
+        if not self.mandir:
+            self.mandir = self.r_home / "share" / "man"
+        self.rincludedir = rincludedir
+        if not self.rincludedir:
+            self.rincludedir = self.r_home / "include"
+        self.rdocdir = rdocdir
+        if not self.rdocdir:
+            self.rdocdir = self.r_home / "doc"
+        self.rsharedir = rsharedir
+        if not self.rsharedir:
+            self.rsharedir = self.r_home / "share"
+        self.infodir = infodir
+        if not self.infodir:
+            self.infodir = self.r_home / "info"
+        self.etcdir = self.r_home / "etc"
+        self.modulesdir = self.r_home / "modules"
+        self.srcdir = self.r_home / "src"
+        self.Tcldir = self.r_home / "Tcl"
+        self.testsdir = self.r_home / "tests"
+
+        # Start setting other variables.
+        self.rlibrary = self.r_home / "library"
+        print(str(self.bindir))
+        major, error = utils.system_r_call(rcmd_type="major", rscript=str(self.bindir / "Rscript"), system_os="windows")
+        # Minor Version
+        minor, error = utils.system_r_call(rcmd_type="minor", rscript=str(self.bindir / "Rscript"), system_os="windows")
+        print(major)
+        print(minor)
+        major = re.findall('"([^"]*)"', major)
+        minor = re.findall('"([^"]*)"', minor)
+
+        self.r_major_ver = major
+        self.r_minor_ver = minor
+
+        self.r_version = "%s.%s" % (str(major[0]), str(minor[0]))
+        self.logger.debug("The target R version is %s." % self.r_version)
+
+        # ****************** Virtual Environment R ****************
+        self.usr_cfg_file = self.env_home / "renv.yaml"
+        self.env_bindir = self.env_home / "bin"
+        self.env_mandir = self.env_home / "share" / "man"
+        self.env_includedir = self.env_home / "include"
+        self.env_docdir = self.env_home / "doc"
+        self.env_sharedir = self.env_home / "share"
+        self.env_library = self.env_home / "library"
+        self.env_etcdir = self.env_home / "etc"
+        self.env_modulesdir = self.env_home / "modules"
+        self.env_srcdir = self.env_home / "src"
+        self.env_Tcldir = self.env_home / "Tcl"
+        self.env_testsdir = self.env_home / "tests"
+
+    def build_venv(self):
+        self.create_env_dirs()
+        self.setup_templates()
+        self.logger.info("%s has been created." % self.env_name)
+        return str(self.env_bindir)
+
+    def create_env_dirs(self):
+        # Delete the environment if clear is True.
+        if self.clear:
+            shutil.rmtree(self.env_home)
+            time.sleep(5)
+            self.logger.debug("%s has been deleted." % self.env_home)
+
+        # create directories
+        if not self.env_home.exists():
+            self.env_home.mkdir()
+            self.logger.info("Environment home created at %s" % str(self.env_home))
+        elif self.env_home.exists():
+            self.logger.error("%s already exists. Remove using --clear." % self.env_home)
+            sys.exit()
+
+        shutil.copytree(str(self.etcdir), str(self.env_etcdir))
+        shutil.copytree(str(self.rdocdir), str(self.env_docdir))
+        shutil.copytree(str(self.rincludedir), str(self.env_includedir))
+        shutil.copytree(str(self.rlibrary), str(self.env_library))
+        shutil.copytree(str(self.modulesdir), str(self.env_modulesdir))
+        shutil.copytree(str(self.rsharedir), str(self.env_sharedir))
+        shutil.copytree(str(self.srcdir), str(self.env_srcdir))
+        shutil.copytree(str(self.Tcldir), str(self.env_Tcldir))
+        shutil.copytree(str(self.testsdir), str(self.env_testsdir))
+
+    def setup_templates(self):
+        self.logger.debug("Creating templated files...")
+        activator_cookie = self.cookie_jar / 'nt'
+        e_c = {
+            "dirname": "bin",
+            "__R_HOME__": str(self.env_home),
+            "__VENV_DIR__": str(self.env_home),
+            "__VENV_NAME__": self.env_name,
+            "__VENV_PROMPT__": self.prompt,
+            "__VENV_BIN_NAME__": "bin",  # Why???
+            "__VENV_R__": str(self.env_bindir / "R"),
+            "__VENV_RSCRIPT__": str(self.env_bindir / "Rscript"),
+            "__VENV_R_PROFILE__": str(self.env_etcdir / "Rprofile.site"),
+            "__R_VERSION__": self.r_version,
+            "__CRAN_MIRROR__": self.cran_mirror,
+            "__CRANEXTRA_MIRROR__": self.cranextra_mirror,
+            "__R_LIBS_USER__": str(self.env_library),
+            "__R_LIBS_SITE__": str(self.env_library),
+            "__R_INCLUDE_DIR__": str(self.env_includedir),
+            "__R_DOC_DIR__": str(self.env_docdir),
+            "__R_SHARE_DIR__": str(self.env_sharedir)
+        }
+        cookiecutter(str(activator_cookie), no_input=True, extra_context=e_c, output_dir=self.env_home)
+        for file in listdir(str(self.bindir)):
+            print(file)
+            if os.path.isdir(str(self.bindir / file)):
+                shutil.copytree(str(self.bindir / file), str(self.env_bindir / file))
+            else:
+                shutil.copy(str(self.bindir / file), str(self.env_bindir / file))
+
+        if os.path.exists(str(self.env_etcdir / "Rprofile.site")):
+            os.remove(str(self.env_etcdir / "Rprofile.site"))
+        if os.path.exists(str(self.env_etcdir / "Renviron.site")):
+            os.remove(str(self.env_etcdir / "Renviron.site"))
+        shutil.move(str(self.env_bindir / "Rprofile.site"), str(self.env_etcdir))
+        shutil.move(str(self.env_bindir / "Renviron.site"), str(self.env_etcdir))
