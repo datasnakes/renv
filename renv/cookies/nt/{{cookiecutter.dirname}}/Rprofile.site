@@ -1,0 +1,14 @@
+# Force R to always use the virtual environment library by default
+.Library.site <- "{{cookiecutter.__R_LIBS_SITE__}}"
+
+# This overwrites the .libPaths function  and .Library in order to control where packages are installed
+# by other functions/packages (e.g. install.packages, remotes::, devtools::)
+# .Library
+unlockBinding(".Library", baseenv())
+.Library <- "{{cookiecutter.__R_LIBS_SITE__}}"
+lockBinding(".Library", baseenv())
+# .libPaths
+unlockBinding(".libPaths", baseenv())
+base::.libPaths(c("{{cookiecutter.__R_LIBS_SITE__}}"))
+lockBinding(".libPaths", baseenv())
+
