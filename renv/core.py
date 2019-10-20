@@ -379,6 +379,12 @@ class WindowsRenvBuilder(BaseRenvBuilder):
         self.env_Tcldir = self.env_home / "Tcl"
         self.env_testsdir = self.env_home / "tests"
 
+    def build_venv(self):
+        self.create_env_dirs()
+        self.setup_templates()
+        self.logger.info("%s has been created." % self.env_name)
+        return str(self.env_bindir)
+
     def create_env_dirs(self):
         # Delete the environment if clear is True.
         if self.clear:
